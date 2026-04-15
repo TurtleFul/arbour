@@ -1,7 +1,7 @@
 <div align="center">
     <img src="./frontend/public/icon.svg" width="128" alt="Arbour" />
     <h1>Arbour</h1>
-    <p>A fancy, easy-to-use Docker Compose stack manager for your homelab.</p>
+    <p>An easy-to-use Docker Compose stack manager for your homelab.</p>
 </div>
 
 ## About
@@ -21,7 +21,6 @@ It is a fork of [dockge](https://github.com/louislam/dockge), continued under a 
 - Multi-host support via agents
 - Image update detection
 - Docker resource management (images, volumes, networks, containers)
-- 30+ languages
 
 ## Getting Started
 
