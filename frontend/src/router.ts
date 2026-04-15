@@ -1,0 +1,137 @@
+import { createRouter, createWebHistory } from "vue-router";
+
+import Layout from "./layouts/Layout.vue";
+import Setup from "./pages/Setup.vue";
+import Dashboard from "./pages/Dashboard.vue";
+import DashboardHome from "./pages/DashboardHome.vue";
+import AgentMaintenance from "./pages/AgentMaintenance.vue";
+import Console from "./pages/Console.vue";
+import Compose from "./pages/Compose.vue";
+import ContainerTerminal from "./pages/ContainerTerminal.vue";
+import ContainerLog from "./pages/ContainerLog.vue";
+import ContainerInspect from "./pages/ContainerInspect.vue";
+
+const Settings = () => import("./pages/Settings.vue");
+
+// Settings - Sub Pages
+import Appearance from "./components/settings/Appearance.vue";
+import General from "./components/settings/General.vue";
+const Security = () => import("./components/settings/Security.vue");
+import About from "./components/settings/About.vue";
+import MobileStackList from "./pages/MobileStackList.vue";
+
+const routes = [
+    {
+        path: "/empty",
+        component: Layout,
+        children: [
+            {
+                path: "",
+                component: Dashboard,
+                children: [
+                    {
+                        name: "DashboardHome",
+                        path: "/",
+                        component: DashboardHome,
+                        children: [
+                            {
+                                path: "/agent",
+                                component: AgentMaintenance,
+                            },
+                            {
+                                path: "/agent/:endpoint",
+                                component: AgentMaintenance,
+                            },
+                            {
+                                path: "/compose",
+                                component: Compose,
+                            },
+                            {
+                                path: "/compose/:stackName/:endpoint",
+                                component: Compose,
+                            },
+                            {
+                                path: "/compose/:stackName",
+                                component: Compose,
+                            },
+                            {
+                                path: "/terminal/:stackName/:serviceName/:type",
+                                component: ContainerTerminal,
+                                name: "containerTerminal",
+                            },
+                            {
+                                path: "/terminal/:stackName/:serviceName/:type/:endpoint",
+                                component: ContainerTerminal,
+                                name: "containerTerminalEndpoint",
+                            },
+                            {
+                                path: "/log/:stackName/:serviceName",
+                                component: ContainerLog,
+                                name: "containerLog",
+                            },
+                            {
+                                path: "/log/:stackName/:serviceName/:endpoint",
+                                component: ContainerLog,
+                                name: "containerLogEndpoint",
+                            },
+                            {
+                                path: "/inspect/:containerName",
+                                component: ContainerInspect,
+                                name: "containerInspect",
+                            },
+                            {
+                                path: "/inspect/:containerName/:endpoint",
+                                component: ContainerInspect,
+                                name: "containerInspectEndpoint",
+                            },
+                        ]
+                    },
+                    {
+                        path: "/stacks",
+                        component: MobileStackList,
+                    },
+                    {
+                        path: "/console",
+                        component: Console,
+                    },
+                    {
+                        path: "/console/:endpoint",
+                        component: Console,
+                    },
+                    {
+                        path: "/settings",
+                        component: Settings,
+                        children: [
+                            {
+                                path: "general",
+                                component: General,
+                            },
+                            {
+                                path: "appearance",
+                                component: Appearance,
+                            },
+                            {
+                                path: "security",
+                                component: Security,
+                            },
+                            {
+                                path: "about",
+                                component: About,
+                            },
+                        ]
+                    },
+                ]
+            },
+        ]
+    },
+    {
+        path: "/setup",
+        component: Setup,
+    },
+];
+
+export const router = createRouter({
+    linkActiveClass: "active",
+    history: createWebHistory(),
+    routes,
+});
