@@ -42,7 +42,7 @@ export class MainSocketHandler extends SocketHandler {
                     throw new Error("Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length.");
                 }
 
-                const countResult = getDb().$client.query<{ count: number }>("SELECT COUNT(id) as count FROM user").get();
+                const countResult = getDb().$client.query<{ count: number }, []>("SELECT COUNT(id) as count FROM user").get();
                 if (countResult && countResult.count !== 0) {
                     throw new Error("Arbour has been initialized. If you want to run setup again, please delete the database.");
                 }

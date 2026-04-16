@@ -1,27 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
     <defs>
         <linearGradient id="arbour-g" x1="80" y1="80" x2="432" y2="460" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#7ac97a"/>
-            <stop offset="55%" stop-color="#6b8f4a"/>
-            <stop offset="100%" stop-color="#8b5a2b"/>
+            <stop offset="0%" stop-color="#8cdf83"/>
+            <stop offset="55%" stop-color="#7ba34f"/>
+            <stop offset="100%" stop-color="#a87136"/>
         </linearGradient>
     </defs>
 
-    <!-- Top beam (overhangs posts on both sides) -->
+    <rect width="512" height="512" rx="96" fill="#0d1117"/>
+
     <path d="M 56 100 L 456 100"
           stroke="url(#arbour-g)" stroke-width="40" stroke-linecap="round" fill="none"/>
-
-    <!-- Secondary rafter (narrower overhang) -->
     <path d="M 86 150 L 426 150"
           stroke="url(#arbour-g)" stroke-width="20" stroke-linecap="round" fill="none"/>
-
-    <!-- Posts -->
     <path d="M 132 170 L 132 462"
           stroke="url(#arbour-g)" stroke-width="40" stroke-linecap="round" fill="none"/>
     <path d="M 380 170 L 380 462"
           stroke="url(#arbour-g)" stroke-width="40" stroke-linecap="round" fill="none"/>
 
-    <!-- Compose stack nested under the arbour -->
     <rect x="166" y="252" width="180" height="34" rx="9" fill="url(#arbour-g)"/>
     <rect x="166" y="298" width="180" height="34" rx="9" fill="url(#arbour-g)"/>
     <rect x="166" y="344" width="180" height="34" rx="9" fill="url(#arbour-g)"/>

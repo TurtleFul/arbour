@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) >= 1.1 (replaces Node.js and npm)
+- [Bun](https://bun.sh) >= 1.3 (replaces Node.js and npm)
 - Docker (required at runtime for stack management — the backend talks to the host Docker socket)
 
 Install Bun:
@@ -127,3 +127,29 @@ bun run build:frontend
 ```
 
 The backend serves `frontend-dist/` when `NODE_ENV` is not `development`.
+
+## Building the Docker Image (local)
+
+```bash
+bun run build:docker-local   # builds arbour:local via docker/Dockerfile
+bun run start-docker         # runs it on :5001
+```
+
+## CI via Dagger
+
+Arbour uses [Dagger](https://dagger.io) for its CI pipeline. The same module
+runs locally and (later) in GitHub Actions — no YAML duplication.
+
+Module source: `.dagger/src/index.ts`.
+
+```bash
+dagger call test             --source=.    # bun test
+dagger call lint             --source=.    # eslint
+dagger call check-ts         --source=.    # tsc --noEmit
+dagger call build-frontend   --source=. export --path=./frontend-dist
+dagger call build-image      --source=. as-tarball export --path=./arbour.tar
+dagger call ci               --source=.    # test + lint + check-ts in parallel
+```
+
+Install Dagger with Homebrew: `brew install dagger`.
+

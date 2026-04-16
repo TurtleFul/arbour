@@ -1,0 +1,8 @@
+{
+  "name": "arbour",
+  "engineVersion": "v0.20.6",
+  "sdk": {
+    "source": "typescript"
+  },
+  "source": ".dagger"
+}

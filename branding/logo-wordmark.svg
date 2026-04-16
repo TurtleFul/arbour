@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 420" width="1400" height="420">
+    <defs>
+        <linearGradient id="arbour-g" x1="60" y1="60" x2="360" y2="380" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#7ac97a"/>
+            <stop offset="55%" stop-color="#6b8f4a"/>
+            <stop offset="100%" stop-color="#8b5a2b"/>
+        </linearGradient>
+    </defs>
+
+    <g transform="translate(10, 0)">
+        <!-- Top beam (overhangs posts) -->
+        <path d="M 46 82 L 374 82"
+              stroke="url(#arbour-g)" stroke-width="34" stroke-linecap="round" fill="none"/>
+        <!-- Secondary rafter -->
+        <path d="M 70 124 L 350 124"
+              stroke="url(#arbour-g)" stroke-width="16" stroke-linecap="round" fill="none"/>
+        <!-- Posts -->
+        <path d="M 108 142 L 108 378"
+              stroke="url(#arbour-g)" stroke-width="34" stroke-linecap="round" fill="none"/>
+        <path d="M 312 142 L 312 378"
+              stroke="url(#arbour-g)" stroke-width="34" stroke-linecap="round" fill="none"/>
+
+        <!-- Compose stack -->
+        <rect x="136" y="210" width="148" height="28" rx="7" fill="url(#arbour-g)"/>
+        <rect x="136" y="248" width="148" height="28" rx="7" fill="url(#arbour-g)"/>
+        <rect x="136" y="286" width="148" height="28" rx="7" fill="url(#arbour-g)"/>
+    </g>
+
+    <text x="460" y="290"
+          font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="220" font-weight="600" fill="#2d3b1f" letter-spacing="-6">arbour</text>
+</svg>

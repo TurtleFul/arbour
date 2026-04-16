@@ -13,3 +13,6 @@ frontend-dist
 #claude
 .claude
 
+# Dagger build artifacts
+/arbour-dagger.tar
+/arbour*.tar

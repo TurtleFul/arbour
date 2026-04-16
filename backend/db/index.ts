@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite";
 import { drizzle, BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import * as schema from "./schema";
 
-export type DB = BunSQLiteDatabase<typeof schema>;
+export type DB = BunSQLiteDatabase<typeof schema> & { $client: Database };
 
 let _db: DB | null = null;
 let _sqlite: Database | null = null;

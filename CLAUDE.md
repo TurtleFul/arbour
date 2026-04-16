@@ -15,7 +15,8 @@ The theme: help people **cultivate their homelabs** — good UX, easy to use, fo
 | Frontend | Vue 3, Vite, Bootstrap 5, Bootstrap-Vue-Next |
 | Database | SQLite via `bun:sqlite` + Drizzle ORM |
 | Terminal | xterm.js + node-pty |
-| Packaging | Docker (multi-arch: amd64, arm64, arm/v7) |
+| Packaging | Docker (multi-arch: amd64, arm64 — arm/v7 dropped with Bun migration) |
+| CI | Dagger (TS SDK module in `.dagger/`) — runs locally and in CI |
 
 ## Project Structure
 
@@ -47,8 +48,10 @@ frontend/
     lang/          i18n translations (30+ languages)
     mixins/        Vue mixins (socket, theme, lang)
     styles/        SCSS — CSS vars use --arbour-* prefix
-docker/           Dockerfiles
-extra/            Release tooling scripts
+docker/           Dockerfile (single multi-stage, Bun-based)
+.dagger/          Dagger CI module (TypeScript)
+  src/index.ts      Pipeline functions: test, lint, checkTs, buildFrontend, buildImage, ci
+extra/            Release tooling scripts + healthcheck.ts
 stacks/           Local dev stacks directory (gitignored)
 data/             Runtime data dir — SQLite DB lives here (gitignored)
 ```
@@ -74,5 +77,6 @@ See [docs/development.md](docs/development.md).
 - `backend/check-version.ts` — CHECK_URL is blank; version check feature is silently disabled until we have a release endpoint
 - Docker image `ghcr.io/arbour-app/arbour` does not exist yet — build/publish infrastructure not set up
 - GitHub org `arbour-app` not yet created — About page and release links are currently dead
-- `.github/workflows/ci.yml` — CI pipeline needs updating for Arbour's infrastructure
+- `.github/workflows/` — only json-yaml-validate; CI pipeline to call `dagger call ci` not yet wired
 - `extra/update-version.ts`, `extra/test-docker.ts` — release scripts need review/rewrite
+- `bun run lint` has 22 pre-existing errors + 118 warnings (most auto-fixable via `bun run fmt`)
