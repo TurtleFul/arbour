@@ -18,14 +18,20 @@ async function killPort(port: number) {
 await killPort(BACKEND_PORT);
 await killPort(FRONTEND_PORT);
 
-const backend = Bun.spawn(["bun", "--watch", "./backend/index.ts"], {
-    stdio: ["inherit", "inherit", "inherit"],
-    env: { ...process.env, NODE_ENV: "development" },
+const backend = Bun.spawn([ "bun", "--watch", "./backend/index.ts" ], {
+    stdio: [ "inherit", "inherit", "inherit" ],
+    env: {
+        ...process.env,
+        NODE_ENV: "development"
+    },
 });
 
-const frontend = Bun.spawn(["bunx", "vite", "--host", "--strictPort", "--config", "./frontend/vite.config.ts"], {
-    stdio: ["inherit", "inherit", "inherit"],
-    env: { ...process.env, NODE_ENV: "development" },
+const frontend = Bun.spawn([ "bunx", "vite", "--host", "--strictPort", "--config", "./frontend/vite.config.ts" ], {
+    stdio: [ "inherit", "inherit", "inherit" ],
+    env: {
+        ...process.env,
+        NODE_ENV: "development"
+    },
 });
 
 function cleanup() {
@@ -37,5 +43,5 @@ function cleanup() {
 process.on("SIGINT", cleanup);
 process.on("SIGTERM", cleanup);
 
-await Promise.race([backend.exited, frontend.exited]);
+await Promise.race([ backend.exited, frontend.exited ]);
 cleanup();

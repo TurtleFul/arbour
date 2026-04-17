@@ -4,7 +4,9 @@
         "target": "ESNext",
         "strict": true,
         "moduleResolution": "bundler",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "types": ["bun"],
+        "lib": ["ESNext", "DOM"]
     },
     "include": [
         "backend/**/*",

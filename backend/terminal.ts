@@ -9,7 +9,7 @@ import {
 } from "../common/util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
-import type { Subprocess } from "bun";
+import { spawn as ptySpawn, type IPty } from "bun-pty";
 
 /**
  * Terminal for running commands, no user interaction
@@ -17,7 +17,7 @@ import type { Subprocess } from "bun";
 export class Terminal {
     protected static terminalMap : Map<string, Terminal> = new Map();
 
-    protected _process? : Subprocess;
+    protected _pty? : IPty;
     protected server : ArbourServer;
     protected buffer : LimitQueue<string> = new LimitQueue(100);
     protected _name : string;
@@ -40,7 +40,7 @@ export class Terminal {
         this.server = server;
         this._name = name;
         this.file = file;
-        this.args = Array.isArray(args) ? args : [args];
+        this.args = Array.isArray(args) ? args : [ args ];
         this.cwd = cwd;
 
         Terminal.terminalMap.set(this.name, this);
@@ -62,22 +62,10 @@ export class Terminal {
         this._cols = cols;
     }
 
-    protected get stdinMode(): "pipe" | "inherit" {
-        return "inherit";
-    }
-
-    protected buildSpawnArgs(): string[] {
-        const args = [this.file, ...this.args];
-        if (this.file === "docker" && this.args[0] === "compose") {
-            args.splice(2, 0, "--ansi", "always");
-        }
-        return args;
-    }
-
     public start() {
         log.debug("Terminal", "Terminal " + this.name + " starting");
 
-        if (this._process) {
+        if (this._pty) {
             return;
         }
 
@@ -111,28 +99,27 @@ export class Terminal {
         try {
             for (const socketID in this.socketList) {
                 const socket = this.socketList[socketID];
-                socket.emitAgent("terminalWrite", this.name, this.file + " " + this.args.join(" ") + "\n\r");
+                socket.emitAgent("terminalWrite", this.name, this.file + " " + this.args.join(" ") + "\r\n");
             }
 
-            const spawnArgs = this.buildSpawnArgs();
-            this._process = Bun.spawn(spawnArgs, {
+            this._pty = ptySpawn(this.file, this.args, {
+                name: "xterm-256color",
+                cols: this._cols,
+                rows: this._rows,
                 cwd: this.cwd,
-                stdin: this.stdinMode,
-                stdout: "pipe",
-                stderr: "pipe",
                 env: {
                     ...process.env,
                     TERM: "xterm-256color",
-                    FORCE_COLOR: "1",
-                    CLICOLOR_FORCE: "1",
                 },
             });
 
-            this.readStream(this._process.stdout as ReadableStream<Uint8Array> | null);
-            this.readStream(this._process.stderr as ReadableStream<Uint8Array> | null);
+            this._pty.onData((data: string) => {
+                this.onData(data);
+            });
 
-            this._process.exited.then((exitCode) => {
-                this.exit({ exitCode: exitCode ?? 1 });
+            this._pty.onExit((res) => {
+                this.exit({ exitCode: res.exitCode,
+                    signal: res.signal ? Number(res.signal) : undefined });
             });
         } catch (error) {
             if (error instanceof Error) {
@@ -147,39 +134,12 @@ export class Terminal {
         }
     }
 
-    private async readStream(stream: ReadableStream<Uint8Array> | null) {
-        if (!stream) {
-            return;
-        }
-
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-
-        try {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) {
-                    break;
-                }
-
-                const data = decoder.decode(value, { stream: true });
-                this.onData(data);
-            }
-        } catch (e) {
-            log.debug("Terminal", "Stream read error: " + (e instanceof Error ? e.message : String(e)));
-        }
-    }
-
     protected onData(data: string) {
-        // Without a PTY the terminal driver doesn't translate \n → \r\n,
-        // but xterm.js expects \r\n for proper line breaks.
-        const normalized = data.replace(/\r?\n/g, "\r\n");
-
-        this.buffer.pushItem(normalized);
+        this.buffer.pushItem(data);
 
         for (const socketID in this.socketList) {
             const socket = this.socketList[socketID];
-            socket.emitAgent("terminalWrite", this.name, normalized);
+            socket.emitAgent("terminalWrite", this.name, data);
         }
     }
 
@@ -197,7 +157,7 @@ export class Terminal {
         clearInterval(this.keepAliveInterval);
         clearInterval(this.kickDisconnectedClientsInterval);
 
-        this._process = undefined;
+        this._pty = undefined;
 
         if (this.callback) {
             this.callback(res.exitCode);
@@ -231,9 +191,15 @@ export class Terminal {
         return this.buffer.join("");
     }
 
+    public resize(cols: number, rows: number) {
+        this._cols = cols;
+        this._rows = rows;
+        this._pty?.resize(cols, rows);
+    }
+
     close() {
         clearInterval(this.keepAliveInterval);
-        this._process?.kill("SIGTERM");
+        this._pty?.kill("SIGTERM");
     }
 
     public static getTerminal(name : string) : Terminal | undefined {
@@ -278,22 +244,13 @@ export class Terminal {
  * Interactive terminal — used for container exec
  */
 export class InteractiveTerminal extends Terminal {
-    protected get stdinMode(): "pipe" | "inherit" {
-        return "pipe";
-    }
-
     public write(input : string) {
-        if (this._process?.stdin) {
-            const sink = this._process.stdin as import("bun").FileSink;
-            sink.write(input);
-            sink.flush();
-        }
+        this._pty?.write(input);
     }
 }
 
 /**
  * User interactive terminal — bash or powershell console (behind ARBOUR_ENABLE_CONSOLE flag).
- * Note: without a PTY, features like tab completion and line editing are limited.
  */
 export class MainTerminal extends InteractiveTerminal {
     constructor(server : ArbourServer, name : string) {
@@ -312,9 +269,5 @@ export class MainTerminal extends InteractiveTerminal {
             shell = "bash";
         }
         super(server, name, shell, [], server.stacksDir);
-    }
-
-    public write(input : string) {
-        super.write(input);
     }
 }

@@ -119,6 +119,24 @@ optgroup {
     border-radius: 25px;
 }
 
+.btn-hover-danger:hover {
+    background-color: $danger;
+    border-color: $danger;
+    color: white;
+}
+
+.btn-hover-primary:hover {
+    background: $primary-gradient-active;
+    border-color: $primary;
+    color: white;
+}
+
+.btn-hover-info:hover {
+    background-color: $info;
+    border-color: $info;
+    color: white;
+}
+
 .btn-primary {
     color: white;
     background: $primary-gradient;
@@ -585,24 +603,11 @@ optgroup {
 
 [contenteditable=true] {
     transition: all $easing-in 0.2s;
-    background-color: rgba(239, 239, 239, 0.7);
+    
     border-radius: 8px;
 
     &.no-bg {
         background-color: transparent !important;
-    }
-
-    &:focus {
-        outline: 0 solid #eee;
-        background-color: rgba(245, 245, 245, 0.9);
-    }
-
-    &:hover {
-        background-color: rgba(239, 239, 239, 0.8);
-    }
-
-    .dark & {
-        background-color: rgba(239, 239, 239, 0.2);
     }
 
     /*

@@ -49,7 +49,7 @@ import { ComposeDocument, ComposeNetwork } from "../../../common/compose-documen
 import { StackData } from "../../../common/types";
 
 export default defineComponent({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     data() {
         return {
             networkList: [],

@@ -91,7 +91,7 @@ export function getResBaseURL() {
  * @returns {boolean} Running in dev container?
  */
 export function isDevContainer() {
-    // eslint-disable-next-line no-undef
+
     return (typeof DEVCONTAINER === "string" && DEVCONTAINER === "1");
 }
 
@@ -104,7 +104,6 @@ export function getDevContainerServerHostname() {
         return "";
     }
 
-    // eslint-disable-next-line no-undef
     return CODESPACE_NAME + "-3001." + GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN;
 }
 

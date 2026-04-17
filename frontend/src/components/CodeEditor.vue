@@ -51,7 +51,7 @@ const baseTheme = EditorView.theme({
 });
 
 const extensions = computed(() => {
-    const ext = [oneDark, baseTheme, EditorView.lineWrapping];
+    const ext = [ oneDark, baseTheme, EditorView.lineWrapping ];
 
     if (props.lang === "yaml" || props.lang === "env") {
         ext.push(yaml());
@@ -82,6 +82,24 @@ const extensions = computed(() => {
 
     .cm-scroller {
         border-radius: 5px;
+    }
+}
+
+.code-editor-readonly {
+    :deep(.cm-editor) {
+        background-color: transparent;
+
+        .cm-gutters {
+            display: none;
+        }
+
+        .cm-activeLine {
+            background-color: transparent;
+        }
+
+        .cm-cursor {
+            display: none;
+        }
     }
 }
 </style>

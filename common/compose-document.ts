@@ -549,7 +549,7 @@ function copyYAMLComments(doc : Document, src : Document) {
  * Copy yaml comments from srcItems to items
  * Attempts to preserve comments by matching content rather than just array indices
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function copyYAMLCommentsItems(items: any, srcItems: any) {
     if (!items || !srcItems) {
         return;
@@ -557,20 +557,20 @@ function copyYAMLCommentsItems(items: any, srcItems: any) {
 
     // First pass - try to match items by their content
     for (let i = 0; i < items.length; i++) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const item: any = items[i];
 
         // Try to find matching source item by content
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const srcIndex = srcItems.findIndex((srcItem: any) =>
             JSON.stringify(srcItem.value) === JSON.stringify(item.value) &&
             JSON.stringify(srcItem.key) === JSON.stringify(item.key)
         );
 
         if (srcIndex !== -1) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             const srcItem: any = srcItems[srcIndex];
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             const nextSrcItem: any = srcItems[srcIndex + 1];
 
             if (item.key && srcItem.key) {

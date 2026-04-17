@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
 # Build base: install dependencies
 ############################################
 FROM system-base AS build-base
+RUN apt-get update && apt-get install --yes --no-install-recommends \
+        python3 build-essential pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json bun.lock ./
 

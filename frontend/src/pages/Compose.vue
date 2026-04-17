@@ -21,7 +21,7 @@
                         {{ $t("saveStackDraft") }}
                     </button>
 
-                    <button v-if="!isEditMode" class="btn btn-secondary me-1" data-toggle="tooltip" :title="$t('tooltipStackEdit')" :disabled="processing" @click="enableEditMode">
+                    <button v-if="!isEditMode" class="btn btn-normal me-1" data-toggle="tooltip" :title="$t('tooltipStackEdit')" :disabled="processing" @click="enableEditMode">
                         <font-awesome-icon icon="pen" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("editStack") }}</span>
                     </button>
@@ -36,7 +36,7 @@
                         <span class="d-none d-xl-inline">{{ $t("restartStack") }}</span>
                     </button>
 
-                    <button v-if="!isEditMode" class="btn me-1" data-toggle="tooltip" :title="$t('tooltipStackUpdate')" :class="stack.imageUpdatesAvailable ? 'btn-info' : 'btn-normal'" :disabled="processing" @click="showUpdateDialog = true">
+                    <button v-if="!isEditMode" class="btn btn-normal btn-hover-info me-1" data-toggle="tooltip" :title="$t('tooltipStackUpdate')" :disabled="processing" @click="showUpdateDialog = true">
                         <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("updateStack") }}</span>
                     </button>
@@ -58,7 +58,7 @@
                         </template>
                     </BModal>
 
-                    <button v-if="!isEditMode && hasRunningServices" class="btn btn-normal me-1" data-toggle="tooltip" :title="$t('tooltipStackStop')" :disabled="processing" @click="stopStack">
+                    <button v-if="!isEditMode && hasRunningServices" class="btn btn-normal btn-hover-danger me-1" data-toggle="tooltip" :title="$t('tooltipStackStop')" :disabled="processing" @click="stopStack">
                         <font-awesome-icon icon="stop" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("stopStack") }}</span>
                     </button>
@@ -786,9 +786,6 @@ export default defineComponent({
 .editor-box {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
-    &.edit-mode {
-        background-color: #2c2f38 !important;
-    }
     position: relative;
 }
 
