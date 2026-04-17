@@ -21,7 +21,7 @@ stackStatusList<template>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4>{{ $tc("arbourAgent", 2) }}</h4>
+                        <h4>{{ $t("arbourAgent", 2) }}</h4>
                         <button v-if="!showAgentForm" class="btn btn-primary" @click="showAgentForm = !showAgentForm">
                             <font-awesome-icon icon="plus" /> {{ $t("addAgent") }}
                         </button>

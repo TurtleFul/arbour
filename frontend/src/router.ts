@@ -22,7 +22,7 @@ import MobileStackList from "./pages/MobileStackList.vue";
 
 const routes = [
     {
-        path: "/empty",
+        path: "/",
         component: Layout,
         children: [
             {
@@ -31,75 +31,75 @@ const routes = [
                 children: [
                     {
                         name: "DashboardHome",
-                        path: "/",
+                        path: "",
                         component: DashboardHome,
                         children: [
                             {
-                                path: "/agent",
+                                path: "agent",
                                 component: AgentMaintenance,
                             },
                             {
-                                path: "/agent/:endpoint",
+                                path: "agent/:endpoint",
                                 component: AgentMaintenance,
                             },
                             {
-                                path: "/compose",
+                                path: "compose",
                                 component: Compose,
                             },
                             {
-                                path: "/compose/:stackName/:endpoint",
+                                path: "compose/:stackName/:endpoint",
                                 component: Compose,
                             },
                             {
-                                path: "/compose/:stackName",
+                                path: "compose/:stackName",
                                 component: Compose,
                             },
                             {
-                                path: "/terminal/:stackName/:serviceName/:type",
+                                path: "terminal/:stackName/:serviceName/:type",
                                 component: ContainerTerminal,
                                 name: "containerTerminal",
                             },
                             {
-                                path: "/terminal/:stackName/:serviceName/:type/:endpoint",
+                                path: "terminal/:stackName/:serviceName/:type/:endpoint",
                                 component: ContainerTerminal,
                                 name: "containerTerminalEndpoint",
                             },
                             {
-                                path: "/log/:stackName/:serviceName",
+                                path: "log/:stackName/:serviceName",
                                 component: ContainerLog,
                                 name: "containerLog",
                             },
                             {
-                                path: "/log/:stackName/:serviceName/:endpoint",
+                                path: "log/:stackName/:serviceName/:endpoint",
                                 component: ContainerLog,
                                 name: "containerLogEndpoint",
                             },
                             {
-                                path: "/inspect/:containerName",
+                                path: "inspect/:containerName",
                                 component: ContainerInspect,
                                 name: "containerInspect",
                             },
                             {
-                                path: "/inspect/:containerName/:endpoint",
+                                path: "inspect/:containerName/:endpoint",
                                 component: ContainerInspect,
                                 name: "containerInspectEndpoint",
                             },
                         ]
                     },
                     {
-                        path: "/stacks",
+                        path: "stacks",
                         component: MobileStackList,
                     },
                     {
-                        path: "/console",
+                        path: "console",
                         component: Console,
                     },
                     {
-                        path: "/console/:endpoint",
+                        path: "console/:endpoint",
                         component: Console,
                     },
                     {
-                        path: "/settings",
+                        path: "settings",
                         component: Settings,
                         children: [
                             {

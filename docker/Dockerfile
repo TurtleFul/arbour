@@ -21,14 +21,9 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ############################################
-# Build base: system-base + native toolchain for node-pty
+# Build base: install dependencies
 ############################################
 FROM system-base AS build-base
-RUN apt-get update && apt-get install --yes --no-install-recommends \
-        python3 \
-        make \
-        g++ \
-    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json bun.lock ./
 
@@ -60,9 +55,6 @@ COPY --from=deps-prod /app/node_modules ./node_modules
 COPY --from=frontend-build /app/frontend-dist ./frontend-dist
 COPY . .
 RUN mkdir -p ./data
-
-# node-pty + io_uring compatibility (see node-pty#630)
-ENV UV_USE_IO_URING=0
 
 VOLUME /app/data
 EXPOSE 5001

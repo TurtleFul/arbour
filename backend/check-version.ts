@@ -1,5 +1,5 @@
 import { log } from "./log";
-import compareVersions from "compare-versions";
+import { compareVersions } from "../common/util-common";
 import packageJSON from "../package.json";
 import { Settings } from "./settings";
 
@@ -32,7 +32,7 @@ class CheckVersion {
                 const checkBeta = await Settings.get("checkBeta");
 
                 if (checkBeta && data.beta) {
-                    if (compareVersions.compare(data.beta, data.slow, ">")) {
+                    if (compareVersions(data.beta, data.slow) > 0) {
                         this.latestVersion = data.beta;
                         return;
                     }

@@ -30,7 +30,7 @@ import { Stack } from "./stack";
 import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
 import User from "./models/user";
-import childProcessAsync from "promisify-child-process";
+import { exec } from "./spawn";
 import { AgentManager } from "./agent-manager";
 import { AgentProxySocketHandler } from "./socket-handlers/agent-proxy-socket-handler";
 import { AgentSocketHandler } from "./agent-socket-handler";
@@ -200,7 +200,7 @@ export class ArbourServer {
         }));
 
         // Universal Route Handler, must be at the end of all express routes.
-        this.app.get("*", async (_request, response) => {
+        this.app.get("*all", async (_request, response) => {
             response.send(this.indexHTML);
         });
 
@@ -403,7 +403,7 @@ export class ArbourServer {
             }
 
             // Run every 10 seconds
-            Cron("*/10 * * * * *", {
+            new Cron("*/10 * * * * *", {
                 protect: true,  // Enabled over-run protection.
             }, () => {
                 //log.debug("server", "Cron job running");
@@ -560,7 +560,7 @@ export class ArbourServer {
         try {
             dayjs.utc("2013-11-18 11:55").tz(timezone).format();
         } catch (e) {
-            throw new Error("Invalid timezone:" + timezone);
+            throw new Error("Invalid timezone:" + timezone, { cause: e });
         }
     }
 
@@ -680,20 +680,18 @@ export class ArbourServer {
     }
 
     async getDockerNetworkList() : Promise<string[]> {
-        let res = await childProcessAsync.spawn("docker", [ "network", "ls", "--format", "{{.Name}}" ], {
-            encoding: "utf-8",
-        });
+        let res = await exec("docker", [ "network", "ls", "--format", "{{.Name}}" ]);
 
         if (!res.stdout) {
             return [];
         }
 
-        let list = res.stdout.toString().split("\n");
+        let list = res.stdout.split("\n");
 
         // Remove empty string item
-        list = list.filter((item) => {
+        list = list.filter((item: string) => {
             return item !== "";
-        }).sort((a, b) => {
+        }).sort((a: string, b: string) => {
             return a.localeCompare(b);
         });
 
@@ -702,12 +700,10 @@ export class ArbourServer {
 
     async getContainerInspectData(containerName : string): Promise<string> {
         try {
-            let res = await childProcessAsync.spawn("docker", [ "inspect", "--format", "json", containerName ], {
-                encoding: "utf-8",
-            });
+            let res = await exec("docker", [ "inspect", "--format", "json", containerName ]);
 
             if (res.stdout) {
-                return res.stdout?.toString();
+                return res.stdout;
             }
         } catch (e) {
             log.error("getDockerStats", e);

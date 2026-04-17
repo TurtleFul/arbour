@@ -4,7 +4,7 @@ import { getAgentMaintenanceTerminalName } from "../common/util-common";
 import { ArbourSocket } from "./util-server";
 import { Terminal } from "./terminal";
 import { log } from "./log";
-import childProcessAsync from "promisify-child-process";
+import { exec } from "./spawn";
 
 export class AgentMaintenance {
 
@@ -18,15 +18,13 @@ export class AgentMaintenance {
         };
 
         try {
-            const res = await childProcessAsync.spawn("docker", [ "ps", "--all", "--format", "json" ], {
-                encoding: "utf-8",
-            });
+            const res = await exec("docker", [ "ps", "--all", "--format", "json" ]);
 
             if (!res.stdout) {
                 return containerData;
             }
 
-            const lines = res.stdout?.toString().split("\n");
+            const lines = res.stdout.split("\n");
 
             for (let line of lines) {
                 if (line != "") {
@@ -61,15 +59,13 @@ export class AgentMaintenance {
         };
 
         try {
-            const res = await childProcessAsync.spawn("docker", [ "image", "ls", "--format", "json" ], {
-                encoding: "utf-8",
-            });
+            const res = await exec("docker", [ "image", "ls", "--format", "json" ]);
 
             if (!res.stdout) {
                 return imageData;
             }
 
-            const lines = res.stdout?.toString().split("\n");
+            const lines = res.stdout.split("\n");
 
             for (let line of lines) {
                 if (line != "") {
@@ -108,15 +104,13 @@ export class AgentMaintenance {
         const defaultNetworks = new Set([ "bridge", "host", "none" ]);
 
         try {
-            const res = await childProcessAsync.spawn("docker", [ "network", "ls", "--format", "json" ], {
-                encoding: "utf-8",
-            });
+            const res = await exec("docker", [ "network", "ls", "--format", "json" ]);
 
             if (!res.stdout) {
                 return networkData;
             }
 
-            const lines = res.stdout?.toString().split("\n");
+            const lines = res.stdout.split("\n");
 
             for (let line of lines) {
                 if (line != "") {
@@ -129,12 +123,10 @@ export class AgentMaintenance {
                     };
 
                     if (!defaultNetworks.has(networkInfo.Name)) {
-                        const inspectRes = await childProcessAsync.spawn("docker", [ "network", "inspect", "--format", "json", networkInfo.ID ], {
-                            encoding: "utf-8",
-                        });
+                        const inspectRes = await exec("docker", [ "network", "inspect", "--format", "json", networkInfo.ID ]);
 
                         if (inspectRes.stdout) {
-                            inspectData = JSON.parse(inspectRes.stdout.toString())[0];
+                            inspectData = JSON.parse(inspectRes.stdout)[0];
                         }
                     }
 
@@ -167,13 +159,11 @@ export class AgentMaintenance {
         };
 
         try {
-            const danglingRes = await childProcessAsync.spawn("docker", [ "volume", "ls", "--format", "json", "-f", "dangling=true" ], {
-                encoding: "utf-8",
-            });
+            const danglingRes = await exec("docker", [ "volume", "ls", "--format", "json", "-f", "dangling=true" ]);
 
             const danglingVolumes = new Set();
             if (danglingRes.stdout) {
-                const lines = danglingRes.stdout?.toString().split("\n");
+                const lines = danglingRes.stdout.split("\n");
                 for (let line of lines) {
                     if (line != "") {
                         const danglingVolume = JSON.parse(line);
@@ -182,29 +172,25 @@ export class AgentMaintenance {
                 }
             }
 
-            const res = await childProcessAsync.spawn("docker", [ "volume", "ls", "--format", "json" ], {
-                encoding: "utf-8",
-            });
+            const res = await exec("docker", [ "volume", "ls", "--format", "json" ]);
 
             if (!res.stdout) {
                 return volumeData;
             }
 
-            const lines = res.stdout?.toString().split("\n");
+            const lines = res.stdout.split("\n");
 
             for (let line of lines) {
                 if (line != "") {
                     const volumeInfo = JSON.parse(line);
 
-                    const inspectRes = await childProcessAsync.spawn("docker", [ "volume", "inspect", "--format", "json", volumeInfo.Name ], {
-                        encoding: "utf-8",
-                    });
+                    const inspectRes = await exec("docker", [ "volume", "inspect", "--format", "json", volumeInfo.Name ]);
 
                     let inspectData = {
                         CreatedAt: ""
                     };
                     if (inspectRes.stdout) {
-                        inspectData = JSON.parse(inspectRes.stdout.toString())[0];
+                        inspectData = JSON.parse(inspectRes.stdout)[0];
                     }
 
                     volumeData.data.push({

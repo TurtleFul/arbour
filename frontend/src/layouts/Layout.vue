@@ -31,10 +31,10 @@
                     </router-link>
                 </li>
 
-                <li v-if="$root.loggedIn && $root.isMobile" class="nav-item me-2" data-toggle="tooltip" :title="$tc('stack', 2)">
+                <li v-if="$root.loggedIn && $root.isMobile" class="nav-item me-2" data-toggle="tooltip" :title="$t('stack', 2)">
                     <router-link to="/stacks" class="nav-link d-flex flex-column flex-sm-row align-items-center">
                         <font-awesome-icon icon="list" />
-                        <div class="mt-2 mt-sm-0 ms-sm-2">{{ $tc("stack", 2) }}</div>
+                        <div class="mt-2 mt-sm-0 ms-sm-2">{{ $t("stack", 2) }}</div>
                     </router-link>
                 </li>
 
@@ -109,8 +109,7 @@
 
 <script>
 import Login from "../components/Login.vue";
-import { compareVersions } from "compare-versions";
-import { ALL_ENDPOINTS } from "../../../common/util-common";
+import { ALL_ENDPOINTS, compareVersions } from "../../../common/util-common";
 
 export default {
 

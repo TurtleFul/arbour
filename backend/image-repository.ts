@@ -1,5 +1,5 @@
 import { log } from "./log";
-import childProcessAsync from "promisify-child-process";
+import { exec } from "./spawn";
 
 export class ImageRepository {
 
@@ -15,13 +15,11 @@ export class ImageRepository {
         let imageInfo = await this.updateLocal(stack, service, image);
 
         if (!!imageInfo.localDigest && !image.startsWith("sha256:")) {
-            const resRemote = await childProcessAsync.spawn("skopeo", [ "inspect", "--no-tags", "--format", "{{ .Digest }}", "docker://" + image ], {
-                encoding: "utf-8",
-            });
+            const resRemote = await exec("skopeo", [ "inspect", "--no-tags", "--format", "{{ .Digest }}", "docker://" + image ]);
 
             let remoteDigest = "";
             if (resRemote.stdout) {
-                remoteDigest = resRemote.stdout?.toString().trim();
+                remoteDigest = resRemote.stdout.trim();
             }
 
             imageInfo = new ImageInfo(remoteDigest, imageInfo.localDigest, imageInfo.localId);
@@ -34,14 +32,12 @@ export class ImageRepository {
     async updateLocal(stack: string, service: string, image: string): Promise<ImageInfo> {
         let imageInfo = this.getImageInfo(stack, service, image);
 
-        const resLocal = await childProcessAsync.spawn("docker", [ "inspect", "--format", "json", image ], {
-            encoding: "utf-8",
-        });
+        const resLocal = await exec("docker", [ "inspect", "--format", "json", image ]);
 
         let localId = "";
         let localDigest = "";
         if (resLocal.stdout) {
-            const localInspect = JSON.parse(resLocal.stdout!.toString());
+            const localInspect = JSON.parse(resLocal.stdout);
             if (Array.isArray(localInspect) && localInspect[0]) {
                 localId = localInspect[0].Id;
 

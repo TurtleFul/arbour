@@ -4,27 +4,23 @@
             <h1 class="mb-3">{{ $t("inspect") }} - {{ containerName }}</h1>
 
             <div class="shadow-box mb-3 editor-box">
-                <prism-editor
+                <CodeEditor
                     v-model="inspectData"
                     class="json-viewer"
-                    readonly
-                    :highlight="highlighterJSON"
-                ></prism-editor>
+                    lang="json"
+                    :readonly="true"
+                />
             </div>
         </div>
     </transition>
 </template>
 
 <script>
-import { highlight, languages } from "prismjs/components/prism-core";
-import { PrismEditor } from "vue-prism-editor";
-import "prismjs/components/prism-json";
-import "prismjs/themes/prism-tomorrow.css";
-import "vue-prism-editor/dist/prismeditor.min.css";
+import CodeEditor from "../components/CodeEditor.vue";
 
 export default {
     components: {
-        PrismEditor,
+        CodeEditor,
     },
     data() {
         return {
@@ -52,11 +48,6 @@ export default {
             }
         });
     },
-    methods: {
-        highlighterJSON(code) {
-            return highlight(code, languages.json);
-        }
-    }
 };
 </script>
 
@@ -65,7 +56,8 @@ export default {
 .editor-box {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
-    height: 500px;
+    height: calc(100vh - 200px);
+    min-height: 300px;
 }
 
 </style>

@@ -351,3 +351,16 @@ export function parseDockerPort(input : string, hostname : string) {
         display: display,
     };
 }
+
+export function compareVersions(a: string, b: string): number {
+    const pa = a.replace(/^v/, "").split(".").map(Number);
+    const pb = b.replace(/^v/, "").split(".").map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const na = pa[i] || 0;
+        const nb = pb[i] || 0;
+        if (na !== nb) {
+            return na > nb ? 1 : -1;
+        }
+    }
+    return 0;
+}

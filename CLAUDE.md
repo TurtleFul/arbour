@@ -14,7 +14,7 @@ The theme: help people **cultivate their homelabs** — good UX, easy to use, fo
 | Backend | TypeScript, Express, Socket.io |
 | Frontend | Vue 3, Vite, Bootstrap 5, Bootstrap-Vue-Next |
 | Database | SQLite via `bun:sqlite` + Drizzle ORM |
-| Terminal | xterm.js + node-pty |
+| Terminal | xterm.js + Bun.spawn |
 | Packaging | Docker (multi-arch: amd64, arm64 — arm/v7 dropped with Bun migration) |
 | CI | Dagger (TS SDK module in `.dagger/`) — runs locally and in CI |
 

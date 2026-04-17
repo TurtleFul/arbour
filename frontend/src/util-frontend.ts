@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
-import timezones from "timezones-list";
+import tz from "timezones-list";
+const timezones = (tz as { default?: typeof tz } & typeof tz).default ?? tz;
 import { localeDirection, currentLocale } from "./i18n";
 import { POSITION } from "vue-toastification";
 

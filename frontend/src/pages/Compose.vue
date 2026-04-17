@@ -113,7 +113,7 @@
                     </div>
 
                     <!-- Containers -->
-                    <h4 class="mb-3">{{ $tc("container", 2) }}</h4>
+                    <h4 class="mb-3">{{ $t("container", 2) }}</h4>
 
                     <div v-if="isEditMode" class="input-group mb-3">
                         <input
@@ -145,7 +145,7 @@
                             <!-- URLs -->
                             <div class="mb-4">
                                 <label class="form-label">
-                                    {{ $tc("url", 2) }}
+                                    {{ $t("url", 2) }}
                                 </label>
                                 <ArrayInput :composeArray="composeDocument.xArbour.urls" :display-name="$t('url')" placeholder="https://" />
                             </div>
@@ -174,16 +174,15 @@
                         <button v-if="isEditMode" v-b-modal.compose-editor-modal class="expand-button yaml-expand-button">
                             <font-awesome-icon icon="expand" />
                         </button>
-                        <prism-editor
-                            ref="editor"
+                        <CodeEditor
                             v-model="stack.composeYAML"
                             class="yaml-editor"
-                            :highlight="highlighterYAML"
-                            line-numbers :readonly="!isEditMode"
-                            @input="yamlCodeChange"
+                            lang="yaml"
+                            :readonly="!isEditMode"
+                            @update:model-value="yamlCodeChange"
                             @focus="editorFocus = true"
                             @blur="editorFocus = false"
-                        ></prism-editor>
+                        />
                     </div>
                     <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
@@ -192,16 +191,15 @@
                     <!-- YAML modal fullscreen editor -->
                     <BModal id="compose-editor-modal" :title="stack.composeFileName" scrollable size="xl" no-footer>
                         <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                            <prism-editor
-                                ref="editor"
+                            <CodeEditor
                                 v-model="stack.composeYAML"
                                 class="yaml-editor"
-                                :highlight="highlighterYAML"
-                                line-numbers :readonly="!isEditMode"
-                                @input="yamlCodeChange"
+                                lang="yaml"
+                                :readonly="!isEditMode"
+                                @update:model-value="yamlCodeChange"
                                 @focus="editorFocus = true"
                                 @blur="editorFocus = false"
-                            ></prism-editor>
+                            />
                         </div>
                         <div v-if="isEditMode" class="mb-3">
                             {{ yamlError }}
@@ -212,28 +210,27 @@
                     <div v-if="isEditMode">
                         <h4 class="mb-3">.env</h4>
                         <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                            <prism-editor
-                                ref="editor"
+                            <CodeEditor
                                 v-model="stack.composeENV"
                                 class="env-editor"
-                                :highlight="highlighterENV"
-                                line-numbers :readonly="!isEditMode"
+                                lang="env"
+                                :readonly="!isEditMode"
                                 @focus="editorFocus = true"
                                 @blur="editorFocus = false"
-                            ></prism-editor>
+                            />
                         </div>
                     </div>
 
                     <div v-if="isEditMode">
                         <!-- Volumes -->
                         <div v-if="false">
-                            <h4 class="mb-3">{{ $tc("volume", 2) }}</h4>
+                            <h4 class="mb-3">{{ $t("volume", 2) }}</h4>
                             <div class="shadow-box big-padding mb-3">
                             </div>
                         </div>
 
                         <!-- Networks -->
-                        <h4 class="mb-3">{{ $tc("network", 2) }}</h4>
+                        <h4 class="mb-3">{{ $t("network", 2) }}</h4>
                         <div class="shadow-box big-padding mb-3">
                             <NetworkInput />
                         </div>
@@ -264,13 +261,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { highlight, languages } from "prismjs/components/prism-core";
-import { PrismEditor } from "vue-prism-editor";
-import "prismjs/components/prism-yaml";
-
-import "prismjs/themes/prism-tomorrow.css";
-import "vue-prism-editor/dist/prismeditor.min.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import CodeEditor from "../components/CodeEditor.vue";
 import {
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
@@ -299,17 +291,11 @@ let yamlErrorTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 let updateStackDataTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 let updateServiceStatsTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
-let prismjsSymbolDefinition = {
-    "symbol": {
-        pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
-    }
-};
-
 export default defineComponent({
     components: {
         NetworkInput,
         FontAwesomeIcon,
-        PrismEditor,
+        CodeEditor,
         ProgressTerminal,
         BModal,
     },
@@ -724,46 +710,6 @@ export default defineComponent({
         discardStack() {
             this.loadStack();
             this.isEditMode = false;
-        },
-
-        highlighterYAML(code) {
-            if (!languages.yaml_with_symbols) {
-                languages.yaml_with_symbols = languages.insertBefore("yaml", "punctuation", {
-                    "symbol": prismjsSymbolDefinition["symbol"]
-                });
-            }
-            return highlight(code, languages.yaml_with_symbols);
-        },
-
-        highlighterENV(code) {
-            if (!languages.docker_env) {
-                languages.docker_env = {
-                    "comment": {
-                        pattern: /(^#| #).*$/m,
-                        greedy: true
-                    },
-                    "keyword": {
-                        pattern: /^\w*(?=[:=])/m,
-                        greedy: true
-                    },
-                    "value": {
-                        pattern: /(?<=[:=]).*?((?= #)|$)/m,
-                        greedy: true,
-                        inside: {
-                            "string": [
-                                {
-                                    pattern: /^ *'.*?(?<!\\)'/m,
-                                },
-                                {
-                                    pattern: /^ *".*?(?<!\\)"|^.*$/m,
-                                    inside: prismjsSymbolDefinition
-                                },
-                            ],
-                        },
-                    },
-                };
-            }
-            return highlight(code, languages.docker_env);
         },
 
         yamlCodeChange() {

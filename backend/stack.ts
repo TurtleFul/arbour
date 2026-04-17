@@ -18,7 +18,7 @@ import {
     sleep
 } from "../common/util-common";
 import { InteractiveTerminal, Terminal } from "./terminal";
-import childProcessAsync from "promisify-child-process";
+import { exec } from "./spawn";
 import { Settings } from "./settings";
 import { ImageRepository } from "./image-repository";
 import { SimpleStackData, StackData, ServiceData, StatsData } from "../common/types";
@@ -153,10 +153,7 @@ export class Stack {
             }
             args.push("config", "--dry-run");
 
-            await childProcessAsync.spawn("docker", args, {
-                cwd: this.path,
-                encoding: "utf-8",
-            });
+            await exec("docker", args, { cwd: this.path });
         } catch (e) {
             log.warn("validate", e);
 
@@ -214,7 +211,7 @@ export class Stack {
     get fullPath() : string {
         let dir = this.path;
 
-        // Compose up via node-pty
+        // Compose up via terminal
         let fullPathDir;
 
         // if dir is relative, make it absolute
@@ -293,13 +290,10 @@ export class Stack {
     async getServiceStats(): Promise<Map<string, StatsData>> {
         const serviceStats = new Map<string, StatsData>();
         try {
-            const statsRes = await childProcessAsync.spawn("docker", [ "compose", "stats", "--no-stream", "--format", "json" ], {
-                cwd: this.path,
-                encoding: "utf-8",
-            });
+            const statsRes = await exec("docker", [ "compose", "stats", "--no-stream", "--format", "json" ], { cwd: this.path });
 
             if (statsRes.stdout) {
-                const statsLines = statsRes.stdout?.toString().split("\n");
+                const statsLines = statsRes.stdout.split("\n");
 
                 for (let statsLine of statsLines) {
                     if (statsLine != "") {
@@ -329,16 +323,13 @@ export class Stack {
         const composeDocument = this.composeDocument;
 
         try {
-            const res = await childProcessAsync.spawn("docker", [ "compose", "ps", "--all", "--format", "json" ], {
-                cwd: this.path,
-                encoding: "utf-8",
-            });
+            const res = await exec("docker", [ "compose", "ps", "--all", "--format", "json" ], { cwd: this.path });
 
             if (!res.stdout) {
                 return;
             }
 
-            const lines = res.stdout?.toString().split("\n");
+            const lines = res.stdout.split("\n");
 
             let runningCount = 0;
             let ignoredRunningCount = 0;
@@ -520,15 +511,13 @@ export class Stack {
         }
 
         // Get status from docker compose ls
-        let res = await childProcessAsync.spawn("docker", [ "compose", "ls", "--all", "--format", "json" ], {
-            encoding: "utf-8",
-        });
+        let res = await exec("docker", [ "compose", "ls", "--all", "--format", "json" ]);
 
         if (!res.stdout) {
             return stackList;
         }
 
-        let composeList = JSON.parse(res.stdout.toString());
+        let composeList = JSON.parse(res.stdout);
 
         for (let composeStack of composeList) {
             let stack = stackList.get(composeStack.Name);
@@ -751,7 +740,7 @@ export class Stack {
         let terminal = Terminal.getTerminal(terminalName);
 
         if (!terminal) {
-            terminal = new InteractiveTerminal(this.server, terminalName, "docker", [ "compose", "exec", serviceName, shell ], this.path);
+            terminal = new InteractiveTerminal(this.server, terminalName, "docker", [ "compose", "exec", "-i", serviceName, shell ], this.path);
             terminal.enableKeepAlive = true;
             terminal.rows = TERMINAL_ROWS;
             log.debug("joinContainerTerminal", "Terminal created");

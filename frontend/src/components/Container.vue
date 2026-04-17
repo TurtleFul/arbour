@@ -26,7 +26,7 @@
                 </button>
 
                 <!-- Image update modal -->
-                <BModal :id="updateModalId" :ref="updateModalId" :title="$tc('imageUpdate', 1)">
+                <BModal :id="updateModalId" :ref="updateModalId" :title="$t('imageUpdate', 1)">
                     <div>
                         <h5>{{ $t("image") }}</h5>
                         <span>{{ composeService.image }}</span>
@@ -142,13 +142,13 @@
 
                 <!-- Ports -->
                 <div class="mb-4">
-                    <h5>{{ $tc("port", 2) }}</h5>
+                    <h5>{{ $t("port", 2) }}</h5>
                     <ArrayInput :composeArray="composeService.ports" :display-name="$t('port')" placeholder="HOST:CONTAINER" />
                 </div>
 
                 <!-- Volumes -->
                 <div class="mb-4">
-                    <h5>{{ $tc("volume", 2) }}</h5>
+                    <h5>{{ $t("volume", 2) }}</h5>
                     <ArrayInput :composeArray="composeService.volumes" :display-name="$t('volume')" placeholder="HOST:CONTAINER" />
                 </div>
 
@@ -165,7 +165,7 @@
 
                 <!-- Environment Variables -->
                 <div class="mb-4">
-                    <h5>{{ $tc("environmentVariable", 2) }}</h5>
+                    <h5>{{ $t("environmentVariable", 2) }}</h5>
                     <!-- TODO environmap kann auch Map sein -->
                     <ArrayInput :composeArray="composeService.environment" :display-name="$t('environmentVariable')" placeholder="KEY=VALUE" />
                 </div>
@@ -184,7 +184,7 @@
 
                 <!-- Network -->
                 <div class="mb-4">
-                    <h5>{{ $tc("network", 2) }}</h5>
+                    <h5>{{ $t("network", 2) }}</h5>
 
                     <div v-if="composeDocument.networks.isEmpty() && !composeService.networks.isEmpty()" class="text-warning mb-3">
                         {{ $t("NoNetworksAvailable") }}

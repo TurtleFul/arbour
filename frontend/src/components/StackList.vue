@@ -33,7 +33,7 @@
                     <BDropdownDivider></BDropdownDivider>
 
                     <template v-for="category in stackFilter.categories" :key="category">
-                        <BDropdownGroup v-if="category.hasOptions()" :header="$tc(category.label, 2)">
+                        <BDropdownGroup v-if="category.hasOptions()" :header="$t(category.label, 2)">
                             <BDropdownForm v-for="(value, key) in category.options" :key="value" form-class="filter-option" @change="category.toggleSelected(value)" @click.stop>
                                 <BFormCheckbox :checked="category.selected.has(value)">{{ $t(key) }}</BFormCheckbox>
                             </BDropdownForm>

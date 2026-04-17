@@ -1,6 +1,5 @@
 import { ArbourServer } from "./arbour-server";
 import * as os from "node:os";
-import * as pty from "node-pty";
 import { LimitQueue } from "./utils/limit-queue";
 import { ArbourSocket } from "./util-server";
 import {
@@ -10,6 +9,7 @@ import {
 } from "../common/util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
+import type { Subprocess } from "bun";
 
 /**
  * Terminal for running commands, no user interaction
@@ -17,13 +17,13 @@ import { log } from "./log";
 export class Terminal {
     protected static terminalMap : Map<string, Terminal> = new Map();
 
-    protected _ptyProcess? : pty.IPty;
+    protected _process? : Subprocess;
     protected server : ArbourServer;
     protected buffer : LimitQueue<string> = new LimitQueue(100);
     protected _name : string;
 
     protected file : string;
-    protected args : string | string[];
+    protected args : string[];
     protected cwd : string;
     protected callback? : (exitCode : number) => void;
 
@@ -39,9 +39,8 @@ export class Terminal {
     constructor(server : ArbourServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
         this._name = name;
-        //this._name = "terminal-" + Date.now() + "-" + getCryptoRandomInt(0, 1000000);
         this.file = file;
-        this.args = args;
+        this.args = Array.isArray(args) ? args : [args];
         this.cwd = cwd;
 
         Terminal.terminalMap.set(this.name, this);
@@ -53,13 +52,6 @@ export class Terminal {
 
     set rows(rows : number) {
         this._rows = rows;
-        try {
-            this.ptyProcess?.resize(this.cols, this.rows);
-        } catch (e) {
-            if (e instanceof Error) {
-                log.debug("Terminal", "Failed to resize terminal: " + e.message);
-            }
-        }
     }
 
     get cols() {
@@ -68,20 +60,24 @@ export class Terminal {
 
     set cols(cols : number) {
         this._cols = cols;
-        log.debug("Terminal", `Terminal cols: ${this._cols}`); // Added to check if cols is being set when changing terminal size.
-        try {
-            this.ptyProcess?.resize(this.cols, this.rows);
-        } catch (e) {
-            if (e instanceof Error) {
-                log.debug("Terminal", "Failed to resize terminal: " + e.message);
-            }
+    }
+
+    protected get stdinMode(): "pipe" | "inherit" {
+        return "inherit";
+    }
+
+    protected buildSpawnArgs(): string[] {
+        const args = [this.file, ...this.args];
+        if (this.file === "docker" && this.args[0] === "compose") {
+            args.splice(2, 0, "--ansi", "always");
         }
+        return args;
     }
 
     public start() {
         log.debug("Terminal", "Terminal " + this.name + " starting");
 
-        if (this._ptyProcess) {
+        if (this._process) {
             return;
         }
 
@@ -98,7 +94,6 @@ export class Terminal {
         if (this.enableKeepAlive) {
             log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
 
-            // Close if there is no clients
             this.keepAliveInterval = setInterval(() => {
                 const numClients = Object.keys(this.socketList).length;
 
@@ -114,31 +109,31 @@ export class Terminal {
         }
 
         try {
-            // Print command
             for (const socketID in this.socketList) {
                 const socket = this.socketList[socketID];
-                socket.emitAgent("terminalWrite", this.name, this.file + " " + (Array.isArray(this.args) ? this.args.join(" ") : this.args) + "\n\r");
+                socket.emitAgent("terminalWrite", this.name, this.file + " " + this.args.join(" ") + "\n\r");
             }
 
-            this._ptyProcess = pty.spawn(this.file, this.args, {
-                name: this.name,
+            const spawnArgs = this.buildSpawnArgs();
+            this._process = Bun.spawn(spawnArgs, {
                 cwd: this.cwd,
-                cols: TERMINAL_COLS,
-                rows: this.rows,
+                stdin: this.stdinMode,
+                stdout: "pipe",
+                stderr: "pipe",
+                env: {
+                    ...process.env,
+                    TERM: "xterm-256color",
+                    FORCE_COLOR: "1",
+                    CLICOLOR_FORCE: "1",
+                },
             });
 
-            // On Data
-            this._ptyProcess.onData((data) => {
-                this.buffer.pushItem(data);
+            this.readStream(this._process.stdout as ReadableStream<Uint8Array> | null);
+            this.readStream(this._process.stderr as ReadableStream<Uint8Array> | null);
 
-                for (const socketID in this.socketList) {
-                    const socket = this.socketList[socketID];
-                    socket.emitAgent("terminalWrite", this.name, data);
-                }
+            this._process.exited.then((exitCode) => {
+                this.exit({ exitCode: exitCode ?? 1 });
             });
-
-            // On Exit
-            this._ptyProcess.onExit(this.exit);
         } catch (error) {
             if (error instanceof Error) {
                 clearInterval(this.keepAliveInterval);
@@ -152,17 +147,48 @@ export class Terminal {
         }
     }
 
-    /**
-     * Exit event handler
-     * @param res
-     */
+    private async readStream(stream: ReadableStream<Uint8Array> | null) {
+        if (!stream) {
+            return;
+        }
+
+        const reader = stream.getReader();
+        const decoder = new TextDecoder();
+
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+
+                const data = decoder.decode(value, { stream: true });
+                this.onData(data);
+            }
+        } catch (e) {
+            log.debug("Terminal", "Stream read error: " + (e instanceof Error ? e.message : String(e)));
+        }
+    }
+
+    protected onData(data: string) {
+        // Without a PTY the terminal driver doesn't translate \n → \r\n,
+        // but xterm.js expects \r\n for proper line breaks.
+        const normalized = data.replace(/\r?\n/g, "\r\n");
+
+        this.buffer.pushItem(normalized);
+
+        for (const socketID in this.socketList) {
+            const socket = this.socketList[socketID];
+            socket.emitAgent("terminalWrite", this.name, normalized);
+        }
+    }
+
     protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
         for (const socketID in this.socketList) {
             const socket = this.socketList[socketID];
             socket.emitAgent("terminalExit", this.name, res.exitCode);
         }
 
-        // Remove all clients
         this.socketList = {};
 
         Terminal.terminalMap.delete(this.name);
@@ -171,7 +197,7 @@ export class Terminal {
         clearInterval(this.keepAliveInterval);
         clearInterval(this.kickDisconnectedClientsInterval);
 
-        this._ptyProcess = undefined;
+        this._process = undefined;
 
         if (this.callback) {
             this.callback(res.exitCode);
@@ -194,17 +220,10 @@ export class Terminal {
         delete this.socketList[socket.id];
     }
 
-    public get ptyProcess() {
-        return this._ptyProcess;
-    }
-
     public get name() {
         return this._name;
     }
 
-    /**
-     * Get the terminal output string
-     */
     getBuffer() : string {
         if (this.buffer.length === 0) {
             return "";
@@ -214,21 +233,14 @@ export class Terminal {
 
     close() {
         clearInterval(this.keepAliveInterval);
-        // Send Ctrl+C to the terminal
-        this.ptyProcess?.write("\x03");
-        this.ptyProcess?.kill(undefined);
+        this._process?.kill("SIGTERM");
     }
 
-    /**
-     * Get a running and non-exited terminal
-     * @param name
-     */
     public static getTerminal(name : string) : Terminal | undefined {
         return Terminal.terminalMap.get(name);
     }
 
     public static getOrCreateTerminal(server : ArbourServer, name : string, file : string, args : string | string[], cwd : string) : Terminal {
-        // Since exited terminal will be removed from the map, it is safe to get the terminal from the map
         let terminal = Terminal.getTerminal(name);
         if (!terminal) {
             terminal = new Terminal(server, name, file, args, cwd);
@@ -238,7 +250,6 @@ export class Terminal {
 
     public static exec(server : ArbourServer, socket : ArbourSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
         return new Promise((resolve, reject) => {
-            // check if terminal exists
             if (Terminal.terminalMap.has(terminalName)) {
                 reject("Another operation is already running, please try again later.");
                 return;
@@ -264,32 +275,33 @@ export class Terminal {
 }
 
 /**
- * Interactive terminal
- * Mainly used for container exec
+ * Interactive terminal — used for container exec
  */
 export class InteractiveTerminal extends Terminal {
-    public write(input : string) {
-        this.ptyProcess?.write(input);
+    protected get stdinMode(): "pipe" | "inherit" {
+        return "pipe";
     }
 
-    resetCWD() {
-        const cwd = process.cwd();
-        this.ptyProcess?.write(`cd "${cwd}"\r`);
+    public write(input : string) {
+        if (this._process?.stdin) {
+            const sink = this._process.stdin as import("bun").FileSink;
+            sink.write(input);
+            sink.flush();
+        }
     }
 }
 
 /**
- * User interactive terminal that use bash or powershell with limited commands such as docker, ls, cd, dir
+ * User interactive terminal — bash or powershell console (behind ARBOUR_ENABLE_CONSOLE flag).
+ * Note: without a PTY, features like tab completion and line editing are limited.
  */
 export class MainTerminal extends InteractiveTerminal {
     constructor(server : ArbourServer, name : string) {
-        let shell;
-
-        // Throw an error if console is not enabled
         if (!server.config.enableConsole) {
             throw new Error("Console is not enabled.");
         }
 
+        let shell;
         if (os.platform() === "win32") {
             if (commandExistsSync("pwsh.exe")) {
                 shell = "pwsh.exe";

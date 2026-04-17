@@ -645,18 +645,10 @@ h5.settings-subheading::after {
     border-bottom: 1px solid $dark-border-color;
 }
 
-/* required class */
+/* CodeMirror editor container */
 .code-editor, .css-editor {
-    /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
-
-    border-radius: 1rem;
-    padding: 10px 5px;
-    border: 1px solid #ced4da;
-
-    .dark & {
-        background: $dark-bg2;
-        border: 1px solid $dark-border-color;
-    }
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 
@@ -715,19 +707,6 @@ code {
 .form-text {
     color: $dark-font-color3;
 }
-
-// Vue Prism Editor bug - workaround
-// https://github.com/koca/vue-prism-editor/issues/87
-/*
-.prism-editor__textarea {
-    width: 999999px !important;
-}
-.prism-editor__editor {
-    white-space: pre !important;
-}
-.prism-editor__container {
-    overflow-x: scroll !important;
-}*/
 
 // Localization
 @import "localization.scss";

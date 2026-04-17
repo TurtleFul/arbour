@@ -12,6 +12,18 @@ export default defineConfig({
     server: {
         port: 5000,
     },
+    css: {
+        preprocessorOptions: {
+            scss: {
+                silenceDeprecations: [
+                    "import",
+                    "global-builtin",
+                    "color-functions",
+                    "if-function",
+                ],
+            },
+        },
+    },
     define: {
         "FRONTEND_VERSION": JSON.stringify(process.env.npm_package_version),
     },
