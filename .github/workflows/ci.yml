@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run CI pipeline
+        uses: dagger/dagger-for-github@v8.4.0
+        with:
+          verb: call
+          args: github-ci --source=.
+          version: "latest"

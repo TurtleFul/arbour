@@ -88,7 +88,10 @@ export class AgentManager {
     async add(url: string, username: string, password: string, name: string): Promise<Agent> {
         const row = getDb()
             .insert(agentTable)
-            .values({ url, username, password, name })
+            .values({ url,
+                username,
+                password,
+                name })
             .returning()
             .get();
         return new Agent(row);
@@ -130,7 +133,10 @@ export class AgentManager {
         } else if (url === "") {
             // Master has not yet persisted
             db.insert(agentTable)
-                .values({ url: "", username: "", password: "", name: updatedName })
+                .values({ url: "",
+                    username: "",
+                    password: "",
+                    name: updatedName })
                 .run();
         } else {
             throw new Error("Agent not found");

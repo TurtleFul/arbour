@@ -38,7 +38,8 @@ export class Settings {
         try {
             const v = JSON.parse(rawValue as string);
             log.debug("settings", `Get Setting: ${key}: ${v}`);
-            Settings.cacheList[key] = { value: v, timestamp: Date.now() };
+            Settings.cacheList[key] = { value: v,
+                timestamp: Date.now() };
             return v;
         } catch (_) {
             return rawValue;
@@ -56,20 +57,24 @@ export class Settings {
 
         if (existing) {
             db.update(setting)
-                .set({ value: serialised, type })
+                .set({ value: serialised,
+                    type })
                 .where(eq(setting.key, key))
                 .run();
         } else {
             db.insert(setting)
-                .values({ key, value: serialised, type })
+                .values({ key,
+                    value: serialised,
+                    type })
                 .run();
         }
 
-        Settings.deleteCache([key]);
+        Settings.deleteCache([ key ]);
     }
 
     static async getSettings(type: string): Promise<LooseObject> {
-        const rows = getDb().select({ key: setting.key, value: setting.value })
+        const rows = getDb().select({ key: setting.key,
+            value: setting.value })
             .from(setting)
             .where(eq(setting.type, type))
             .all();
@@ -88,7 +93,8 @@ export class Settings {
     static async setSettings(type: string, data: LooseObject) {
         const db = getDb();
         for (const key of Object.keys(data)) {
-            const existing = db.select({ id: setting.id, type: setting.type })
+            const existing = db.select({ id: setting.id,
+                type: setting.type })
                 .from(setting)
                 .where(eq(setting.key, key))
                 .get();
@@ -104,7 +110,9 @@ export class Settings {
                 }
             } else {
                 db.insert(setting)
-                    .values({ key, value: serialised, type })
+                    .values({ key,
+                        value: serialised,
+                        type })
                     .run();
             }
         }

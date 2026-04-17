@@ -178,9 +178,10 @@ function checkOpenPullDialog() {
         .filter(id => dataMap.get(id)!.excludedActions.includes(DockerArtefactAction.Pull));
 
     if (selectedDanglingImages.length > 0) {
+        const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         const danglingImageList = [ "<ul>" ];
         for (const id of selectedDanglingImages) {
-            danglingImageList.push(`<li>${dataMap.get(id)!.actionIds.pull}</li>`);
+            danglingImageList.push(`<li>${escape(dataMap.get(id)!.actionIds.pull)}</li>`);
         }
         danglingImageList.push("</ul>");
         pullDialogData.danglingImagesList = danglingImageList.join("");

@@ -46,10 +46,14 @@
             <div v-if="selectMode && false" class="selection-controls px-2 pt-2">
                 <input v-model="selectAll" class="form-check-input select-input" type="checkbox" />
 
-                <button class="btn-outline-normal" @click="pauseDialog"><font-awesome-icon icon="pause" size="sm" /> {{
-                    $t("Pause") }}</button>
-                <button class="btn-outline-normal" @click="resumeSelected"><font-awesome-icon icon="play" size="sm" />
-                    {{ $t("Resume") }}</button>
+                <button class="btn-outline-normal" @click="pauseDialog">
+                    <font-awesome-icon icon="pause" size="sm" /> {{
+                        $t("Pause") }}
+                </button>
+                <button class="btn-outline-normal" @click="resumeSelected">
+                    <font-awesome-icon icon="play" size="sm" />
+                    {{ $t("Resume") }}
+                </button>
 
                 <span v-if="selectedStackCount > 0">
                     {{ $t("selectedStackCount", [selectedStackCount]) }}

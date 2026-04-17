@@ -56,9 +56,11 @@ describe("Settings.get / Settings.set", () => {
     });
 
     test("round-trips an object value", async () => {
-        await Settings.set("obj", { a: 1, b: "two" });
+        await Settings.set("obj", { a: 1,
+            b: "two" });
         const result = await Settings.get("obj");
-        expect(result).toEqual({ a: 1, b: "two" });
+        expect(result).toEqual({ a: 1,
+            b: "two" });
     });
 
     test("overwrites an existing value", async () => {
@@ -82,7 +84,7 @@ describe("Settings cache", () => {
     test("deleteCache removes entry", async () => {
         await Settings.set("cached", "value");
         await Settings.get("cached");
-        Settings.deleteCache(["cached"]);
+        Settings.deleteCache([ "cached" ]);
         expect("cached" in Settings.cacheList).toBe(false);
     });
 
@@ -106,7 +108,8 @@ describe("Settings.getSettings / Settings.setSettings", () => {
     });
 
     test("stores and retrieves settings by type", async () => {
-        await Settings.setSettings("general", { theme: "dark", lang: "en" });
+        await Settings.setSettings("general", { theme: "dark",
+            lang: "en" });
         const result = await Settings.getSettings("general");
         expect(result.theme).toBe("dark");
         expect(result.lang).toBe("en");

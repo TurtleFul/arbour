@@ -6,7 +6,7 @@ import { log } from "../log";
 import { getDb } from "../db/index";
 import { user as userTable } from "../db/schema";
 import { eq, and } from "drizzle-orm";
-import { loginRateLimiter, twoFaRateLimiter } from "../rate-limiter";
+import { loginRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
 import {

@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { Terminal } from "./terminal";
-import { randomBytes } from "crypto";
+
 import { log } from "./log";
 import { ERROR_TYPE_VALIDATION } from "../common/util-common";
 import { getDb } from "./db/index";

@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ComposeDocument, ComposeNetwork, ComposeNetworks } from "../../../common/compose-document";
+import { ComposeDocument, ComposeNetwork } from "../../../common/compose-document";
 import { StackData } from "../../../common/types";
 
 export default defineComponent({

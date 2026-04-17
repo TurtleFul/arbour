@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ComposeDocument, X_ARBOUR } from "../compose-document";
+import { ComposeDocument } from "../compose-document";
 
 const SIMPLE_COMPOSE = `
 services:

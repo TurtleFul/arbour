@@ -669,7 +669,6 @@ export default defineComponent({
         startStack() {
             this.startComposeAction();
 
-
             this.$root.emitAgent(this.endpoint, "startStack", this.stack.name, (res) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);

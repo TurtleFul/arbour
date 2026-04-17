@@ -18,7 +18,7 @@ import {
 
 describe("intHash", () => {
     test("returns a number in [0, length)", () => {
-        for (const str of ["", "hello", "world", "abc123", "a".repeat(100)]) {
+        for (const str of [ "", "hello", "world", "abc123", "a".repeat(100) ]) {
             const result = intHash(str);
             expect(result).toBeGreaterThanOrEqual(0);
             expect(result).toBeLessThan(10);
@@ -165,15 +165,15 @@ describe("getNested", () => {
     const obj = { a: { b: { c: 42 } } };
 
     test("retrieves a deeply nested value", () => {
-        expect(getNested<number>(obj, ["a", "b", "c"])).toBe(42);
+        expect(getNested<number>(obj, [ "a", "b", "c" ])).toBe(42);
     });
 
     test("returns undefined for missing keys", () => {
-        expect(getNested(obj, ["a", "x"])).toBeUndefined();
-        expect(getNested(obj, ["z"])).toBeUndefined();
+        expect(getNested(obj, [ "a", "x" ])).toBeUndefined();
+        expect(getNested(obj, [ "z" ])).toBeUndefined();
     });
 
     test("returns undefined for non-object intermediaries", () => {
-        expect(getNested({ a: 1 }, ["a", "b"])).toBeUndefined();
+        expect(getNested({ a: 1 }, [ "a", "b" ])).toBeUndefined();
     });
 });

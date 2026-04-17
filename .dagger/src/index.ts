@@ -8,6 +8,7 @@
  *   dagger call build-frontend   --source=. export --path=./frontend-dist
  *   dagger call build-image      --source=. as-tarball export --path=./arbour.tar
  *   dagger call ci               --source=.
+ *   dagger call github-ci        --source=.    # full pipeline: ci + build-image
  */
 import { dag, Container, Directory, object, func } from "@dagger.io/dagger";
 
@@ -89,5 +90,21 @@ export class Arbour {
             this.checkTs(source),
         ]);
         return `=== test ===\n${t}\n\n=== lint ===\n${l}\n\n=== check-ts ===\n${c}`;
+    }
+
+    /** Full CI pipeline for GitHub Actions: lint + typecheck + test, then build image. */
+    @func()
+    async githubCi(source: Directory): Promise<string> {
+        const [t, l, c] = await Promise.all([
+            this.test(source),
+            this.lint(source),
+            this.checkTs(source),
+        ]);
+
+        const output = `=== test ===\n${t}\n\n=== lint ===\n${l}\n\n=== check-ts ===\n${c}`;
+
+        await this.buildImage(source).sync();
+
+        return `${output}\n\n=== build-image ===\nSuccess`;
     }
 }
