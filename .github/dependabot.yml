@@ -5,14 +5,13 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     labels:
       - dependencies
     groups:
-      minor-and-patch:
-        update-types:
-          - minor
-          - patch
+      npm-all:
+        patterns:
+          - "*"
 
   - package-ecosystem: docker
     directory: /docker
@@ -22,6 +21,10 @@ updates:
     labels:
       - dependencies
       - docker
+    groups:
+      docker-all:
+        patterns:
+          - "*"
 
   - package-ecosystem: github-actions
     directory: /
@@ -31,3 +34,7 @@ updates:
     labels:
       - dependencies
       - github-actions
+    groups:
+      actions-all:
+        patterns:
+          - "*"
