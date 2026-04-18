@@ -2,8 +2,6 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
-
 ## [0.2.0] — 2026-04-18
 
 First public release of the Arbour fork. Renamed from Dockge and refocused on long-term maintenance of the homelab compose-manager use case.
