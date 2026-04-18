@@ -38,6 +38,7 @@ declare module 'vue' {
     Login: typeof import('./src/components/Login.vue')['default']
     NetworkInput: typeof import('./src/components/NetworkInput.vue')['default']
     ProgressTerminal: typeof import('./src/components/ProgressTerminal.vue')['default']
+    ReleaseNotes: typeof import('./src/components/settings/ReleaseNotes.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Security: typeof import('./src/components/settings/Security.vue')['default']

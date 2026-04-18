@@ -3,9 +3,14 @@ import { compareVersions } from "../common/util-common";
 import packageJSON from "../package.json";
 import { Settings } from "./settings";
 
-// How much time in ms to wait between update checks
 const UPDATE_CHECKER_INTERVAL_MS = 1000 * 60 * 60 * 48;
-const CHECK_URL = ""; // TODO: Set up version check endpoint for Arbour
+const RELEASES_URL = "https://api.github.com/repos/turtleful/arbour/releases/latest";
+
+interface GitHubRelease {
+    tag_name?: string;
+    prerelease?: boolean;
+    draft?: boolean;
+}
 
 class CheckVersion {
     version = packageJSON.version;
@@ -14,38 +19,45 @@ class CheckVersion {
 
     async startInterval() {
         const check = async () => {
-            if (!CHECK_URL || await Settings.get("checkUpdate") === false) {
+            if (await Settings.get("checkUpdate") === false) {
                 return;
             }
 
-            log.debug("update-checker", "Retrieving latest versions");
+            log.debug("update-checker", "Retrieving latest release from GitHub");
 
             try {
-                const res = await fetch(CHECK_URL);
-                const data = await res.json();
+                const res = await fetch(RELEASES_URL, {
+                    headers: { "Accept": "application/vnd.github+json" },
+                });
 
-                // For debug
+                if (!res.ok) {
+                    log.info("update-checker", `GitHub releases API returned ${res.status}`);
+                    return;
+                }
+
+                const data = await res.json() as GitHubRelease;
+
                 if (process.env.TEST_CHECK_VERSION === "1") {
-                    data.slow = "1000.0.0";
+                    this.latestVersion = "1000.0.0";
+                    return;
+                }
+
+                if (data.draft || !data.tag_name) {
+                    return;
                 }
 
                 const checkBeta = await Settings.get("checkBeta");
-
-                if (checkBeta && data.beta) {
-                    if (compareVersions(data.beta, data.slow) > 0) {
-                        this.latestVersion = data.beta;
-                        return;
-                    }
+                if (data.prerelease && !checkBeta) {
+                    return;
                 }
 
-                if (data.slow) {
-                    this.latestVersion = data.slow;
+                const latest = data.tag_name.replace(/^v/, "");
+                if (compareVersions(latest, this.version) > 0) {
+                    this.latestVersion = latest;
                 }
-
             } catch (_) {
                 log.info("update-checker", "Failed to check for new versions");
             }
-
         };
 
         await check();

@@ -1,6 +1,7 @@
 services:
   arbour:
-    image: ghcr.io/arbour-app/arbour:1
+    # Pin to a specific version (e.g. :0.2.0) for production. :latest tracks the newest release.
+    image: ghcr.io/turtleful/arbour:latest
     restart: unless-stopped
     ports:
       # Host Port : Container Port

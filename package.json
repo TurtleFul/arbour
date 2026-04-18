@@ -1,6 +1,6 @@
 {
     "name": "arbour",
-    "version": "1.5.0",
+    "version": "0.2.0",
     "type": "module",
     "engines": {
         "node": ">= 22.14.0"
@@ -15,16 +15,9 @@
         "dev": "bun ./extra/dev.ts",
         "dev:backend": "NODE_ENV=development bun --watch ./backend/index.ts",
         "dev:frontend": "NODE_ENV=development vite --host --strictPort --config ./frontend/vite.config.ts",
-        "release-final": "bun ./extra/test-docker.ts && bun extra/update-version.ts && bun run build:docker",
-        "release-beta": "bun ./extra/test-docker.ts && bun extra/update-version.ts && bun run build:docker-beta",
         "build:frontend": "vite build --config ./frontend/vite.config.ts",
         "build:docker-local": "docker build --target release -f ./docker/Dockerfile -t arbour:local .",
-        "build:docker": "docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/arbour-app/arbour:latest -t ghcr.io/arbour-app/arbour:1 -t ghcr.io/arbour-app/arbour:$VERSION -t ghcr.io/arbour-app/arbour:beta -t ghcr.io/arbour-app/arbour:nightly --target release -f ./docker/Dockerfile . --push",
-        "build:docker-beta": "docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/arbour-app/arbour:beta -t ghcr.io/arbour-app/arbour:$VERSION --target release -f ./docker/Dockerfile . --push",
-        "build:docker-nightly": "docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/arbour-app/arbour:nightly --target nightly -f ./docker/Dockerfile . --push",
         "start-docker": "docker run --rm -p 5001:5001 --name arbour arbour:local",
-        "mark-as-nightly": "bun ./extra/mark-as-nightly.ts",
-        "reformat-changelog": "bun ./extra/reformat-changelog.ts",
         "reset-password": "bun ./extra/reset-password.ts"
     },
     "dependencies": {

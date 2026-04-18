@@ -1,0 +1,89 @@
+name: Bug report
+description: Report a problem with Arbour
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the sections below so we can reproduce and fix it quickly.
+
+        **Do not report security vulnerabilities here.** Use the [security advisory form](https://github.com/turtleful/arbour/security/advisories/new) instead.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched existing issues and did not find a duplicate
+          required: true
+        - label: I am running a recent version (latest release or `:next`)
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: When I click X, Y happens instead of Z.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps that reliably trigger the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Arbour version
+      placeholder: e.g. 0.2.0 or :next
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: Install method
+      options:
+        - Docker (compose)
+        - Docker (docker run)
+        - From source (bun)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: host-os
+    attributes:
+      label: Host OS and Docker version
+      placeholder: e.g. Ubuntu 24.04, Docker 27.3.1
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste container logs, browser console output, or stack traces. Redact any secrets.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Screenshots, compose snippets, anything else that might help.

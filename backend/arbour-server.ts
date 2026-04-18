@@ -89,7 +89,7 @@ export class ArbourServer {
         // Catch unexpected errors here
         let unexpectedErrorHandler = (error : unknown) => {
             console.trace(error);
-            console.error("If you keep encountering errors, please report to https://github.com/arbour-app/arbour");
+            console.error("If you keep encountering errors, please report to https://github.com/turtleful/arbour");
         };
         process.addListener("unhandledRejection", unexpectedErrorHandler);
         process.addListener("uncaughtException", unexpectedErrorHandler);

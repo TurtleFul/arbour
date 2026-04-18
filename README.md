@@ -24,14 +24,72 @@ It is a fork of [dockge](https://github.com/louislam/dockge), continued under a 
 
 ## Getting Started
 
-> Docker image publishing is not yet set up. See [docs/development.md](docs/development.md) to run from source.
+> ⚠️ Arbour has access to your host Docker socket. Treat it like a privileged admin panel. See [SECURITY.md](SECURITY.md) before exposing it to a network.
+
+Minimal `compose.yaml`:
+
+```yaml
+services:
+  arbour:
+    image: ghcr.io/turtleful/arbour:latest
+    restart: unless-stopped
+    ports:
+      - 5001:5001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+      # ⚠️ Left path === right path (stacks are addressed by their full host path).
+      - /opt/stacks:/opt/stacks
+    environment:
+      - TZ=${TZ:-UTC}
+      - ARBOUR_STACKS_DIR=/opt/stacks
+```
+
+Then:
+
+```bash
+mkdir -p /opt/stacks
+docker compose up -d
+```
+
+Open <http://localhost:5001> and create the admin account on first run.
+
+Available image tags:
+
+| Tag | Contents |
+|---|---|
+| `:latest` | Latest tagged release |
+| `:X.Y.Z`, `:X.Y`, `:X` | Semver-pinned release |
+| `:next` | Head of `main` — all changes since the last release |
+
+Pin to a specific `X.Y.Z` tag for production.
+
+## Releases
+
+- Browse all releases on [GitHub Releases](https://github.com/turtleful/arbour/releases).
+- Per-version changes live in [CHANGELOG.md](CHANGELOG.md).
+- Inside the app, open **Settings → Release Notes** for a readable view of what changed in each version.
 
 ## Development
 
-See [docs/development.md](docs/development.md) for instructions on running Arbour locally.
+See [docs/development.md](docs/development.md) for running Arbour locally from source.
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
+- Bug reports and feature requests → [Issues](https://github.com/turtleful/arbour/issues)
+- Questions and ideas → [Discussions](https://github.com/turtleful/arbour/discussions)
+- Security vulnerabilities → [SECURITY.md](SECURITY.md) (do not use public issues)
+
+By participating, you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Acknowledgments
+
+Arbour would not exist without [Dockge](https://github.com/louislam/dockge) and the work of [Louis Lam](https://github.com/louislam). Dockge is a great tool — Arbour is a continuation of that work, with a focus on keeping it maintained and growing it further. Huge thanks to Louis and every Dockge contributor.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[AGPL-3.0-or-later](LICENSE) — free to use, modify, and distribute, including over a network. Derivative works (including hosted services) must be released under the same license with source available.
 
-Arbour is based on dockge, originally created by [Louis Lam](https://github.com/louislam).
+Dockge's original MIT license terms are preserved in [NOTICE](NOTICE).

@@ -79,6 +79,9 @@ export default {
                 security: {
                     title: this.$t("Security"),
                 },
+                "release-notes": {
+                    title: this.$t("Release Notes"),
+                },
                 about: {
                     title: this.$t("About"),
                 },

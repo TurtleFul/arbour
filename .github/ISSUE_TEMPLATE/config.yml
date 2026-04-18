@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/turtleful/arbour/security/advisories/new
+    about: Please report security issues privately via GitHub Security Advisories, not public issues.
+  - name: Question or discussion
+    url: https://github.com/turtleful/arbour/discussions
+    about: For usage questions, ideas, or general discussion.
