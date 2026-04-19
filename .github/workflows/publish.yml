@@ -2,7 +2,7 @@ name: Publish Docker Image
 
 on:
   push:
-    branches: [main]
+    branches: ["**", "!dependabot/**"]
     tags: ["v*.*.*"]
   workflow_dispatch:
 

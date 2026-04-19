@@ -434,7 +434,7 @@ export class ArbourServer {
             timeout: 30000,                   // timeout: 30 secs
             development: false,               // not in dev mode
             forceExit: true,                  // triggers process.exit() at the end of shutdown process
-            onShutdown: this.shutdownFunction,     // shutdown function (async) - e.g. for cleanup DB, ...
+            onShutdown: this.shutdownFunction.bind(this),
             finally: this.finalFunction,            // finally function (sync) - e.g. for logging
         });
 
@@ -725,7 +725,8 @@ export class ArbourServer {
         log.info("server", "Shutdown requested");
         log.info("server", "Called signal: " + signal);
 
-        // TODO: Close all terminals?
+        // Force-close all Socket.io connections so the HTTP server doesn't wait for browsers to disconnect
+        this.io.disconnectSockets(true);
 
         await Database.close();
         Settings.stopCacheCleaner();

@@ -82,6 +82,9 @@ export default {
                 "release-notes": {
                     title: this.$t("Release Notes"),
                 },
+                "self-manage": {
+                    title: "Self-Management",
+                },
                 about: {
                     title: this.$t("About"),
                 },

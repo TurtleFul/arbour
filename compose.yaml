@@ -1,7 +1,6 @@
 services:
   arbour:
-    # Pin to a specific version (e.g. :0.2.0) for production. :latest tracks the newest release.
-    image: ghcr.io/turtleful/arbour:latest
+    image: ${ARBOUR_IMAGE:-ghcr.io/turtleful/arbour:latest}
     restart: unless-stopped
     ports:
       # Host Port : Container Port
@@ -10,16 +9,15 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/app/data
 
-      # If you want to use private registries, you need to share the auth file with Arbour:
-      # - /root/.docker/:/root/.docker
-
       # Stacks Directory
-      # ⚠️ READ IT CAREFULLY. If you did it wrong, your data could end up writing into a WRONG PATH.
-      # ⚠️ 1. FULL path only. No relative path (MUST)
-      # ⚠️ 2. Left Stacks Path === Right Stacks Path (MUST)
+      # Change the left side to wherever you want to store stacks on your host.
+      # The right side (/opt/stacks) is the container path — do not change it.
+      # ⚠️ Bind mounts inside your stacks MUST use absolute host paths (e.g. /docker/mystacks).
+      #    Relative paths like ./data will not work — Docker resolves them against the container
+      #    path, not the host path, so the daemon cannot find the files.
       - /opt/stacks:/opt/stacks
     environment:
-      # Set timezone, if TZ ist not set on your host, set a specific timezone e.g. Europe/Berlin
-      - TZ=${TZ}
-      # Tell Arbour where is your stacks directory
+      # Set timezone
+      - TZ=${TZ:-Europe/Berlin}
+      # Internal container path for stacks — must match the right side of the volume mount above.
       - ARBOUR_STACKS_DIR=/opt/stacks

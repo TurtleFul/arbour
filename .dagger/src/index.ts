@@ -9,6 +9,10 @@
  *   dagger call build-image      --source=. as-tarball export --path=./arbour.tar
  *   dagger call ci               --source=.
  *   dagger call github-ci        --source=.    # full pipeline: ci + build-image
+ *
+ * Local dev workflow (build + load into Docker daemon, no push required):
+ *   ./scripts/dev-load.sh
+ *   # Then run: ARBOUR_IMAGE=arbour:dev docker compose up -d
  */
 import { dag, Container, Directory, object, func } from "@dagger.io/dagger";
 

@@ -3,6 +3,7 @@ import composerize from "composerize";
 import { SocketHandler } from "../socket-handler.js";
 import { ArbourServer } from "../arbour-server";
 import { log } from "../log";
+import { isRunningInDocker, isSelfManageEnabled, enableSelfManage, disableSelfManage } from "../self-manage";
 import { getDb } from "../db/index";
 import { user as userTable } from "../db/schema";
 import { eq, and } from "drizzle-orm";
@@ -313,6 +314,40 @@ export class MainSocketHandler extends SocketHandler {
                 if (e instanceof Error) {
                     log.warn("disconnectOtherSocketClients", e.message);
                 }
+            }
+        });
+
+        // Self-management
+        socket.on("getSelfManageStatus", async (callback) => {
+            try {
+                checkLogin(socket);
+                const inDocker = await isRunningInDocker();
+                const enabled = await isSelfManageEnabled();
+                callback({ ok: true, data: { inDocker, enabled } });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        socket.on("enableSelfManage", async (callback) => {
+            try {
+                checkLogin(socket);
+                await enableSelfManage(server);
+                callback({ ok: true, msg: "Self-management enabled." });
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        socket.on("disableSelfManage", async (callback) => {
+            try {
+                checkLogin(socket);
+                await disableSelfManage(server);
+                callback({ ok: true, msg: "Self-management disabled." });
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
             }
         });
 
