@@ -1,6 +1,6 @@
 services:
   arbour:
-    image: ${ARBOUR_IMAGE:-ghcr.io/turtleful/arbour:latest}
+    image: ${ARBOUR_IMAGE:-ghcr.io/turtleful/arbour:self-managed-arbour}
     restart: unless-stopped
     ports:
       # Host Port : Container Port

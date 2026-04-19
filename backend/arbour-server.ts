@@ -429,13 +429,24 @@ export class ArbourServer {
             );
         });
 
+        // Disconnect sockets BEFORE gracefulShutdown calls server.close(), otherwise
+        // server.close() blocks waiting for browser WebSocket connections to drop on their own.
+        const forceDisconnect = () => {
+            this.io.disconnectSockets(true);
+            if (typeof (this.httpServer as any).closeAllConnections === "function") {
+                (this.httpServer as any).closeAllConnections();
+            }
+        };
+        process.once("SIGINT", forceDisconnect);
+        process.once("SIGTERM", forceDisconnect);
+
         gracefulShutdown(this.httpServer, {
             signals: "SIGINT SIGTERM",
-            timeout: 30000,                   // timeout: 30 secs
-            development: false,               // not in dev mode
-            forceExit: true,                  // triggers process.exit() at the end of shutdown process
+            timeout: 3000,
+            development: false,
+            forceExit: true,
             onShutdown: this.shutdownFunction.bind(this),
-            finally: this.finalFunction,            // finally function (sync) - e.g. for logging
+            finally: this.finalFunction,
         });
 
     }
@@ -724,9 +735,6 @@ export class ArbourServer {
     async shutdownFunction(signal : string | undefined) {
         log.info("server", "Shutdown requested");
         log.info("server", "Called signal: " + signal);
-
-        // Force-close all Socket.io connections so the HTTP server doesn't wait for browsers to disconnect
-        this.io.disconnectSockets(true);
 
         await Database.close();
         Settings.stopCacheCleaner();
