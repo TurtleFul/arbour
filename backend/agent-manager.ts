@@ -217,8 +217,9 @@ export class AgentManager {
         client.on("info", (res) => {
             log.debug("agent-manager", res);
 
-            // Reject dockge agents below 1.4.0 and Arbour agents below 0.2.0
-            const supported = semver.satisfies(res.version, ">=0.2.0 <1.0.0 || >=1.4.0");
+            // Reject agents below 0.2.0 (Arbour) or in the unsupported 1.0–1.3 range.
+            // Skip check when version is undefined — sent before auth, real version arrives post-auth.
+            const supported = res.version === undefined || semver.satisfies(res.version, ">=0.2.0 <1.0.0 || >=1.4.0");
             if (!isDev && !supported) {
                 this.socket.emit("agentStatus", {
                     endpoint: endpoint,
