@@ -69,7 +69,7 @@ Bun loads `.env` natively — no `dotenv` import needed.
 
 | Variable | Default | Description |
 |---|---|---|
-| `ARBOUR_STACKS_DIR` | `/opt/stacks` | Directory where compose stacks are stored |
+| `ARBOUR_STACKS_DIR` | `/opt/stacks` | Override the stacks directory inside the container (optional in Docker — just mount to `/opt/stacks`) |
 | `ARBOUR_PORT` | `5001` | Backend server port |
 | `ARBOUR_DATA_DIR` | `./data/` | Directory for the SQLite database and other runtime data |
 | `ARBOUR_HOSTNAME` | (unset) | Bind hostname |

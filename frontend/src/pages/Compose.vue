@@ -291,9 +291,39 @@
                 </div>
             </div>
 
-            <div v-if="!stack.isManagedByArbour && !processing">
-                {{ $t("stackNotManagedByArbourMsg") }}
+            <div v-if="!stack.isManagedByArbour && !processing" class="mt-3">
+                <p>{{ $t("stackNotManagedByArbourMsg") }}</p>
+                <button class="btn btn-primary" @click="showImportDialog = true">
+                    <font-awesome-icon icon="file-import" class="me-1" />
+                    {{ $t("importStack") }}
+                </button>
             </div>
+
+            <!-- Import Dialog -->
+            <BModal
+                v-model="showImportDialog"
+                :title="$t('importStack')"
+                :cancelTitle="$t('cancel')"
+                :okTitle="$t('importStack')"
+                @ok="importStack"
+            >
+                <p>{{ $t("importStackMsg") }}</p>
+                <ul class="mb-0">
+                    <li>{{ $t("importStackPoint1") }}</li>
+                    <li>{{ $t("importStackPoint2") }}</li>
+                    <li>{{ $t("importStackPoint3") }}</li>
+                </ul>
+            </BModal>
+
+            <!-- Import Relative Path Warning -->
+            <BModal
+                v-model="showImportRelativePathWarning"
+                :title="$t('importStackRelativePathTitle')"
+                ok-only
+                :okTitle="$t('ok')"
+            >
+                <p v-html="$t('importStackRelativePathMsg', { dir: importSourceDir })"></p>
+            </BModal>
 
             <!-- Delete Dialog -->
             <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
@@ -374,6 +404,9 @@ export default defineComponent({
             autoUpdateMode: "disabled" as AutoUpdateMode,
             autoUpdateCustomSchedule: "",
             autoUpdateSaving: false,
+            showImportDialog: false,
+            showImportRelativePathWarning: false,
+            importSourceDir: "",
         };
     },
 
@@ -818,6 +851,20 @@ export default defineComponent({
 
         stackNameToLowercase() {
             this.stack.name = this.stack?.name?.toLowerCase();
+        },
+
+        importStack() {
+            this.$root.emitAgent(this.endpoint, "importStack", this.stack.name, (res) => {
+                if (res.ok) {
+                    this.importSourceDir = res.sourceDir;
+                    if (res.hasRelativePaths) {
+                        this.showImportRelativePathWarning = true;
+                    }
+                    this.loadStack();
+                } else {
+                    this.$root.toastRes(res);
+                }
+            });
         },
 
         loadAutoUpdateSettings() {
