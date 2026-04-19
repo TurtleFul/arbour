@@ -1,3 +1,10 @@
+export type AutoUpdateMode = "disabled" | "immediate" | "scheduled";
+
+export type StackAutoUpdateSettings = {
+    mode: AutoUpdateMode;
+    schedule: string | null;
+};
+
 export type StatsData = {
     cpuPerc: string,
     memUsage: string,

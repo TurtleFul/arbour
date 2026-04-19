@@ -452,6 +452,37 @@ export class Stack {
         }
     }
 
+    getServicesWithAvailableImageUpdates(): ServiceData[] {
+        const result: ServiceData[] = [];
+        for (const serviceData of this._services.values()) {
+            const imageInfo = Stack.imageRepository.getImageInfo(this.name, serviceData.name, serviceData.image);
+            if (imageInfo.isImageUpdateAvailable()) {
+                result.push(serviceData);
+            }
+        }
+        return result;
+    }
+
+    async autoUpdateService(serviceName: string): Promise<boolean> {
+        try {
+            const pullRes = await exec("docker", [ "compose", "pull", serviceName ], { cwd: this.path });
+            if (pullRes.exitCode !== 0) {
+                log.error("autoUpdateService", `Stack '${this.name}' service '${serviceName}': pull failed: ${pullRes.stderr}`);
+                return false;
+            }
+            const upRes = await exec("docker", [ "compose", "up", "-d", "--no-deps", serviceName ], { cwd: this.path });
+            if (upRes.exitCode !== 0) {
+                log.error("autoUpdateService", `Stack '${this.name}' service '${serviceName}': up failed: ${upRes.stderr}`);
+                return false;
+            }
+            log.info("autoUpdateService", `Stack '${this.name}' service '${serviceName}': updated`);
+            return true;
+        } catch (e) {
+            log.error("autoUpdateService", `Stack '${this.name}' service '${serviceName}': ${e}`);
+            return false;
+        }
+    }
+
     /**
      * Checks if a compose file exists in the specified directory.
      * @async

@@ -38,6 +38,8 @@ import { AgentSocket } from "../common/agent-socket";
 import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 
 import { AgentMaintenanceSocketHandler } from "./agent-socket-handlers/agent-maintenance-socket-handler";
+import { StackAutoUpdateSocketHandler } from "./agent-socket-handlers/stack-auto-update-socket-handler";
+import { StackAutoUpdateManager } from "./stack-auto-update-manager";
 
 export class ArbourServer {
     app : Express;
@@ -70,8 +72,11 @@ export class ArbourServer {
     agentSocketHandlerList : AgentSocketHandler[] = [
         new DockerSocketHandler(),
         new TerminalSocketHandler(),
-        new AgentMaintenanceSocketHandler()
+        new AgentMaintenanceSocketHandler(),
+        new StackAutoUpdateSocketHandler(),
     ];
+
+    autoUpdateManager: StackAutoUpdateManager = new StackAutoUpdateManager(this);
 
     /**
      * Show Setup Page
@@ -412,6 +417,10 @@ export class ArbourServer {
 
             checkVersion.startInterval();
 
+            this.autoUpdateManager.init().catch((e) => {
+                log.error("autoUpdate", "Failed to initialize auto-update manager: " + e);
+            });
+
             // Update stack properties every 5 Minutes
             setTimeout(
                 () => {
@@ -615,6 +624,7 @@ export class ArbourServer {
         for (const stack of stackList.values()) {
             if (stack.isManagedByArbour) {
                 await stack.updateImageInfos();
+                await this.autoUpdateManager.onImageUpdateDetected(stack);
             }
         }
         log.info("checkImageUpdates", "Check for image updates finished.");
