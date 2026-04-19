@@ -217,8 +217,9 @@ export class AgentManager {
         client.on("info", (res) => {
             log.debug("agent-manager", res);
 
-            // Disconnect if the version is lower than 1.4.0
-            if (!isDev && semver.satisfies(res.version, "< 1.4.0")) {
+            // Reject dockge agents below 1.4.0 and Arbour agents below 0.2.0
+            const supported = semver.satisfies(res.version, ">=0.2.0 <1.0.0 || >=1.4.0");
+            if (!isDev && !supported) {
                 this.socket.emit("agentStatus", {
                     endpoint: endpoint,
                     status: "offline",
