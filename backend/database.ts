@@ -6,6 +6,7 @@ import { sleep } from "../common/util-common";
 
 // Dynamically import migration SQL at startup
 import migration0000 from "./db/migrations/0000_baseline.sql" with { type: "text" };
+import migration0001 from "./db/migrations/0001_stack_auto_update.sql" with { type: "text" };
 
 interface DBConfig {
     type?: "sqlite";
@@ -67,18 +68,20 @@ export class Database {
      */
     static async migrate() {
         const db = getDb();
+        const migrations = [ migration0000, migration0001 ];
         try {
-            // Strip comment lines, then split on statement boundaries
-            const statements = migration0000
-                .split("\n")
-                .filter((line: string) => !line.trim().startsWith("--"))
-                .join("\n")
-                .split(";")
-                .map((s: string) => s.trim())
-                .filter((s: string) => s.length > 0);
+            for (const migration of migrations) {
+                const statements = migration
+                    .split("\n")
+                    .filter((line: string) => !line.trim().startsWith("--"))
+                    .join("\n")
+                    .split(";")
+                    .map((s: string) => s.trim())
+                    .filter((s: string) => s.length > 0);
 
-            for (const statement of statements) {
-                db.$client.run(statement);
+                for (const statement of statements) {
+                    db.$client.run(statement);
+                }
             }
             log.debug("db", "Migrations applied");
         } catch (e) {

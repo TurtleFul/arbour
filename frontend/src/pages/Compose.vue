@@ -165,6 +165,50 @@
                             style="height: 315px;"
                         ></Terminal>
                     </div>
+
+                    <!-- Auto Update Settings -->
+                    <div v-if="!isEditMode && !isAdd && stack.isManagedByArbour">
+                        <h4 class="mb-3">{{ $t("autoUpdate") }}</h4>
+                        <div class="shadow-box big-padding mb-3">
+                            <div class="mb-3">
+                                <label class="form-label">{{ $t("autoUpdateMode") }}</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input id="au-disabled" v-model="autoUpdateMode" class="form-check-input" type="radio" value="disabled" />
+                                        <label class="form-check-label" for="au-disabled">{{ $t("disabled") }}</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input id="au-immediate" v-model="autoUpdateMode" class="form-check-input" type="radio" value="immediate" />
+                                        <label class="form-check-label" for="au-immediate">{{ $t("autoUpdateImmediate") }}</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input id="au-scheduled" v-model="autoUpdateMode" class="form-check-input" type="radio" value="scheduled" />
+                                        <label class="form-check-label" for="au-scheduled">{{ $t("autoUpdateScheduled") }}</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="autoUpdateMode === 'scheduled'" class="mb-3">
+                                <label class="form-label">{{ $t("autoUpdateSchedule") }}</label>
+                                <input
+                                    v-model="autoUpdateCustomSchedule"
+                                    type="text"
+                                    class="form-control font-monospace"
+                                    placeholder="0 3 * * *"
+                                />
+                                <div class="form-text">{{ $t("autoUpdateCronHint") }}</div>
+                            </div>
+
+                            <div v-if="autoUpdateMode === 'immediate'" class="mb-3 form-text">
+                                {{ $t("autoUpdateImmediateHint") }}
+                            </div>
+
+                            <button class="btn btn-primary btn-sm" :disabled="autoUpdateSaving" @click="saveAutoUpdateSettings">
+                                <font-awesome-icon icon="save" class="me-1" />
+                                {{ $t("saveSettings") }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-xl-6">
                     <h4 class="mb-3">{{ stack.composeFileName }}</h4>
@@ -270,7 +314,7 @@ import {
     getComposeTerminalName,
     UNKNOWN
 } from "../../../common/util-common";
-import { StackData } from "../../../common/types";
+import { StackData, StackAutoUpdateSettings, AutoUpdateMode } from "../../../common/types";
 import { ComposeDocument } from "../../../common/compose-document";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
@@ -326,7 +370,10 @@ export default defineComponent({
             updateDialogData: {
                 pruneAfterUpdate: false,
                 pruneAllAfterUpdate: false
-            }
+            },
+            autoUpdateMode: "disabled" as AutoUpdateMode,
+            autoUpdateCustomSchedule: "",
+            autoUpdateSaving: false,
         };
     },
 
@@ -603,6 +650,7 @@ export default defineComponent({
                     this.stack = res.stack;
                     this.yamlCodeChange();
                     this.processing = false;
+                    this.loadAutoUpdateSettings();
                 } else {
                     this.$root.toastRes(res);
                 }
@@ -770,6 +818,30 @@ export default defineComponent({
 
         stackNameToLowercase() {
             this.stack.name = this.stack?.name?.toLowerCase();
+        },
+
+        loadAutoUpdateSettings() {
+            this.$root.emitAgent(this.endpoint, "getStackAutoUpdate", this.stack.name, (res) => {
+                if (res.ok) {
+                    const s: StackAutoUpdateSettings = res.settings;
+                    this.autoUpdateMode = s.mode;
+                    this.autoUpdateCustomSchedule = s.schedule ?? "";
+                }
+            });
+        },
+
+        saveAutoUpdateSettings() {
+            const schedule = this.autoUpdateMode === "scheduled" ? this.autoUpdateCustomSchedule.trim() || null : null;
+            if (this.autoUpdateMode === "scheduled" && !schedule) {
+                this.$root.toastError("Please enter a cron schedule");
+                return;
+            }
+            this.autoUpdateSaving = true;
+            const settings: StackAutoUpdateSettings = { mode: this.autoUpdateMode, schedule };
+            this.$root.emitAgent(this.endpoint, "setStackAutoUpdate", this.stack.name, settings, (res) => {
+                this.autoUpdateSaving = false;
+                this.$root.toastRes(res);
+            });
         },
 
     }

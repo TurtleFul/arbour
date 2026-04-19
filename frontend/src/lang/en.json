@@ -207,5 +207,13 @@
     "clearFilter": "Clear filter",
     "agent": "Agent | Agents",
     "status": "Status",
-    "attribute": "Attribute | Attributes"    
+    "attribute": "Attribute | Attributes",
+    "autoUpdate": "Auto Update",
+    "autoUpdateMode": "Update Mode",
+    "autoUpdateImmediate": "Immediate",
+    "autoUpdateScheduled": "Scheduled",
+    "autoUpdateSchedule": "Schedule",
+    "autoUpdateCronHint": "Standard cron expression, e.g. 0 3 * * * for daily at 3 AM",
+    "autoUpdateImmediateHint": "Services will be updated automatically when a newer image is detected during the periodic image check (every 6 hours).",
+    "saveSettings": "Save Settings"
 }

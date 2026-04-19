@@ -1,5 +1,7 @@
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
+export type AutoUpdateMode = "disabled" | "immediate" | "scheduled";
+
 export const setting = sqliteTable("setting", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     key: text("key", { length: 200 }).notNull().unique(),
@@ -25,4 +27,10 @@ export const agent = sqliteTable("agent", {
     password: text("password", { length: 255 }).notNull(),
     active: integer("active", { mode: "boolean" }).notNull().default(true),
     name: text("name").default(""),
+});
+
+export const stackAutoUpdate = sqliteTable("stack_auto_update", {
+    stackName: text("stack_name").primaryKey(),
+    mode: text("mode").$type<AutoUpdateMode>().notNull().default("disabled"),
+    schedule: text("schedule"),
 });
