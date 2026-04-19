@@ -16,7 +16,8 @@ export class StackAutoUpdateSocketHandler extends AgentSocketHandler {
                 }
 
                 const settings = await server.autoUpdateManager.getSettings(stackName);
-                callbackResult({ ok: true, settings }, callback);
+                callbackResult({ ok: true,
+                    settings }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -48,7 +49,9 @@ export class StackAutoUpdateSocketHandler extends AgentSocketHandler {
                 }
 
                 await server.autoUpdateManager.setSettings(stackName, s);
-                callbackResult({ ok: true, msg: "Saved", msgi18n: true }, callback);
+                callbackResult({ ok: true,
+                    msg: "Saved",
+                    msgi18n: true }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }

@@ -837,7 +837,10 @@ export default defineComponent({
                 return;
             }
             this.autoUpdateSaving = true;
-            const settings: StackAutoUpdateSettings = { mode: this.autoUpdateMode, schedule };
+            const settings: StackAutoUpdateSettings = {
+                mode: this.autoUpdateMode,
+                schedule
+            };
             this.$root.emitAgent(this.endpoint, "setStackAutoUpdate", this.stack.name, settings, (res) => {
                 this.autoUpdateSaving = false;
                 this.$root.toastRes(res);

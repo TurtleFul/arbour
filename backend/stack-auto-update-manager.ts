@@ -39,10 +39,13 @@ export class StackAutoUpdateManager {
     async setSettings(stackName: string, settings: StackAutoUpdateSettings): Promise<void> {
         const db = getDb();
         db.insert(stackAutoUpdateTable)
-            .values({ stackName, mode: settings.mode, schedule: settings.schedule ?? null })
+            .values({ stackName,
+                mode: settings.mode,
+                schedule: settings.schedule ?? null })
             .onConflictDoUpdate({
                 target: stackAutoUpdateTable.stackName,
-                set: { mode: settings.mode, schedule: settings.schedule ?? null },
+                set: { mode: settings.mode,
+                    schedule: settings.schedule ?? null },
             })
             .run();
 
