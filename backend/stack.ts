@@ -107,6 +107,10 @@ export class Stack {
         return fs.existsSync(this.path) && fs.statSync(this.path).isDirectory();
     }
 
+    get configFilePath() : string | undefined {
+        return this._configFilePath;
+    }
+
     get status() : number {
         return this._status;
     }

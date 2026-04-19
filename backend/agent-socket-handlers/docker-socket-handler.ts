@@ -3,10 +3,14 @@ import { ArbourServer } from "../arbour-server";
 import { callbackError, callbackResult, checkLogin, ArbourSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
+import { promises as fsAsync } from "fs";
+import path from "path";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : ArbourSocket, server : ArbourServer, agentSocket : AgentSocket) {
         // Do not call super.create()
+
+        this.importStack(server, agentSocket, socket);
 
         agentSocket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
@@ -483,6 +487,63 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 callbackResult({
                     ok: true,
                     dockerNetworkList,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+    }
+
+    async importStack(server: ArbourServer, agentSocket: AgentSocket, socket: ArbourSocket) {
+        agentSocket.on("importStack", async (stackName: unknown, callback: unknown) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof stackName !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName, false);
+
+                if (stack.isManagedByArbour) {
+                    throw new ValidationError("Stack is already managed by Arbour");
+                }
+
+                const configFilePath = stack.configFilePath;
+                if (!configFilePath) {
+                    throw new Error("Cannot determine compose file path for this stack");
+                }
+
+                const sourceDir = path.dirname(configFilePath);
+                const composeFileName = path.basename(configFilePath);
+
+                const composeYAML = await fsAsync.readFile(configFilePath, "utf-8");
+
+                let composeENV = "";
+                const envPath = path.join(sourceDir, ".env");
+                try {
+                    composeENV = await fsAsync.readFile(envPath, "utf-8");
+                } catch {
+                    // no .env — that's fine
+                }
+
+                // Detect relative paths (volumes, build contexts) that will resolve differently after import
+                const hasRelativePaths = /^\s+[-\s]*\.{1,2}\//m.test(composeYAML) ||
+                    /(?:context|build):\s*\.{1,2}\//m.test(composeYAML);
+
+                const destDir = path.join(server.stacksDir, stackName);
+                await fsAsync.mkdir(destDir, { recursive: true });
+                await fsAsync.writeFile(path.join(destDir, composeFileName), composeYAML);
+                if (composeENV.trim()) {
+                    await fsAsync.writeFile(path.join(destDir, ".env"), composeENV);
+                }
+
+                server.sendStackList();
+
+                callbackResult({
+                    ok: true,
+                    hasRelativePaths,
+                    sourceDir,
                 }, callback);
             } catch (e) {
                 callbackError(e, callback);

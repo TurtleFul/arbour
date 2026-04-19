@@ -38,17 +38,25 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/app/data
-      # ⚠️ Left path === right path (stacks are addressed by their full host path).
+      # Mount your preferred host path to /opt/stacks — the right side is fixed, the left is yours
       - /opt/stacks:/opt/stacks
     environment:
       - TZ=${TZ:-UTC}
-      - ARBOUR_STACKS_DIR=/opt/stacks
+```
+
+The right-hand side of the stacks mount must always be `/opt/stacks`. The left-hand side is any path on your host:
+
+```yaml
+# Examples — pick what suits your setup
+- /opt/stacks:/opt/stacks
+- /home/user/stacks:/opt/stacks
+- /mnt/nas/docker/stacks:/opt/stacks
 ```
 
 Then:
 
 ```bash
-mkdir -p /opt/stacks
+mkdir -p /opt/stacks   # or whichever host path you chose
 docker compose up -d
 ```
 
