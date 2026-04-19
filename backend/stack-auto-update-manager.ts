@@ -54,6 +54,10 @@ export class StackAutoUpdateManager {
         if (settings.mode === "scheduled" && settings.schedule) {
             this.scheduleCron(stackName, settings.schedule);
         }
+
+        if (settings.mode === "immediate") {
+            this.runScheduledUpdate(stackName);
+        }
     }
 
     async deleteSettings(stackName: string): Promise<void> {
