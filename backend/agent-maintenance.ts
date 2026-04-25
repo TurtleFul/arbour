@@ -1,5 +1,5 @@
 import { ArbourServer } from "./arbour-server";
-import { DockerArtefactAction, DockerArtefactData, DockerArtefactInfos } from "../common/types";
+import { DockerArtefactAction, DockerArtefactData, DockerArtefactInfos, NetworkInspectData } from "../common/types";
 import { getAgentMaintenanceTerminalName } from "../common/util-common";
 import { ArbourSocket } from "./util-server";
 import { Terminal } from "./terminal";
@@ -214,6 +214,43 @@ export class AgentMaintenance {
         }
 
         return volumeData;
+    }
+
+    async getNetworkInspect(networkId: string): Promise<NetworkInspectData> {
+        const res = await exec("docker", [ "network", "inspect", "--format", "json", networkId ]);
+
+        if (!res.stdout) {
+            throw new Error(`No inspect data for network ${networkId}`);
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const raw: any = JSON.parse(res.stdout)[0];
+
+        const subnets = (raw.IPAM?.Config ?? []).map((c: { Subnet?: string; Gateway?: string }) => ({
+            subnet: c.Subnet ?? "",
+            gateway: c.Gateway ?? "",
+        }));
+
+        const containers = Object.values(raw.Containers ?? {}).map((c: unknown) => {
+            const container = c as { Name: string; IPv4Address: string; IPv6Address: string; MacAddress: string };
+            return {
+                name: container.Name,
+                ipv4: container.IPv4Address,
+                ipv6: container.IPv6Address,
+                mac: container.MacAddress,
+            };
+        });
+
+        return {
+            id: raw.Id,
+            name: raw.Name,
+            driver: raw.Driver,
+            scope: raw.Scope,
+            internal: raw.Internal ?? false,
+            ipv6: raw.EnableIPv6 ?? false,
+            subnets,
+            containers,
+        };
     }
 
     async prune(socket: ArbourSocket, artefact: string, all: boolean) {

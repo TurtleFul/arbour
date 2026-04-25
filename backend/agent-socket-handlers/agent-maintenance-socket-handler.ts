@@ -86,6 +86,23 @@ export class AgentMaintenanceSocketHandler extends AgentSocketHandler {
             }
         });
 
+        agentSocket.on("getNetworkInspect", async (networkId: unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof networkId !== "string") {
+                    throw new ValidationError("networkId must be a string");
+                }
+
+                const data = await agentMaintenance.getNetworkInspect(networkId);
+
+                callbackResult({ ok: true,
+                    data }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         agentSocket.on("dockerSystemPrune", async (all: unknown, volumes: unknown, callback) => {
             try {
                 checkLogin(socket);

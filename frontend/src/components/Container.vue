@@ -81,6 +81,10 @@
                                 <div class="text-muted small">{{ $t('lastUpdate') }}</div>
                                 <div>{{ formatRelativeTime(lastUpdate.timestamp) }}</div>
                             </div>
+                            <div v-if="service.lastImageCheck">
+                                <div class="text-muted small">{{ $t('lastImageCheck') }}</div>
+                                <div>{{ formatRelativeTime(service.lastImageCheck) }}</div>
+                            </div>
                         </div>
                         <table class="table table-sm table-striped">
                             <thead>

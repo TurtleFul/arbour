@@ -36,6 +36,14 @@
         <p class="mb-3" v-html="$t(artefact.name + 'DeleteMsg')"></p>
     </BModal>
 
+    <!-- Network inspect modal (single instance, always mounted for network artefacts) -->
+    <NetworkInspectModal
+        v-if="artefact.name === 'network'"
+        v-model="showNetworkInspect"
+        :endpoint="endpoint"
+        :network-id="inspectNetworkId"
+    />
+
     <div v-if="fetchingData">{{ $t("fetchingData") }}</div>
 
     <div v-else class="table-responsive">
@@ -59,7 +67,15 @@
                     </td>
                     <td v-for="(value, valueIndex) in item.values" :key="valueIndex" class="artefact-cell">{{ getValue(value) }}</td>
                     <td>
-                        <span v-if="item.dangling" class="badge bg-info">{{ item.danglingLabel }}</span>
+                        <span v-if="item.dangling" class="badge bg-info me-2">{{ item.danglingLabel }}</span>
+                        <button
+                            v-if="artefact.name === 'network'"
+                            class="btn btn-sm btn-outline-secondary py-0 px-1"
+                            :title="$t('networkInspect')"
+                            @click="openNetworkInspect(item.id)"
+                        >
+                            <font-awesome-icon icon="circle-info" />
+                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -70,6 +86,7 @@
 <script lang="ts" setup>
 import { computed, ref, Ref, reactive, onMounted, inject, getCurrentInstance } from "vue";
 import { DockerArtefactAction, DockerArtefactData, DockerArtefactInfo, DockerArtefactItem } from "../../../common/types";
+import NetworkInspectModal from "./NetworkInspectModal.vue";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const root = getCurrentInstance()?.proxy?.$root as any;
@@ -103,6 +120,8 @@ const pruneDialogData = reactive({ all: false });
 const showPullDialog = ref(false);
 const pullDialogData = reactive({ danglingImagesList: "" });
 const showDeleteDialog = ref(false);
+const inspectNetworkId = ref<string>("");
+const showNetworkInspect = ref(false);
 
 // Computed
 const dataHeader = computed(() => data.value.data.length > 0 ? Object.keys(data.value.data[0].values) : []);
@@ -167,6 +186,11 @@ function getValue(value: string | [string, string] | [string, number], sortValue
     } else {
         return value;
     }
+}
+
+function openNetworkInspect(networkId: string) {
+    inspectNetworkId.value = networkId;
+    showNetworkInspect.value = true;
 }
 
 function resetPruneDialog() {

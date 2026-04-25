@@ -58,7 +58,7 @@ export class StackAutoUpdateManager {
         }
 
         if (settings.mode === "immediate") {
-            this.runScheduledUpdate(stackName);
+            this.runScheduledUpdate(stackName, "immediate");
         }
     }
 
@@ -80,7 +80,7 @@ export class StackAutoUpdateManager {
     protected scheduleCron(stackName: string, schedule: string) {
         try {
             const job = new Cron(schedule, async () => {
-                await this.runScheduledUpdate(stackName);
+                await this.runScheduledUpdate(stackName, "scheduled");
             });
             this.cronJobs.set(stackName, job);
             log.info("autoUpdate", `Scheduled cron for stack '${stackName}': ${schedule}`);
@@ -97,12 +97,12 @@ export class StackAutoUpdateManager {
         }
     }
 
-    protected async runScheduledUpdate(stackName: string) {
+    protected async runScheduledUpdate(stackName: string, trigger: EventTrigger) {
         log.info("autoUpdate", `Running scheduled update for stack '${stackName}'`);
         try {
             const stack = await Stack.getStack(this.server, stackName);
             await stack.updateImageInfos();
-            await this.applyUpdates(stack, "scheduled");
+            await this.applyUpdates(stack, trigger);
         } catch (e) {
             log.error("autoUpdate", `Scheduled update failed for stack '${stackName}': ${e}`);
         }

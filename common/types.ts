@@ -36,6 +36,7 @@ export type ServiceData = {
     recreateNecessary: boolean,
     imageUpdateAvailable: boolean,
     remoteImageDigest: string,
+    lastImageCheck: number | null,
 }
 
 export type SimpleStackData = {
@@ -95,6 +96,24 @@ export const DockerArtefactInfos: Record<string, DockerArtefactInfo> = {
         actions: [ DockerArtefactAction.Prune, DockerArtefactAction.PruneAll, DockerArtefactAction.Remove ]
     }
 };
+
+export type NetworkInspectContainer = {
+    name: string;
+    ipv4: string;
+    ipv6: string;
+    mac: string;
+}
+
+export type NetworkInspectData = {
+    id: string;
+    name: string;
+    driver: string;
+    scope: string;
+    internal: boolean;
+    ipv6: boolean;
+    subnets: { subnet: string; gateway: string }[];
+    containers: NetworkInspectContainer[];
+}
 
 export type DockerArtefactItem = {
     id: string,

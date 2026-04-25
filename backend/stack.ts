@@ -38,6 +38,7 @@ export class Stack {
     protected _imageUpdatesAvailable: boolean = false;
     protected _recreateNecessary: boolean = false;
     protected _services: Map<string, ServiceData> = new Map();
+    protected _lastImageCheck: number | null = null;
     protected server: ArbourServer;
 
     protected combinedTerminal? : Terminal;
@@ -390,7 +391,8 @@ export class Stack {
                             health: serviceInfo.Health,
                             recreateNecessary: recreateNecessary,
                             imageUpdateAvailable: serviceImageUpdateAvailable,
-                            remoteImageDigest: imageInfo.remoteDigest
+                            remoteImageDigest: imageInfo.remoteDigest,
+                            lastImageCheck: this._lastImageCheck
                         }
                     );
 
@@ -454,6 +456,7 @@ export class Stack {
                 log.error("updateImageInfos", "Stack '" + this.name + "' - Image '" + serviceData.image + "': " + e);
             }
         }
+        this._lastImageCheck = Date.now();
     }
 
     getServicesWithAvailableImageUpdates(): ServiceData[] {

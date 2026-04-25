@@ -37,6 +37,7 @@ declare module 'vue' {
     HiddenInput: typeof import('./src/components/HiddenInput.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
     NetworkInput: typeof import('./src/components/NetworkInput.vue')['default']
+    NetworkInspectModal: typeof import('./src/components/NetworkInspectModal.vue')['default']
     ProgressTerminal: typeof import('./src/components/ProgressTerminal.vue')['default']
     ReleaseNotes: typeof import('./src/components/settings/ReleaseNotes.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
