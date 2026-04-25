@@ -1,5 +1,18 @@
 export type AutoUpdateMode = "disabled" | "immediate" | "scheduled";
 
+export type EventType = "deploy" | "start" | "stop" | "restart" | "update" | "recreate" | "down";
+export type EventTrigger = "manual" | "scheduled" | "immediate";
+
+export type ServiceEventEntry = {
+    id: number;
+    stackName: string;
+    serviceName: string;
+    eventType: EventType;
+    trigger: EventTrigger;
+    timestamp: number;
+    success: boolean | null;
+};
+
 export type StackAutoUpdateSettings = {
     mode: AutoUpdateMode;
     schedule: string | null;

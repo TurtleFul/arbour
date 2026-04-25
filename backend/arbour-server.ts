@@ -619,7 +619,7 @@ export class ArbourServer {
         }
     }
 
-    async updateAvailableStackImageUpdates(updatePeriod: number) {
+    async checkForImageUpdates(): Promise<void> {
         const stackList = await Stack.getStackList(this, true);
         for (const stack of stackList.values()) {
             if (stack.isManagedByArbour) {
@@ -627,7 +627,12 @@ export class ArbourServer {
                 await this.autoUpdateManager.onImageUpdateDetected(stack);
             }
         }
+        this.sendStackList();
         log.info("checkImageUpdates", "Check for image updates finished.");
+    }
+
+    async updateAvailableStackImageUpdates(updatePeriod: number) {
+        await this.checkForImageUpdates();
 
         setTimeout(
             () => {

@@ -7,6 +7,7 @@ import { sleep } from "../common/util-common";
 // Dynamically import migration SQL at startup
 import migration0000 from "./db/migrations/0000_baseline.sql" with { type: "text" };
 import migration0001 from "./db/migrations/0001_stack_auto_update.sql" with { type: "text" };
+import migration0002 from "./db/migrations/0002_service_event_log.sql" with { type: "text" };
 
 interface DBConfig {
     type?: "sqlite";
@@ -68,7 +69,7 @@ export class Database {
      */
     static async migrate() {
         const db = getDb();
-        const migrations = [ migration0000, migration0001 ];
+        const migrations = [ migration0000, migration0001, migration0002 ];
         try {
             for (const migration of migrations) {
                 const statements = migration

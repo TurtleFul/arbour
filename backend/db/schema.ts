@@ -1,6 +1,8 @@
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
 export type AutoUpdateMode = "disabled" | "immediate" | "scheduled";
+export type EventType = "deploy" | "start" | "stop" | "restart" | "update" | "recreate" | "down";
+export type EventTrigger = "manual" | "scheduled" | "immediate";
 
 export const setting = sqliteTable("setting", {
     id: integer("id").primaryKey({ autoIncrement: true }),
@@ -33,4 +35,14 @@ export const stackAutoUpdate = sqliteTable("stack_auto_update", {
     stackName: text("stack_name").primaryKey(),
     mode: text("mode").$type<AutoUpdateMode>().notNull().default("disabled"),
     schedule: text("schedule"),
+});
+
+export const serviceEventLog = sqliteTable("service_event_log", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    stackName: text("stack_name").notNull(),
+    serviceName: text("service_name").notNull(),
+    eventType: text("event_type").$type<EventType>().notNull(),
+    trigger: text("trigger").$type<EventTrigger>().notNull(),
+    timestamp: integer("timestamp").notNull(),
+    success: integer("success", { mode: "boolean" }),
 });

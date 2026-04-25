@@ -222,5 +222,15 @@
     "autoUpdateSchedule": "Schedule",
     "autoUpdateCronHint": "Standard cron expression, e.g. 0 3 * * * for daily at 3 AM",
     "autoUpdateImmediateHint": "Services will be updated automatically when a newer image is detected during the periodic image check (every 6 hours).",
-    "saveSettings": "Save Settings"
+    "saveSettings": "Save Settings",
+    "checkForUpdates": "Check for updates",
+    "checkForUpdatesStarted": "Update check started",
+    "serviceEventLog": "Service Event Log",
+    "noEventsYet": "No events recorded yet.",
+    "lastRestart": "Last restart",
+    "lastUpdate": "Last update",
+    "wholeStack": "whole stack",
+    "event": "Event",
+    "trigger": "Trigger",
+    "time": "Time"
 }

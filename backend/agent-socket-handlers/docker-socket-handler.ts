@@ -5,6 +5,7 @@ import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
 import { promises as fsAsync } from "fs";
 import path from "path";
+import { logServiceEvent, getServiceEvents } from "../service-event-logger";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : ArbourSocket, server : ArbourServer, agentSocket : AgentSocket) {
@@ -17,6 +18,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 checkLogin(socket);
                 const stack = await this.saveStack(server, name, composeYAML, composeENV, isAdd);
                 await stack.deploy(socket);
+                logServiceEvent(stack.name, "", "deploy", "manual", true);
                 server.sendStackList();
                 callbackResult({
                     ok: true,
@@ -120,6 +122,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.start(socket);
+                logServiceEvent(stackName, "", "start", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Started",
@@ -145,6 +148,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.stop(socket);
+                logServiceEvent(stackName, "", "stop", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Stopped",
@@ -167,6 +171,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.restart(socket);
+                logServiceEvent(stackName, "", "restart", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Restarted",
@@ -197,6 +202,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.update(socket, pruneAfterUpdate, pruneAllAfterUpdate);
+                logServiceEvent(stackName, "", "update", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Updated",
@@ -219,6 +225,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.down(socket);
+                logServiceEvent(stackName, "", "down", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Downed",
@@ -245,6 +252,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.stopService(socket, serviceName);
+                logServiceEvent(stackName, serviceName, "stop", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Stopped",
@@ -271,6 +279,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.startService(socket, serviceName);
+                logServiceEvent(stackName, serviceName, "start", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Started",
@@ -297,6 +306,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.restartService(socket, serviceName);
+                logServiceEvent(stackName, serviceName, "restart", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Restarted",
@@ -323,6 +333,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.recreateService(socket, serviceName);
+                logServiceEvent(stackName, serviceName, "recreate", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Recreated",
@@ -357,6 +368,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.updateService(socket, serviceName, pruneAfterUpdate, pruneAllAfterUpdate);
+                logServiceEvent(stackName, serviceName, "update", "manual", true);
                 callbackResult({
                     ok: true,
                     msg: "Updated",
@@ -434,6 +446,29 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 callbackResult({
                     ok: true,
                     inspectData
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Service event log
+        agentSocket.on("getServiceEventLog", async (stackName: unknown, serviceName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                if (typeof(serviceName) !== "string") {
+                    throw new ValidationError("Service name must be a string");
+                }
+
+                const events = getServiceEvents(stackName, serviceName);
+                callbackResult({
+                    ok: true,
+                    events,
                 }, callback);
             } catch (e) {
                 callbackError(e, callback);

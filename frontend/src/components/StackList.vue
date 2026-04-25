@@ -20,6 +20,15 @@
                     <input v-model="searchText" class="form-control w-100" autocomplete="off" />
                 </div>
 
+                <button
+                    class="btn btn-link ms-1 p-1"
+                    data-toggle="tooltip" :title="$t('checkForUpdates')"
+                    :disabled="checkingForUpdates"
+                    @click="checkForUpdates"
+                >
+                    <font-awesome-icon :icon="checkingForUpdates ? 'spinner' : 'arrows-rotate'" :spin="checkingForUpdates" />
+                </button>
+
                 <!-- Dropdown for filter -->
                 <BDropdown variant="link" placement="bottom-end" menu-class="filter-dropdown" toggle-class="filter-icon-container" no-caret>
                     <template #button-content>
@@ -118,6 +127,7 @@ export default defineComponent({
             selectedStacks: {},
             windowTop: 0,
             closedAgents: new Map(),
+            checkingForUpdates: false,
         };
     },
     computed: {
@@ -372,6 +382,14 @@ export default defineComponent({
          */
         clearSearchText() {
             this.searchText = "";
+        },
+
+        checkForUpdates() {
+            this.checkingForUpdates = true;
+            this.$root.emitAgent("", "checkForUpdates", (res) => {
+                this.checkingForUpdates = false;
+                this.$root.toastRes(res);
+            });
         },
         /**
          * Deselect a stack

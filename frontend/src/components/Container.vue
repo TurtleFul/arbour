@@ -53,6 +53,63 @@
                     </template>
                 </BModal>
 
+                <button
+                    v-if="!isEditMode"
+                    v-b-modal="eventLogModalId"
+                    class="btn btn-sm btn-normal me-2"
+                    data-toggle="tooltip" :title="$t('serviceEventLog')"
+                    @click="fetchEventLog"
+                >
+                    <font-awesome-icon icon="clipboard-list" />
+                </button>
+
+                <!-- Service event log modal -->
+                <BModal :id="eventLogModalId" :ref="eventLogModalId" :title="$t('serviceEventLog')" size="lg">
+                    <div v-if="eventLogLoading" class="text-center py-3">
+                        <span class="spinner-border spinner-border-sm me-2"></span>{{ $t('loading') }}
+                    </div>
+                    <div v-else-if="eventLogEntries.length === 0" class="text-muted text-center py-3">
+                        {{ $t('noEventsYet') }}
+                    </div>
+                    <div v-else>
+                        <div class="d-flex gap-4 mb-3">
+                            <div v-if="lastRestart">
+                                <div class="text-muted small">{{ $t('lastRestart') }}</div>
+                                <div>{{ formatRelativeTime(lastRestart.timestamp) }}</div>
+                            </div>
+                            <div v-if="lastUpdate">
+                                <div class="text-muted small">{{ $t('lastUpdate') }}</div>
+                                <div>{{ formatRelativeTime(lastUpdate.timestamp) }}</div>
+                            </div>
+                        </div>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{{ $t('time') }}</th>
+                                    <th>{{ $t('service') }}</th>
+                                    <th>{{ $t('event') }}</th>
+                                    <th>{{ $t('trigger') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="entry in eventLogEntries" :key="entry.id">
+                                    <td class="text-nowrap" :title="formatAbsoluteTime(entry.timestamp)">{{ formatRelativeTime(entry.timestamp) }}</td>
+                                    <td class="text-muted small">{{ entry.serviceName || $t('wholeStack') }}</td>
+                                    <td>
+                                        <span class="badge" :class="eventTypeBadge(entry.eventType)">{{ entry.eventType }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" :class="triggerBadge(entry.trigger)">{{ entry.trigger }}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <template #footer>
+                        <button class="btn btn-normal" @click="$refs[eventLogModalId].hide()">{{ $t('close') }}</button>
+                    </template>
+                </BModal>
+
                 <div v-if="!isEditMode" class="btn-group me-2" role="group">
                     <router-link v-if="started" class="btn btn-sm btn-normal me-1" data-toggle="tooltip" :title="$t('tooltipServiceLog')" :to="logRouteLink" :disabled="processing"><font-awesome-icon icon="file-text" /></router-link>
                     <router-link v-if="started" class="btn btn-sm btn-normal me-1" data-toggle="tooltip" :title="$t('tooltipServiceInspect')" :to="inspectRouteLink" :disabled="processing"><font-awesome-icon icon="info-circle" /></router-link>
@@ -244,7 +301,7 @@
 import { defineComponent, PropType } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { parseDockerPort } from "../../../common/util-common";
-import { ServiceData, StatsData, StackData } from "../../../common/types";
+import { ServiceData, StatsData, StackData, ServiceEventEntry } from "../../../common/types";
 import { ComposeDocument, ComposeService } from "../../../common/compose-document";
 import { LABEL_STATUS_IGNORE, LABEL_IMAGEUPDATES_CHECK, LABEL_IMAGEUPDATES_IGNORE, LABEL_IMAGEUPDATES_CHANGELOG } from "../../../common/compose-labels";
 
@@ -282,7 +339,9 @@ export default defineComponent({
             updateDialogData: {
                 pruneAfterUpdate: false,
                 pruneAllAfterUpdate: false
-            }
+            },
+            eventLogEntries: [] as ServiceEventEntry[],
+            eventLogLoading: false,
         };
     },
 
@@ -400,6 +459,18 @@ export default defineComponent({
             return "image-update-modal-" + this.name;
         },
 
+        eventLogModalId(): string {
+            return "event-log-modal-" + this.name;
+        },
+
+        lastRestart(): ServiceEventEntry | null {
+            return this.eventLogEntries.find(e => e.eventType === "restart" || e.eventType === "start") ?? null;
+        },
+
+        lastUpdate(): ServiceEventEntry | null {
+            return this.eventLogEntries.find(e => e.eventType === "update") ?? null;
+        },
+
         ignoreStatus(this: { composeService: ComposeService }): boolean {
             return this.composeService.labels.isTrue(LABEL_STATUS_IGNORE);
         },
@@ -424,6 +495,54 @@ export default defineComponent({
                 pruneAfterUpdate: false,
                 pruneAllAfterUpdate: false
             };
+        },
+
+        fetchEventLog() {
+            this.eventLogLoading = true;
+            this.$root.emitAgent(this.endpoint, "getServiceEventLog", this.stackName, this.name, (res) => {
+                this.eventLogLoading = false;
+                if (res.ok) {
+                    this.eventLogEntries = res.events;
+                }
+            });
+        },
+
+        formatRelativeTime(timestamp: number): string {
+            const diff = Date.now() - timestamp;
+            const seconds = Math.floor(diff / 1000);
+            if (seconds < 60) return `${seconds}s ago`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        },
+
+        formatAbsoluteTime(timestamp: number): string {
+            return new Date(timestamp).toLocaleString();
+        },
+
+        eventTypeBadge(eventType: string): string {
+            const map: Record<string, string> = {
+                update: "bg-primary",
+                deploy: "bg-success",
+                restart: "bg-warning text-dark",
+                recreate: "bg-info text-dark",
+                start: "bg-success",
+                stop: "bg-secondary",
+                down: "bg-dark",
+            };
+            return map[eventType] ?? "bg-secondary";
+        },
+
+        triggerBadge(trigger: string): string {
+            const map: Record<string, string> = {
+                manual: "bg-secondary",
+                scheduled: "bg-info text-dark",
+                immediate: "bg-warning text-dark",
+            };
+            return map[trigger] ?? "bg-secondary";
         },
 
         startComposeAction() {

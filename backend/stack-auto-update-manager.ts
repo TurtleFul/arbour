@@ -6,6 +6,8 @@ import { eq } from "drizzle-orm";
 import { Stack } from "./stack";
 import { ArbourServer } from "./arbour-server";
 import { StackAutoUpdateSettings } from "../common/types";
+import { logServiceEvent } from "./service-event-logger";
+import type { EventTrigger } from "./db/schema";
 
 export class StackAutoUpdateManager {
 
@@ -72,7 +74,7 @@ export class StackAutoUpdateManager {
         if (settings.mode !== "immediate") {
             return;
         }
-        await this.applyUpdates(stack);
+        await this.applyUpdates(stack, "immediate");
     }
 
     private scheduleCron(stackName: string, schedule: string) {
@@ -100,13 +102,13 @@ export class StackAutoUpdateManager {
         try {
             const stack = await Stack.getStack(this.server, stackName);
             await stack.updateImageInfos();
-            await this.applyUpdates(stack);
+            await this.applyUpdates(stack, "scheduled");
         } catch (e) {
             log.error("autoUpdate", `Scheduled update failed for stack '${stackName}': ${e}`);
         }
     }
 
-    private async applyUpdates(stack: Stack): Promise<void> {
+    private async applyUpdates(stack: Stack, trigger: EventTrigger): Promise<void> {
         const services = stack.getServicesWithAvailableImageUpdates();
         if (services.length === 0) {
             return;
@@ -118,6 +120,7 @@ export class StackAutoUpdateManager {
         for (const serviceData of services) {
             const updated = await stack.autoUpdateService(serviceData.name);
             if (updated) {
+                logServiceEvent(stack.name, serviceData.name, "update", trigger, true);
                 anyUpdated = true;
             }
         }
