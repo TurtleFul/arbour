@@ -4,7 +4,8 @@
  * Usage (from repo root):
  *   dagger call test             --source=.
  *   dagger call lint             --source=.
- *   dagger call check-ts         --source=.
+ *   dagger call typecheck        --source=.
+ *   dagger call verify           --source=.
  *   dagger call build-frontend   --source=. export --path=./frontend-dist
  *   dagger call build-image      --source=. as-tarball export --path=./arbour.tar
  *   dagger call ci               --source=.
@@ -58,10 +59,16 @@ export class Arbour {
         return this.base(source).withExec(["sh", "-c", "bun run lint 2>&1"]).stdout();
     }
 
-    /** Run tsc --noEmit. */
+    /** Run vue-tsc --noEmit. */
     @func()
-    async checkTs(source: Directory): Promise<string> {
-        return this.base(source).withExec(["sh", "-c", "bun run check-ts 2>&1"]).stdout();
+    async typecheck(source: Directory): Promise<string> {
+        return this.base(source).withExec(["sh", "-c", "bun run typecheck 2>&1"]).stdout();
+    }
+
+    /** Run fmt + typecheck + test (bun run verify). */
+    @func()
+    async verify(source: Directory): Promise<string> {
+        return this.base(source).withExec(["sh", "-c", "bun run verify 2>&1"]).stdout();
     }
 
     /** Build the frontend bundle, return the frontend-dist directory. */
@@ -81,30 +88,17 @@ export class Arbour {
         });
     }
 
-    /** Run test + lint + check-ts in parallel. */
+    /** Run verify (fmt + typecheck + test). */
     @func()
     async ci(source: Directory): Promise<string> {
-        const [t, l, c] = await Promise.all([
-            this.test(source),
-            this.lint(source),
-            this.checkTs(source),
-        ]);
-        return `=== test ===\n${t}\n\n=== lint ===\n${l}\n\n=== check-ts ===\n${c}`;
+        return this.verify(source);
     }
 
-    /** Full CI pipeline for GitHub Actions: lint + typecheck + test, then build image. */
+    /** Full CI pipeline for GitHub Actions: verify, then build image. */
     @func()
     async githubCi(source: Directory): Promise<string> {
-        const [t, l, c] = await Promise.all([
-            this.test(source),
-            this.lint(source),
-            this.checkTs(source),
-        ]);
-
-        const output = `=== test ===\n${t}\n\n=== lint ===\n${l}\n\n=== check-ts ===\n${c}`;
-
+        const output = await this.verify(source);
         await this.buildImage(source).sync();
-
         return `${output}\n\n=== build-image ===\nSuccess`;
     }
 }
