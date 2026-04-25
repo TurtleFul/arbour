@@ -35,10 +35,12 @@ export default [
             "linebreak-style": ["error", "unix"],
             "camelcase": ["warn", {
                 "properties": "never",
-                "ignoreImports": true
+                "ignoreImports": true,
+                "allow": ["^CONSOLE_STYLE_"]
             }],
             "no-unused-vars": ["warn", {
-                "args": "none"
+                "args": "none",
+                "caughtErrors": "none"
             }],
             indent: [
                 "error",
@@ -106,9 +108,18 @@ export default [
             "max-statements-per-line": ["error", { "max": 1 }],
             "@typescript-eslint/ban-ts-comment": "off",
             "@typescript-eslint/no-unused-vars": ["warn", {
-                "args": "none"
+                "args": "none",
+                "caughtErrors": "none"
             }],
+            "vue/no-v-html": "off",
             "prefer-const": "off",
+        },
+    },
+    {
+        // Base no-unused-vars doesn't understand TS enum members; TS rule handles it correctly
+        files: ["**/*.ts", "**/*.vue"],
+        rules: {
+            "no-unused-vars": "off",
         },
     },
     {

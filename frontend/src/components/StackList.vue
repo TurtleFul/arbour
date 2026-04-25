@@ -85,9 +85,9 @@
                     <span>{{ getAgentName(agent.endpoint) }}</span>
                 </div>
                 <StackListItem
-                    v-for="(item, index) in agent.stacks"
+                    v-for="(item, stackIndex) in agent.stacks"
                     v-show="agentCount === 1 || !closedAgents.get(agent.endpoint)"
-                    :key="index" :stack="item" :isSelectMode="selectMode"
+                    :key="stackIndex" :stack="item" :isSelectMode="selectMode"
                     :isSelected="isSelected" :select="select" :deselect="deselect"
                 />
             </div>

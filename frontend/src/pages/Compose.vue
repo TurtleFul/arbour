@@ -80,7 +80,7 @@
 
             <!-- URLs -->
             <div v-if="urls.length > 0" class="mb-3">
-                <a v-for="(url, index) in urls" :key="index" target="_blank" :href="url.url">
+                <a v-for="(urlItem, index) in urls" :key="index" target="_blank" :href="urlItem.url">
                     <span class="badge bg-secondary text-truncate me-2" style="max-width: 100%;">{{ url.display }}</span>
                 </a>
             </div>
@@ -104,8 +104,8 @@
                             <div class="mt-3">
                                 <label for="name" class="form-label">{{ $t("arbourAgent") }}</label>
                                 <select v-model="stack.endpoint" class="form-select">
-                                    <option v-for="(agent, endpoint) in agentList" :key="endpoint" :value="endpoint" :disabled="agentStatusList[endpoint] != 'online'">
-                                        {{ (agent.name !== '') ? agent.name : agent.url || "Master" }} ({{ agentStatusList[endpoint] }})
+                                    <option v-for="(agent, agentEndpoint) in agentList" :key="agentEndpoint" :value="agentEndpoint" :disabled="agentStatusList[agentEndpoint] != 'online'">
+                                        {{ (agent.name !== '') ? agent.name : agent.url || "Master" }} ({{ agentStatusList[agentEndpoint] }})
                                     </option>
                                 </select>
                             </div>

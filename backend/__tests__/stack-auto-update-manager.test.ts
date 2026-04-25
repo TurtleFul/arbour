@@ -1,11 +1,20 @@
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import { Cron } from "croner";
 import { initDb, closeDb } from "../db/index";
 import { StackAutoUpdateManager } from "../stack-auto-update-manager";
 import { runMigrations } from "./helpers";
 
-// Minimal ArbourServer stub — manager only calls server in runScheduledUpdate/applyUpdates,
-// which are not exercised by the DB-layer tests below.
 const stubServer = {} as never;
+
+// Override runScheduledUpdate so immediate-mode tests don't fire real stack lookups.
+class TestableStackAutoUpdateManager extends StackAutoUpdateManager {
+    protected override async runScheduledUpdate(_stackName: string): Promise<void> {}
+    protected override scheduleCron(_stackName: string, schedule: string): void {
+        try {
+            new Cron(schedule, () => {});
+        } catch { /* swallow */ }
+    }
+}
 
 function applyMigrations() {
     const db = initDb(":memory:");
@@ -22,7 +31,7 @@ afterEach(() => {
 
 describe("StackAutoUpdateManager.getSettings", () => {
     test("returns disabled mode and null schedule for unknown stack", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         const settings = await manager.getSettings("mystack");
         expect(settings.mode).toBe("disabled");
         expect(settings.schedule).toBeNull();
@@ -31,7 +40,7 @@ describe("StackAutoUpdateManager.getSettings", () => {
 
 describe("StackAutoUpdateManager.setSettings", () => {
     test("inserts new row for disabled mode", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("mystack", { mode: "disabled",
             schedule: null });
         const settings = await manager.getSettings("mystack");
@@ -40,7 +49,7 @@ describe("StackAutoUpdateManager.setSettings", () => {
     });
 
     test("inserts new row for immediate mode", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("mystack", { mode: "immediate",
             schedule: null });
         const settings = await manager.getSettings("mystack");
@@ -48,7 +57,7 @@ describe("StackAutoUpdateManager.setSettings", () => {
     });
 
     test("inserts new row for scheduled mode with cron", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("mystack", { mode: "scheduled",
             schedule: "0 3 * * *" });
         const settings = await manager.getSettings("mystack");
@@ -58,7 +67,7 @@ describe("StackAutoUpdateManager.setSettings", () => {
     });
 
     test("upserts — updating existing row", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("mystack", { mode: "immediate",
             schedule: null });
         await manager.setSettings("mystack", { mode: "disabled",
@@ -68,7 +77,7 @@ describe("StackAutoUpdateManager.setSettings", () => {
     });
 
     test("mode transition: disabled → scheduled → immediate → disabled", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("mystack", { mode: "scheduled",
             schedule: "0 3 * * *" });
         expect((await manager.getSettings("mystack")).mode).toBe("scheduled");
@@ -84,7 +93,7 @@ describe("StackAutoUpdateManager.setSettings", () => {
     });
 
     test("multiple stacks are independent", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("stack-a", { mode: "immediate",
             schedule: null });
         await manager.setSettings("stack-b", { mode: "disabled",
@@ -96,7 +105,7 @@ describe("StackAutoUpdateManager.setSettings", () => {
 
 describe("StackAutoUpdateManager.deleteSettings", () => {
     test("removed stack reverts to defaults", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("mystack", { mode: "immediate",
             schedule: null });
         await manager.deleteSettings("mystack");
@@ -106,14 +115,14 @@ describe("StackAutoUpdateManager.deleteSettings", () => {
     });
 
     test("deleting non-existent stack does not throw", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await expect(manager.deleteSettings("ghost")).resolves.toBeUndefined();
     });
 });
 
 describe("StackAutoUpdateManager cron scheduling", () => {
     test("valid cron expression does not throw", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await expect(
             manager.setSettings("mystack", { mode: "scheduled",
                 schedule: "0 3 * * *" })
@@ -122,7 +131,7 @@ describe("StackAutoUpdateManager cron scheduling", () => {
     });
 
     test("invalid cron expression is handled gracefully — no throw", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await expect(
             manager.setSettings("mystack", { mode: "scheduled",
                 schedule: "not-a-cron" })
@@ -130,7 +139,7 @@ describe("StackAutoUpdateManager cron scheduling", () => {
     });
 
     test("switching from scheduled to disabled cancels cron job", async () => {
-        const manager = new StackAutoUpdateManager(stubServer);
+        const manager = new TestableStackAutoUpdateManager(stubServer);
         await manager.setSettings("mystack", { mode: "scheduled",
             schedule: "0 3 * * *" });
         await expect(

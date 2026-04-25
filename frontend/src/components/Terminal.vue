@@ -31,11 +31,13 @@ export default {
         // Require if mode is interactive
         stackName: {
             type: String,
+            default: undefined,
         },
 
         // Require if mode is interactive
         serviceName: {
             type: String,
+            default: undefined,
         },
 
         // Require if mode is interactive

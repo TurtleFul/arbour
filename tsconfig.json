@@ -5,6 +5,7 @@
         "strict": true,
         "moduleResolution": "bundler",
         "skipLibCheck": true,
+        "noEmit": true,
         "types": ["bun"],
         "lib": ["ESNext", "DOM"]
     },

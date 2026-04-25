@@ -77,7 +77,7 @@ export class StackAutoUpdateManager {
         await this.applyUpdates(stack, "immediate");
     }
 
-    private scheduleCron(stackName: string, schedule: string) {
+    protected scheduleCron(stackName: string, schedule: string) {
         try {
             const job = new Cron(schedule, async () => {
                 await this.runScheduledUpdate(stackName);
@@ -97,7 +97,7 @@ export class StackAutoUpdateManager {
         }
     }
 
-    private async runScheduledUpdate(stackName: string) {
+    protected async runScheduledUpdate(stackName: string) {
         log.info("autoUpdate", `Running scheduled update for stack '${stackName}'`);
         try {
             const stack = await Stack.getStack(this.server, stackName);
