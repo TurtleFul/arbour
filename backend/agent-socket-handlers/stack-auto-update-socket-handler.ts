@@ -61,7 +61,9 @@ export class StackAutoUpdateSocketHandler extends AgentSocketHandler {
             try {
                 checkLogin(socket);
                 server.checkForImageUpdates().catch(() => {});
-                callbackResult({ ok: true, msg: "checkForUpdatesStarted", msgi18n: true }, callback);
+                callbackResult({ ok: true,
+                    msg: "checkForUpdatesStarted",
+                    msgi18n: true }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }

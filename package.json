@@ -11,6 +11,7 @@
         "check-ts": "tsc --noEmit",
         "test": "bun test",
         "test:watch": "bun test --watch",
+        "verify": "bun run fmt && bun run check-ts && bun run test",
         "start": "bun ./backend/index.ts",
         "dev": "bun ./extra/dev.ts",
         "dev:backend": "NODE_ENV=development bun --watch ./backend/index.ts",

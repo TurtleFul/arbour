@@ -1,0 +1,10 @@
+[install]
+# Use exact lockfile — no surprise upgrades
+frozen = false
+
+[run]
+# Use Bun's JS runtime for all scripts instead of Node
+bun = true
+
+[test]
+timeout = 10000
