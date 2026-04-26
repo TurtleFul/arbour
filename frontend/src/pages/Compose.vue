@@ -898,8 +898,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss">
-@import "../styles/vars.scss";
+<style scoped>
 
 .terminal {
     height: 200px;
@@ -934,37 +933,31 @@ export default defineComponent({
 
 .agent-name {
     font-size: 13px;
-    color: $dark-font-color3;
+    color: var(--arbour-text-muted);
 }
 
 :deep(.compose-dropdown-menu) {
-    --bs-dropdown-bg: #{$dark-bg};
+    --bs-dropdown-bg: var(--arbour-bg);
     --bs-dropdown-padding-x: 0.5rem;
 }
 
 :deep(.compose-dropdown-item-normal) {
-    $bg-color: $dark-header-bg;
-    $fg-color: $dark-font-color4;
-
-    background-color: $bg-color;
-    color: $fg-color;
+    background-color: var(--arbour-bg-header);
+    color: var(--arbour-text-subtle);
 
     &:hover {
-        background-color: lighten($bg-color, 8%);
-        color: $fg-color;
+        background-color: var(--arbour-bg-header-active);
+        color: var(--arbour-text-subtle);
     }
 }
 
 :deep(.compose-dropdown-item-danger) {
-    $bg-color: $danger;
-    $fg-color: white;
-
-    background-color: $bg-color;
-    color: $fg-color;
+    background-color: var(--arbour-danger);
+    color: white;
 
     &:hover {
-        background-color: darken($bg-color, 8%);
-        color: $fg-color;
+        background-color: color-mix(in srgb, var(--arbour-danger) 85%, black);
+        color: white;
     }
 }
 

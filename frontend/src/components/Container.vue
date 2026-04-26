@@ -75,15 +75,15 @@
                         <div class="d-flex gap-4 mb-3">
                             <div v-if="lastRestart">
                                 <div class="text-muted small">{{ $t('lastRestart') }}</div>
-                                <div>{{ formatRelativeTime(lastRestart.timestamp) }}</div>
+                                <div class="text-muted small">{{ formatRelativeTime(lastRestart.timestamp) }}</div>
                             </div>
                             <div v-if="lastUpdate">
                                 <div class="text-muted small">{{ $t('lastUpdate') }}</div>
-                                <div>{{ formatRelativeTime(lastUpdate.timestamp) }}</div>
+                                <div class="text-muted small">{{ formatRelativeTime(lastUpdate.timestamp) }}</div>
                             </div>
                             <div v-if="service.lastImageCheck">
                                 <div class="text-muted small">{{ $t('lastImageCheck') }}</div>
-                                <div>{{ formatRelativeTime(service.lastImageCheck) }}</div>
+                                <div class="text-muted small">{{ formatRelativeTime(service.lastImageCheck) }}</div>
                             </div>
                         </div>
                         <table class="table table-sm table-striped">
@@ -652,28 +652,27 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss">
-@import "../styles/vars";
+<style scoped>
 
 .container {
     max-width: 100%;
 
     .image {
         font-size: 0.8rem;
-        color: #6c757d;
+        color: var(--arbour-text-muted);
         .tag {
-            color: #33383b;
+            color: var(--arbour-text-muted);
         }
     }
 
     .status {
         font-size: 0.8rem;
-        color: #6c757d;
+        color: var(--arbour-text-muted);
     }
 
     .notification {
         font-size: 1rem;
-        color: $danger;
+        color: var(--arbour-danger);
     }
 
     .function {
@@ -688,12 +687,12 @@ export default defineComponent({
     .stats-select {
         cursor: pointer;
         font-size: 1rem;
-        color: #6c757d;
+        color: var(--arbour-text-muted);
     }
 
     .stats {
         font-size: 0.8rem;
-        color: #6c757d;
+        color: var(--arbour-text-muted);
     }
 }
 </style>

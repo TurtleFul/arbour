@@ -64,7 +64,7 @@ export default defineComponent({
 @import "../styles/vars.scss";
 
 .list-group {
-    background-color: $dark-bg2;
+    background-color: var(--arbour-bg-deep);
 
     li {
         display: flex;
@@ -73,9 +73,9 @@ export default defineComponent({
 
         .domain-input {
             flex-grow: 1;
-            background-color: $dark-bg2;
+            background-color: var(--arbour-bg-deep);
             border: none;
-            color: $dark-font-color;
+            color: var(--arbour-text);
             outline: none;
         }
     }

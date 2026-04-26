@@ -456,9 +456,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../styles/vars.scss";
-
+<style scoped>
 .sticky-shadow-box {
     height: calc(100vh - 150px);
     position: sticky;
@@ -475,15 +473,14 @@ export default defineComponent({
     margin: -10px;
     margin-bottom: 10px;
     padding: 5px;
-    background-color: $dark-header-bg;
+    background-color: var(--arbour-bg-header);
 }
 
 .search-icon {
     width: 40px;
     padding: 10px;
-    color: #c0c0c0;
+    color: var(--arbour-text-muted);
 
-    // Clear filter button (X)
     svg[data-icon="times"] {
         cursor: pointer;
         transition: all ease-in-out 0.1s;
@@ -501,42 +498,42 @@ export default defineComponent({
 
 .filter-icon {
     padding: 10px;
-    color: $dark-font-color3 !important;
+    color: var(--arbour-text-muted) !important;
     cursor: pointer;
     border: 1px solid transparent;
 }
 
 .filter-icon-active {
-    color: $info !important;
-    border: 1px solid $info;
+    color: var(--arbour-info) !important;
+    border: 1px solid var(--arbour-info);
     border-radius: 5px;
 }
 
 :deep(.filter-dropdown) {
-    background-color: $dark-bg;
-    border-color: $dark-font-color3;
-    color: $dark-font-color;
+    background-color: var(--arbour-bg);
+    border-color: var(--arbour-text-muted);
+    color: var(--arbour-text);
 
     .dropdown-header {
-        color: $dark-font-color;
+        color: var(--arbour-text);
         font-weight: bolder;
     }
 
     .form-check-input {
-        border-color: $dark-font-color3;
+        border-color: var(--arbour-text-muted);
     }
 }
 
 :deep(.filter-dropdown-clear) {
-    color: $dark-font-color;
+    color: var(--arbour-text);
 
     &:disabled {
-        color: $dark-font-color3;
+        color: var(--arbour-text-muted);
     }
 
     &:hover {
-        background-color: $dark-header-active-bg;
-        color: $dark-font-color;
+        background-color: var(--arbour-bg-header-active);
+        color: var(--arbour-text);
     }
 }
 
@@ -573,7 +570,7 @@ export default defineComponent({
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    color: $dark-font-color3;
+    color: var(--arbour-text-muted);
     padding-left: 10px;
     padding-right: 10px;
     display: flex;

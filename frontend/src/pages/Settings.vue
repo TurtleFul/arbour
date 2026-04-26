@@ -164,16 +164,14 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-@import "../styles/vars.scss";
-
+<style scoped>
 .shadow-box-settings {
     padding: 20px;
     min-height: calc(100vh - 155px);
 }
 
 footer {
-    color: #aaa;
+    color: var(--arbour-text-muted);
     font-size: 13px;
     margin-top: 20px;
     padding-bottom: 30px;
@@ -186,7 +184,7 @@ footer {
     }
 
     .menu-item {
-        border-radius: 10px;
+        border-radius: var(--arbour-radius);
         margin: 0.5em;
         padding: 0.7em 1em;
         cursor: pointer;
@@ -196,19 +194,19 @@ footer {
     }
 
     .menu-item:hover {
-        background: $dark-header-active-bg;
+        background: var(--arbour-bg-header-active);
     }
 
     .active .menu-item-v {
-        background: $dark-header-active-bg;
-        border-left: 4px solid $primary;
+        background: var(--arbour-bg-header-active);
+        border-left: 4px solid var(--arbour-primary);
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
     }
 
     .active .menu-item-h {
-        background: $dark-header-active-bg;
-        border-bottom: 4px solid $primary;
+        background: var(--arbour-bg-header-active);
+        border-bottom: 4px solid var(--arbour-primary);
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
     }
@@ -222,11 +220,11 @@ footer {
         margin-right: -20px;
         padding: 12.5px 1em;
         font-size: 26px;
-        background: $dark-header-bg;
+        background: var(--arbour-bg-header);
     }
 }
 
 .logout {
-    color: $danger !important;
+    color: var(--arbour-danger) !important;
 }
 </style>

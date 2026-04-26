@@ -14,70 +14,19 @@
                 </option>
             </select>
         </div>
-        <div v-show="false" class="my-4">
-            <label for="timezone" class="form-label">{{ $t("Theme") }}</label>
-            <div>
-                <div
-                    class="btn-group"
-                    role="group"
-                    aria-label="Basic checkbox toggle button group"
-                >
-                    <input
-                        id="btncheck1"
-                        v-model="$root.userTheme"
-                        type="radio"
-                        class="btn-check"
-                        name="theme"
-                        autocomplete="off"
-                        value="light"
-                    />
-                    <label class="btn btn-outline-primary" for="btncheck1">
-                        {{ $t("Light") }}
-                    </label>
-
-                    <input
-                        id="btncheck2"
-                        v-model="$root.userTheme"
-                        type="radio"
-                        class="btn-check"
-                        name="theme"
-                        autocomplete="off"
-                        value="dark"
-                    />
-                    <label class="btn btn-outline-primary" for="btncheck2">
-                        {{ $t("Dark") }}
-                    </label>
-
-                    <input
-                        id="btncheck3"
-                        v-model="$root.userTheme"
-                        type="radio"
-                        class="btn-check"
-                        name="theme"
-                        autocomplete="off"
-                        value="auto"
-                    />
-                    <label class="btn btn-outline-primary" for="btncheck3">
-                        {{ $t("Auto") }}
-                    </label>
-                </div>
-            </div>
+        <div class="my-4">
+            <label for="color-theme" class="form-label">{{ $t("Theme") }}</label>
+            <select id="color-theme" v-model="$root.colorTheme" class="form-select">
+                <option value="arbour">Arbour</option>
+                <option value="dockge">Dockge Classic</option>
+                <option value="sundown">SunDown</option>
+                <option value="unicorn">Unicorn</option>
+                <option value="retro">Retro</option>
+            </select>
         </div>
     </div>
 </template>
 
 <script>
-export default {
-
-};
+export default {};
 </script>
-
-<style lang="scss" scoped>
-@import "../../styles/vars.scss";
-
-.btn-check:active + .btn-outline-primary,
-.btn-check:checked + .btn-outline-primary,
-.btn-check:hover + .btn-outline-primary {
-    color: #000;
-}
-</style>

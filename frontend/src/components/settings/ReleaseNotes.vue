@@ -37,9 +37,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-@import "../../styles/vars.scss";
-
+<style scoped>
 .release-notes {
     padding: 0.5rem 0 2rem;
 }
@@ -47,7 +45,7 @@ export default {
 .release + .release {
     margin-top: 2.5rem;
     padding-top: 2rem;
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--arbour-border);
 }
 
 .release-header {
@@ -67,17 +65,17 @@ export default {
 .release-title {
     font-weight: 400;
     font-size: 1.1rem;
-    color: #aaa;
+    color: var(--arbour-text-subtle);
 }
 
 .release-date {
     font-size: 0.9rem;
-    color: #888;
+    color: var(--arbour-text-muted);
 }
 
 .release-summary {
     margin: 0 0 1.25rem;
-    color: #bbb;
+    color: var(--arbour-text);
 }
 
 .release-section {

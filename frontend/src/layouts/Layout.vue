@@ -166,15 +166,13 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-@import "../styles/vars.scss";
-
+<style scoped>
 header {
-    background-color: $dark-header-bg;
-    border-bottom-color: $dark-header-bg;
+    background-color: var(--arbour-bg-header);
+    border-bottom-color: var(--arbour-bg-header);
 
     span {
-        color: #f0f6fc;
+        color: var(--arbour-text);
     }
 }
 
@@ -185,7 +183,7 @@ header {
     height: calc(60px + env(safe-area-inset-bottom));
     width: 100%;
     left: 0;
-    background-color: $dark-bg;
+    background-color: var(--arbour-bg);
     box-shadow: 0 15px 47px 0 rgba(0, 0, 0, 0.3), 0 5px 14px 0 rgba(0, 0, 0, 0.2);
     text-align: center;
     white-space: nowrap;
@@ -198,12 +196,12 @@ header {
         height: 100%;
         padding: 8px 10px 0;
         font-size: 13px;
-        color: $dark-font-color3;
+        color: var(--arbour-text-muted);
         overflow: hidden;
         text-decoration: none;
 
         &.router-link-exact-active, &.active {
-            color: $primary;
+            color: var(--arbour-primary);
             font-weight: bold;
         }
 
@@ -234,7 +232,6 @@ main {
     z-index: 99999;
 }
 
-// Profile Pic Button with Dropdown
 .dropdown-profile-pic {
     user-select: none;
 
@@ -253,13 +250,13 @@ main {
         margin-top: 8px;
         border-radius: var(--arbour-radius-lg);
         overflow: hidden;
-        background-color: $dark-bg;
-        color: $dark-font-color;
-        border-color: $dark-border-color;
+        background-color: var(--arbour-bg);
+        color: var(--arbour-text);
+        border-color: var(--arbour-border);
 
         .dropdown-divider {
             margin: 0;
-            border-top: 1px solid $dark-border-color;
+            border-top: 1px solid var(--arbour-border);
             background-color: transparent;
         }
 
@@ -270,15 +267,15 @@ main {
 
         .dropdown-item {
             padding: 0.7rem 1rem;
-            color: $dark-font-color;
+            color: var(--arbour-text);
 
             &.active {
-                color: $dark-font-color2;
-                background-color: $highlight;
+                color: var(--arbour-text-on-primary);
+                background-color: var(--arbour-highlight);
             }
 
-            &:hover {
-                background-color: $dark-bg2;
+            &:hover:not(.active) {
+                background-color: var(--arbour-bg-deep);
             }
         }
     }
@@ -288,7 +285,7 @@ main {
         align-items: center;
         justify-content: center;
         color: white;
-        background-color: $primary;
+        background-color: var(--arbour-primary);
         width: 24px;
         height: 24px;
         margin-right: 5px;
@@ -299,7 +296,7 @@ main {
 }
 
 .notification-icon {
-    color: $info;
+    color: var(--arbour-info);
     font-weight: bold;
 }
 </style>

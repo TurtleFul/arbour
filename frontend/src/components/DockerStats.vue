@@ -80,7 +80,7 @@ export default defineComponent({
 
 .stats {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--arbour-text-muted);
 }
 
 .stat-label {

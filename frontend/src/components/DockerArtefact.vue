@@ -47,7 +47,7 @@
     <div v-if="fetchingData">{{ $t("fetchingData") }}</div>
 
     <div v-else class="table-responsive">
-        <table class="table table-dark ">
+        <table class="table">
             <thead>
                 <tr>
                     <th scope="col"></th>
@@ -250,7 +250,7 @@ onMounted(() => {
     }
 
     .sort-symbol {
-        color: $dark-font-color;
+        color: var(--arbour-text);
         font-family: monospace;
     }
 

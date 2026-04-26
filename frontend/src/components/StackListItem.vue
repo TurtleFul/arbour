@@ -145,17 +145,17 @@ export default defineComponent({
         opacity: 0.3;
     }
     &:hover {
-        background-color: $dark-bg2;
+        background-color: var(--arbour-bg-deep);
     }
     &.active {
-        background-color: $dark-bg2;
+        background-color: var(--arbour-bg-deep);
     }
     .title {
         margin-top: -4px;
     }
     .endpoint {
         font-size: 12px;
-        color: $dark-font-color3;
+        color: var(--arbour-text-muted);
     }
 }
 
@@ -182,7 +182,7 @@ export default defineComponent({
 }
 
 .notification-icon {
-    color: $info;
+    color: var(--arbour-info);
     font-weight: bold;
 }
 

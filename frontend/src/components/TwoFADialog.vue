@@ -192,11 +192,9 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-@import "../styles/vars.scss";
-
+<style scoped>
 .modal-dialog .form-text,
 .modal-dialog p {
-    color: $dark-font-color;
+    color: var(--arbour-text);
 }
 </style>

@@ -27,7 +27,7 @@
             <!-- IPAM / Subnets -->
             <div v-if="data.subnets.length > 0" class="mb-3">
                 <div class="text-muted small mb-1">{{ $t('networkSubnets') }}</div>
-                <table class="table table-sm table-dark mb-0">
+                <table class="table table-sm mb-0">
                     <thead>
                         <tr>
                             <th>{{ $t('networkSubnet') }}</th>
@@ -52,7 +52,7 @@
                 <div v-if="data.containers.length === 0" class="text-muted fst-italic small py-2">
                     {{ $t('networkNoContainers') }}
                 </div>
-                <table v-else class="table table-sm table-dark mb-0">
+                <table v-else class="table table-sm mb-0">
                     <thead>
                         <tr>
                             <th>{{ $t('name') }}</th>

@@ -389,8 +389,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@import "../styles/vars";
+<style scoped>
 
 .num-lg {
     font-size: 30px;
@@ -404,7 +403,7 @@ export default defineComponent({
 
 .url {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--arbour-text-muted);
 }
 
 .shadow-box {

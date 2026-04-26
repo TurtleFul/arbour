@@ -4,8 +4,8 @@
 
 // Base
 body {
-    background-color: #090c10;
-    color: $dark-font-color;
+    background-color: var(--arbour-bg-body);
+    color: var(--arbour-text);
 }
 
 #app {
@@ -18,7 +18,8 @@ h1 { font-size: 32px; }
 h2 { font-size: 26px; }
 
 mark, .mark {
-    background-color: #b6ad86;
+    background-color: color-mix(in srgb, var(--arbour-warning) 25%, var(--arbour-bg));
+    color: var(--arbour-text);
 }
 
 textarea.form-control {
@@ -31,57 +32,57 @@ textarea.form-control {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: $dark-border-color;
+    background: var(--arbour-border);
     border-radius: 20px;
 }
 
 // Placeholder
 ::placeholder {
-    color: $dark-font-color3;
+    color: var(--arbour-text-muted);
 }
 
 // Forms
 .form-check-input {
-    background-color: $dark-bg2;
-    border-color: $dark-border-color;
+    background-color: var(--arbour-bg-deep);
+    border-color: var(--arbour-border);
 }
 
 .form-check-input:checked {
-    border-color: $primary;
+    border-color: var(--arbour-primary);
 }
 
 .form-switch .form-check-input {
-    background-color: #232f3b;
+    background-color: var(--arbour-bg-disabled);
 }
 
 .input-group-text {
-    background-color: #282f39;
-    border-color: $dark-border-color;
-    color: $dark-font-color;
+    background-color: var(--arbour-bg-input-group);
+    border-color: var(--arbour-border);
+    color: var(--arbour-text);
 }
 
 .form-control,
 .form-control:focus,
 .form-select,
 .form-select:focus {
-    color: $dark-font-color;
-    background-color: $dark-bg2;
-    border-color: $dark-border-color;
+    color: var(--arbour-text);
+    background-color: var(--arbour-bg-deep);
+    border-color: var(--arbour-border);
 }
 
 .form-select:disabled {
-    color: rgba($dark-font-color, 0.7);
-    background-color: $dark-bg;
+    color: color-mix(in srgb, var(--arbour-text) 70%, transparent);
+    background-color: var(--arbour-bg);
 }
 
 .form-control:disabled,
 .form-control[readonly] {
-    background-color: #232f3b;
+    background-color: var(--arbour-bg-disabled);
     opacity: 1;
 }
 
 .form-text {
-    color: $dark-font-color3;
+    color: var(--arbour-text-muted);
 }
 
 // Floating label
@@ -93,14 +94,14 @@ textarea.form-control {
 }
 
 .form-floating > label {
-    color: $dark-font-color3;
+    color: var(--arbour-text-muted);
 }
 
 // Links, tables, nav
 a:not(.btn),
 .table,
 .nav-link {
-    color: $dark-font-color;
+    color: var(--arbour-text);
 
     &.btn-info {
         color: white;
@@ -113,8 +114,7 @@ a:not(.btn),
 }
 
 .table-hover > tbody > tr:hover > * {
-    --bs-table-accent-bg: #070a10;
-    color: $dark-font-color;
+    color: var(--arbour-text);
 }
 
 // List group
@@ -122,18 +122,18 @@ a:not(.btn),
     border-radius: var(--arbour-radius-lg);
 
     .list-group-item {
-        background-color: $dark-bg2;
-        color: $dark-font-color;
-        border-color: $dark-border-color;
+        background-color: var(--arbour-bg-deep);
+        color: var(--arbour-text);
+        border-color: var(--arbour-border);
     }
 }
 
 // optgroup
 optgroup {
-    color: #535864;
+    color: var(--arbour-text-muted);
 
     option {
-        color: $dark-font-color;
+        color: var(--arbour-text);
     }
 }
 
@@ -145,27 +145,31 @@ optgroup {
 .modal-content {
     border-radius: var(--arbour-radius-lg);
     box-shadow: 0 15px 70px rgb(0 0 0);
-    background-color: $dark-bg;
+    background-color: var(--arbour-bg);
 }
 
 .modal-header {
-    border-color: $dark-bg;
+    border-color: var(--arbour-bg);
+}
+
+.modal-title {
+    color: var(--arbour-text);
 }
 
 .modal-footer {
-    border-color: $dark-bg;
+    border-color: var(--arbour-bg);
 }
 
 // Pagination
 .page-item.disabled .page-link {
-    background-color: $dark-bg;
-    border-color: $dark-border-color;
+    background-color: var(--arbour-bg);
+    border-color: var(--arbour-border);
 }
 
 .page-link {
-    background-color: $dark-bg;
-    border-color: $dark-border-color;
-    color: $dark-font-color;
+    background-color: var(--arbour-bg);
+    border-color: var(--arbour-border);
+    color: var(--arbour-text);
 }
 
 // Close button
@@ -183,7 +187,7 @@ optgroup {
     box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
     padding: 10px;
     border-radius: var(--arbour-radius);
-    background-color: $dark-bg;
+    background-color: var(--arbour-bg);
 
     &.big-padding {
         padding: 20px;
@@ -205,139 +209,144 @@ optgroup {
 }
 
 .btn-primary {
-    color: $dark-font-color2;
-    background: $primary-gradient;
+    --bs-btn-color: var(--arbour-text-on-primary);
+    color: var(--arbour-text-on-primary);
+    background: var(--arbour-gradient);
 
     &:hover, &:active, &:focus, &.active {
-        color: $dark-font-color2;
-        background: $primary-gradient-active;
-        border-color: $highlight;
+        color: var(--arbour-text-on-primary);
+        background: var(--arbour-gradient-active);
+        border-color: var(--arbour-highlight);
     }
 }
 
 .btn-normal {
-    color: $dark-font-color4;
-    background-color: $dark-header-bg;
-    border-color: $dark-header-bg;
+    color: var(--arbour-text-subtle);
+    background-color: var(--arbour-bg-header);
+    border-color: var(--arbour-bg-header);
 
     &:hover {
-        $hover-color: lighten($dark-header-bg, 8%);
-        background-color: $hover-color;
-        border-color: $hover-color;
+        background-color: var(--arbour-bg-header-active);
+        border-color: var(--arbour-bg-header-active);
     }
 }
 
 .btn-warning {
-    color: $dark-font-color2;
-
-    &:hover {
-        $hover-color: darken($warning, 8%);
-        background-color: $hover-color;
-        border-color: $hover-color;
-    }
+    --bs-btn-color: var(--arbour-text-on-warning);
+    color: var(--arbour-text-on-warning);
 
     &:hover, &:active, &:focus, &.active {
-        color: $dark-font-color2;
+        color: var(--arbour-text-on-warning);
+        background-color: color-mix(in srgb, var(--arbour-warning) 85%, black);
+        border-color: color-mix(in srgb, var(--arbour-warning) 85%, black);
     }
 }
 
 .btn-info {
-    color: $dark-font-color2;
-
-    &:hover {
-        $hover-color: darken($info, 8%);
-        background-color: $hover-color;
-        border-color: $hover-color;
-    }
+    --bs-btn-color: var(--arbour-text-on-primary);
+    color: var(--arbour-text-on-primary);
 
     &:hover, &:active, &:focus, &.active {
-        color: $dark-font-color2;
+        color: var(--arbour-text-on-primary);
+        background-color: color-mix(in srgb, var(--arbour-info) 85%, black);
+        border-color: color-mix(in srgb, var(--arbour-info) 85%, black);
     }
 }
 
 .btn-secondary {
+    --bs-btn-color: white;
     color: white;
 }
 
 .btn-dark {
-    background-color: $dark-header-bg;
+    background-color: var(--arbour-bg-header);
 }
 
 .btn-outline-normal {
     padding: 4px 10px;
-    border: 1px solid $dark-font-color2;
+    border: 1px solid var(--arbour-border);
     border-radius: var(--arbour-radius-pill);
     background-color: transparent;
-    color: $dark-font-color;
+    color: var(--arbour-text);
 
     &.active {
-        background-color: $dark-font-color2;
+        background-color: var(--arbour-bg-deep);
     }
 }
 
 .btn-hover-danger:hover {
-    background-color: $danger;
-    border-color: $danger;
+    background-color: var(--arbour-danger);
+    border-color: var(--arbour-danger);
     color: white;
 }
 
 .btn-hover-primary:hover {
-    background: $primary-gradient-active;
-    border-color: $primary;
-    color: white;
+    background: var(--arbour-gradient-active);
+    border-color: var(--arbour-primary);
+    color: var(--arbour-text-on-primary);
 }
 
 .btn-hover-info:hover {
-    background-color: $info;
-    border-color: $info;
+    background-color: var(--arbour-info);
+    border-color: var(--arbour-info);
     color: white;
 }
 
 .btn-success {
-    color: #fff;
-    background-color: #4caf50;
-    border-color: #4caf50;
+    --bs-btn-color: var(--arbour-text-on-primary);
+    color: var(--arbour-text-on-primary);
+    background-color: var(--arbour-primary);
+    border-color: var(--arbour-primary);
+}
+
+.btn-danger {
+    --bs-btn-color: #ffffff;
+    color: #ffffff;
 }
 
 // Nav pills
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
-    color: $dark-font-color2;
-    background: $primary-gradient;
+    color: var(--arbour-text-on-primary);
+    background: var(--arbour-gradient);
 
     &:hover {
-        background: $primary-gradient-active;
+        background: var(--arbour-gradient-active);
     }
 }
 
 // Background utilities
 .bg-primary {
-    color: $dark-font-color2;
-    background: $primary-gradient;
+    color: var(--arbour-text-on-primary);
+    background: var(--arbour-gradient);
 }
 
 .bg-info {
-    color: $dark-font-color2;
-    background-color: $info;
+    color: var(--arbour-text-on-primary);
+    background-color: var(--arbour-info);
 }
 
 .bg-dark {
     color: white;
-    background-color: $dark-header-bg;
+    background-color: var(--arbour-bg-header);
 }
 
 .bg-maintenance {
     color: white;
-    background-color: $maintenance;
+    background-color: var(--arbour-maintenance);
 }
 
 // Text utilities
+.text-muted {
+    color: var(--arbour-text-muted) !important;
+}
+
 .text-info {
-    color: $info;
+    color: var(--arbour-info);
 }
 
 .text-maintenance {
-    color: $maintenance;
+    color: var(--arbour-maintenance);
 }
 
 // Alerts
@@ -347,26 +356,26 @@ optgroup {
     &.bg-danger,
     &.bg-maintenance,
     &.bg-light {
-        color: $dark-font-color2;
+        color: var(--arbour-text-on-primary);
     }
 }
 
 .alert-success {
-    color: #122f21;
-    background-color: $primary;
-    border-color: $primary;
+    color: var(--arbour-text-on-primary);
+    background-color: var(--arbour-primary);
+    border-color: var(--arbour-primary);
 }
 
 .alert-info {
-    color: #055160;
-    background-color: #cff4fc;
-    border-color: #cff4fc;
+    color: var(--arbour-text-on-primary);
+    background-color: var(--arbour-info);
+    border-color: var(--arbour-info);
 }
 
 .alert-danger {
-    color: #842029;
-    background-color: #f8d7da;
-    border-color: #f8d7da;
+    color: white;
+    background-color: var(--arbour-danger);
+    border-color: var(--arbour-danger);
 }
 
 // Stack list
@@ -396,11 +405,11 @@ optgroup {
         }
 
         &:hover {
-            background-color: $dark-bg2;
+            background-color: var(--arbour-bg-deep);
         }
 
         &.active {
-            background-color: $dark-bg2;
+            background-color: var(--arbour-bg-deep);
         }
 
         .title {
@@ -410,16 +419,31 @@ optgroup {
     }
 }
 
+// Tables — force arbour vars regardless of data-bs-theme
+.table {
+    --bs-table-bg: var(--arbour-bg);
+    --bs-table-color: var(--arbour-text);
+    --bs-table-border-color: var(--arbour-border);
+    --bs-table-striped-bg: var(--arbour-bg-deep);
+    --bs-table-striped-color: var(--arbour-text);
+    --bs-table-active-bg: var(--arbour-bg-deep);
+    --bs-table-active-color: var(--arbour-text);
+    --bs-table-hover-bg: var(--arbour-bg-deep);
+    --bs-table-hover-color: var(--arbour-text);
+    color: var(--arbour-text);
+    border-color: var(--arbour-border);
+}
+
 // Code
 code {
     padding: 0.2em 0.4em;
     margin: 0;
     font-size: 85%;
     white-space: break-spaces;
-    background-color: rgba(239, 239, 239, 0.15);
+    background-color: var(--arbour-bg-deep);
     border-radius: var(--arbour-radius-sm);
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    color: $dark-font-color;
+    color: var(--arbour-text);
 }
 
 // Content editable
@@ -443,7 +467,7 @@ code {
 }
 
 .spinner {
-    color: $primary;
+    color: var(--arbour-primary);
 }
 
 .prism-editor__textarea {
@@ -455,7 +479,7 @@ h5.settings-subheading::after {
     display: block;
     width: 50%;
     padding-top: 8px;
-    border-bottom: 1px solid $dark-border-color;
+    border-bottom: 1px solid var(--arbour-border);
 }
 
 .code-editor, .css-editor {
@@ -478,7 +502,7 @@ $shadow-box-padding: 20px;
     margin-left: -$shadow-box-padding;
     margin-right: -$shadow-box-padding;
     z-index: 100;
-    background-color: rgba($dark-header-bg, 0.9);
+    background-color: color-mix(in srgb, var(--arbour-bg-header) 90%, transparent);
     backdrop-filter: blur(2px);
     border-radius: 0 0 var(--arbour-radius) var(--arbour-radius);
 }
@@ -498,10 +522,10 @@ $shadow-box-padding: 20px;
 
         tbody {
             .shadow-box {
-                background-color: $dark-bg2;
+                background-color: var(--arbour-bg-deep);
 
                 td {
-                    border-bottom: 1px solid $dark-border-color;
+                    border-bottom: 1px solid var(--arbour-border);
                 }
             }
         }
@@ -525,7 +549,7 @@ $shadow-box-padding: 20px;
             }
 
             td {
-                border-bottom: 1px solid $dark-font-color;
+                border-bottom: 1px solid var(--arbour-text-muted);
                 display: block;
                 padding: 4px;
 
@@ -539,10 +563,24 @@ $shadow-box-padding: 20px;
     }
 }
 
-// Bootstrap dark theme alignment
+// Bootstrap theme alignment
 [data-bs-theme="dark"] {
-    --bs-body-color: #{$dark-font-color};
-    --bs-body-bg: #090c10;
+    --bs-body-color: var(--arbour-text);
+    --bs-body-bg: var(--arbour-bg-body);
+    --bs-secondary-color: var(--arbour-text-muted);
+    --bs-border-color: var(--arbour-border);
+}
+
+[data-bs-theme="light"] {
+    --bs-body-color: var(--arbour-text);
+    --bs-body-bg: var(--arbour-bg-body);
+    --bs-secondary-color: var(--arbour-text-muted);
+    --bs-border-color: var(--arbour-border);
+}
+
+[data-theme="unicorn"] .btn-close,
+[data-theme="retro"] .btn-close {
+    filter: none;
 }
 
 // Toast responsive

@@ -168,19 +168,16 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss">
-@import "../styles/vars.scss";
-
+<style scoped>
 :deep(.artefact-tab:hover) {
-    background: $dark-header-active-bg;
+    background: var(--arbour-bg-header-active);
 }
 
 :deep(.active-artefact-tab) {
-    background: $dark-header-active-bg !important;
-    color: $dark-font-color !important;
-    border-bottom: 4px solid $primary;
+    background: var(--arbour-bg-header-active) !important;
+    color: var(--arbour-text) !important;
+    border-bottom: 4px solid var(--arbour-primary);
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
 }
-
 </style>
