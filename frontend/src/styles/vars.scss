@@ -1,3 +1,4 @@
+// Brand / status colors
 $primary: #74c2ff;
 $secondary: #b1b8c0;
 $info: #c7a6ff;
@@ -5,21 +6,9 @@ $danger: #dc3545;
 $warning: #f8a306;
 $maintenance: #1747f5;
 
-:root {
-    --arbour-primary-color: #{$primary};
-    --arbour-secondary-color: #{$secondary};
-    --arbour-info-color: #{$info};
-    --arbour-danger-color: #{$danger};
-    --arbour-warning-color: #{$warning};
-    --arbour-maintenance-color: #{$maintenance};
-}
-
-$link-color: #111;
-$border-radius: 50rem;
-
 $highlight: #9dd1ff;
-$highlight-white: #e7faec;
 
+// Dark theme palette
 $dark-font-color: #b1b8c0;
 $dark-font-color2: #020b05;
 $dark-font-color3: #575c62;
@@ -30,11 +19,42 @@ $dark-border-color: #1d2634;
 $dark-header-bg: #161b22;
 $dark-header-active-bg: lighten($dark-header-bg, 8%);
 
+// Easings
 $easing-in: cubic-bezier(0.54, 0.78, 0.55, 0.97);
 $easing-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
 
-$dropdown-border-radius: 0.5rem;
-
+// Gradients
 $primary-gradient: linear-gradient(135deg, #74c2ff 0%, #74c2ff 75%, #86e6a9);
 $primary-gradient-active: linear-gradient(135deg, #74c2ff 0%, #74c2ff 50%, #86e6a9);
+
+// CSS custom properties — runtime design tokens
+:root {
+    // Brand colors
+    --arbour-primary: #{$primary};
+    --arbour-secondary: #{$secondary};
+    --arbour-info: #{$info};
+    --arbour-danger: #{$danger};
+    --arbour-warning: #{$warning};
+    --arbour-maintenance: #{$maintenance};
+
+    // Backgrounds
+    --arbour-bg: #{$dark-bg};
+    --arbour-bg-deep: #{$dark-bg2};
+    --arbour-bg-header: #{$dark-header-bg};
+    --arbour-bg-header-active: #{$dark-header-active-bg};
+
+    // Borders
+    --arbour-border: #{$dark-border-color};
+
+    // Text
+    --arbour-text: #{$dark-font-color};
+    --arbour-text-muted: #{$dark-font-color3};
+    --arbour-text-subtle: #{$dark-font-color4};
+
+    // Border radius
+    --arbour-radius-sm: 6px;
+    --arbour-radius: 10px;
+    --arbour-radius-lg: 16px;
+    --arbour-radius-pill: 50rem;
+}

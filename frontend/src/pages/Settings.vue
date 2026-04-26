@@ -196,50 +196,33 @@ footer {
     }
 
     .menu-item:hover {
-        background: $highlight-white;
-
-        .dark & {
-            background: $dark-header-active-bg;
-        }
+        background: $dark-header-active-bg;
     }
 
     .active .menu-item-v {
-        background: $highlight-white;
+        background: $dark-header-active-bg;
         border-left: 4px solid $primary;
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
-
-        .dark & {
-            background: $dark-header-active-bg;
-        }
     }
 
     .active .menu-item-h {
-        background: $highlight-white;
+        background: $dark-header-active-bg;
         border-bottom: 4px solid $primary;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
-
-        .dark & {
-            background: $dark-header-active-bg;
-        }
     }
 }
 
 .settings-content {
     .settings-content-header {
         width: calc(100% + 20px);
-        border-bottom: 1px solid #dee2e6;
-        border-radius: 0 10px 0 0;
+        border-radius: 0 var(--arbour-radius) 0 0;
         margin-top: -20px;
         margin-right: -20px;
         padding: 12.5px 1em;
         font-size: 26px;
-
-        .dark & {
-            background: $dark-header-bg;
-            border-bottom: 0;
-        }
+        background: $dark-header-bg;
     }
 }
 

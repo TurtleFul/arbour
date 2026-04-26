@@ -145,10 +145,10 @@ export default defineComponent({
         opacity: 0.3;
     }
     &:hover {
-        background-color: $highlight-white;
+        background-color: $dark-bg2;
     }
     &.active {
-        background-color: #cdf8f4;
+        background-color: $dark-bg2;
     }
     .title {
         margin-top: -4px;

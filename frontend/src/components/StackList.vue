@@ -288,10 +288,6 @@ export default defineComponent({
             return resultByEndpoint;
         },
 
-        isDarkTheme() {
-            return document.body.classList.contains("dark");
-        },
-
         stackListStyle() {
             //let listHeaderHeight = 107;
             let listHeaderHeight = 60;
@@ -475,16 +471,11 @@ export default defineComponent({
 }
 
 .list-header {
-    border-bottom: 1px solid #dee2e6;
-    border-radius: 10px 10px 0 0;
+    border-radius: var(--arbour-radius) var(--arbour-radius) 0 0;
     margin: -10px;
     margin-bottom: 10px;
     padding: 5px;
-
-    .dark & {
-        background-color: $dark-header-bg;
-        border-bottom: 0;
-    }
+    background-color: $dark-header-bg;
 }
 
 .search-icon {

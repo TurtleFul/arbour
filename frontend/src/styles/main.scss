@@ -2,42 +2,109 @@
 @import "bootstrap/scss/bootstrap";
 @import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
 
+// Base
+body {
+    background-color: #090c10;
+    color: $dark-font-color;
+}
+
 #app {
-    font-family: BlinkMacSystemFont, segoe ui, Roboto, helvetica neue, Arial, noto sans, sans-serif, apple color emoji, segoe ui emoji, segoe ui symbol, noto color emoji;
-    --bs-border-radius: 0.5rem; // Without the radius is 50rem, no idea where it comes from
+    font-family: BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --bs-border-radius: var(--arbour-radius);
 }
 
-h1 {
-    font-size: 32px;
-}
+h1 { font-size: 32px; }
+h2 { font-size: 26px; }
 
-h2 {
-    font-size: 26px;
+mark, .mark {
+    background-color: #b6ad86;
 }
 
 textarea.form-control {
     border-radius: 19px;
 }
 
+// Scrollbar
 ::-webkit-scrollbar {
     width: 10px;
 }
 
-.bg-maintenance {
-    color: white !important;
-    background-color: $maintenance !important;
+::-webkit-scrollbar-thumb {
+    background: $dark-border-color;
+    border-radius: 20px;
 }
 
-.bg-dark {
-    color: white;
-}
-
-.text-maintenance {
-    color: $maintenance !important;
-}
-
+// Placeholder
 ::placeholder {
     color: $dark-font-color3;
+}
+
+// Forms
+.form-check-input {
+    background-color: $dark-bg2;
+    border-color: $dark-border-color;
+}
+
+.form-check-input:checked {
+    border-color: $primary;
+}
+
+.form-switch .form-check-input {
+    background-color: #232f3b;
+}
+
+.input-group-text {
+    background-color: #282f39;
+    border-color: $dark-border-color;
+    color: $dark-font-color;
+}
+
+.form-control,
+.form-control:focus,
+.form-select,
+.form-select:focus {
+    color: $dark-font-color;
+    background-color: $dark-bg2;
+    border-color: $dark-border-color;
+}
+
+.form-select:disabled {
+    color: rgba($dark-font-color, 0.7);
+    background-color: $dark-bg;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+    background-color: #232f3b;
+    opacity: 1;
+}
+
+.form-text {
+    color: $dark-font-color3;
+}
+
+// Floating label
+.form-floating > .form-control:focus ~ label::after,
+.form-floating > .form-control:not(:placeholder-shown) ~ label::after,
+.form-floating > .form-control-plaintext ~ label::after,
+.form-floating > .form-select ~ label::after {
+    background-color: transparent;
+}
+
+.form-floating > label {
+    color: $dark-font-color3;
+}
+
+// Links, tables, nav
+a:not(.btn),
+.table,
+.nav-link {
+    color: $dark-font-color;
+
+    &.btn-info {
+        color: white;
+    }
 }
 
 .incident a,
@@ -45,78 +112,167 @@ textarea.form-control {
     color: inherit;
 }
 
-.list-group {
-    border-radius: 0.75rem;
-
-    .dark & {
-        .list-group-item {
-            background-color: $dark-bg2;
-            color: $dark-font-color;
-            border-color: $dark-border-color;
-        }
-    }
+.table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: #070a10;
+    color: $dark-font-color;
 }
 
+// List group
+.list-group {
+    border-radius: var(--arbour-radius-lg);
+
+    .list-group-item {
+        background-color: $dark-bg2;
+        color: $dark-font-color;
+        border-color: $dark-border-color;
+    }
+}
 
 // optgroup
 optgroup {
-    color: #b1b1b1;
+    color: #535864;
+
     option {
-        color: #212529;
+        color: $dark-font-color;
     }
 }
 
-.dark {
-    optgroup {
-        color: #535864;
-        option {
-            color: $dark-font-color;
-        }
-    }
-}
-
-// Scrollbar
-::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 20px;
-}
-
+// Modal
 .modal {
     backdrop-filter: blur(3px);
 }
 
 .modal-content {
-    border-radius: 1rem;
-    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
+    border-radius: var(--arbour-radius-lg);
+    box-shadow: 0 15px 70px rgb(0 0 0);
+    background-color: $dark-bg;
+}
 
-    .dark & {
-        box-shadow: 0 15px 70px rgb(0 0 0);
-        background-color: $dark-bg;
+.modal-header {
+    border-color: $dark-bg;
+}
+
+.modal-footer {
+    border-color: $dark-bg;
+}
+
+// Pagination
+.page-item.disabled .page-link {
+    background-color: $dark-bg;
+    border-color: $dark-border-color;
+}
+
+.page-link {
+    background-color: $dark-bg;
+    border-color: $dark-border-color;
+    color: $dark-font-color;
+}
+
+// Close button
+.btn-close {
+    box-shadow: none;
+    filter: invert(1);
+
+    &:hover {
+        opacity: 0.6;
     }
 }
 
-.VuePagination__count {
-    font-size: 13px;
-    text-align: center;
-}
-
+// Shadow box
 .shadow-box {
     box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    border-radius: 10px;
+    border-radius: var(--arbour-radius);
+    background-color: $dark-bg;
 
     &.big-padding {
         padding: 20px;
     }
+
+    &.alert {
+        background-color: unset;
+    }
 }
 
+// Buttons
 .btn {
     padding-left: 20px;
     padding-right: 20px;
 }
 
 .btn-sm {
-    border-radius: 25px;
+    border-radius: var(--arbour-radius-pill);
+}
+
+.btn-primary {
+    color: $dark-font-color2;
+    background: $primary-gradient;
+
+    &:hover, &:active, &:focus, &.active {
+        color: $dark-font-color2;
+        background: $primary-gradient-active;
+        border-color: $highlight;
+    }
+}
+
+.btn-normal {
+    color: $dark-font-color4;
+    background-color: $dark-header-bg;
+    border-color: $dark-header-bg;
+
+    &:hover {
+        $hover-color: lighten($dark-header-bg, 8%);
+        background-color: $hover-color;
+        border-color: $hover-color;
+    }
+}
+
+.btn-warning {
+    color: $dark-font-color2;
+
+    &:hover {
+        $hover-color: darken($warning, 8%);
+        background-color: $hover-color;
+        border-color: $hover-color;
+    }
+
+    &:hover, &:active, &:focus, &.active {
+        color: $dark-font-color2;
+    }
+}
+
+.btn-info {
+    color: $dark-font-color2;
+
+    &:hover {
+        $hover-color: darken($info, 8%);
+        background-color: $hover-color;
+        border-color: $hover-color;
+    }
+
+    &:hover, &:active, &:focus, &.active {
+        color: $dark-font-color2;
+    }
+}
+
+.btn-secondary {
+    color: white;
+}
+
+.btn-dark {
+    background-color: $dark-header-bg;
+}
+
+.btn-outline-normal {
+    padding: 4px 10px;
+    border: 1px solid $dark-font-color2;
+    border-radius: var(--arbour-radius-pill);
+    background-color: transparent;
+    color: $dark-font-color;
+
+    &.active {
+        background-color: $dark-font-color2;
+    }
 }
 
 .btn-hover-danger:hover {
@@ -137,77 +293,204 @@ optgroup {
     color: white;
 }
 
-.btn-primary {
-    color: white;
+.btn-success {
+    color: #fff;
+    background-color: #4caf50;
+    border-color: #4caf50;
+}
+
+// Nav pills
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    color: $dark-font-color2;
     background: $primary-gradient;
 
-    &:hover, &:active, &:focus, &.active {
-        color: white;
+    &:hover {
         background: $primary-gradient-active;
-        border-color: $highlight;
     }
+}
 
-    .dark & {
+// Background utilities
+.bg-primary {
+    color: $dark-font-color2;
+    background: $primary-gradient;
+}
+
+.bg-info {
+    color: $dark-font-color2;
+    background-color: $info;
+}
+
+.bg-dark {
+    color: white;
+    background-color: $dark-header-bg;
+}
+
+.bg-maintenance {
+    color: white;
+    background-color: $maintenance;
+}
+
+// Text utilities
+.text-info {
+    color: $info;
+}
+
+.text-maintenance {
+    color: $maintenance;
+}
+
+// Alerts
+.alert {
+    &.bg-info,
+    &.bg-warning,
+    &.bg-danger,
+    &.bg-maintenance,
+    &.bg-light {
         color: $dark-font-color2;
     }
 }
 
-.btn-normal {
-    $bg-color: #F5F5F5;
-
-    background-color: $bg-color;
-    border-color: $bg-color;
-
-    &:hover {
-        $hover-color: darken($bg-color, 3%);
-        background-color: $hover-color;
-        border-color: $hover-color;
-    }
+.alert-success {
+    color: #122f21;
+    background-color: $primary;
+    border-color: $primary;
 }
 
-.btn-warning {
-    color: white;
-
-    &:hover, &:active, &:focus, &.active {
-        color: white;
-    }
+.alert-info {
+    color: #055160;
+    background-color: #cff4fc;
+    border-color: #cff4fc;
 }
 
-.btn-info {
-    color: white;
-
-    &:hover, &:active, &:focus, &.active {
-        color: white;
-    }
+.alert-danger {
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f8d7da;
 }
 
-.btn-dark {
-    background-color: #161B22;
-}
-
-.btn-outline-normal {
-    padding: 4px 10px;
-    border: 1px solid #ced4da;
-    border-radius: 25px;
-    background-color: transparent;
-
-    .dark & {
-        color: $dark-font-color;
-        border: 1px solid $dark-font-color2;
+// Stack list
+.stack-list {
+    &.scrollbar {
+        overflow-y: auto;
     }
 
-    &.active {
-        background-color: $highlight-white;
+    @media (max-width: 769px) {
+        &.scrollbar {
+            height: calc(100% - 97px);
+        }
+    }
 
-        .dark & {
-            background-color: $dark-font-color2;
+    .item {
+        display: flex;
+        align-items: center;
+        height: 52px;
+        text-decoration: none;
+        border-radius: var(--arbour-radius);
+        transition: all ease-in-out 0.15s;
+        width: 100%;
+        padding: 0 8px;
+
+        &.disabled {
+            opacity: 0.3;
+        }
+
+        &:hover {
+            background-color: $dark-bg2;
+        }
+
+        &.active {
+            background-color: $dark-bg2;
+        }
+
+        .title {
+            display: inline-block;
+            margin-top: -4px;
         }
     }
 }
 
+// Code
+code {
+    padding: 0.2em 0.4em;
+    margin: 0;
+    font-size: 85%;
+    white-space: break-spaces;
+    background-color: rgba(239, 239, 239, 0.15);
+    border-radius: var(--arbour-radius-sm);
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: $dark-font-color;
+}
+
+// Content editable
+[contenteditable=true] {
+    transition: all $easing-in 0.2s;
+    border-radius: var(--arbour-radius);
+
+    &.no-bg {
+        background-color: transparent;
+    }
+}
+
+// Misc interactive
+.action {
+    transition: all $easing-in 0.2s;
+
+    &:hover {
+        cursor: pointer;
+        transform: scale(1.2);
+    }
+}
+
+.spinner {
+    color: $primary;
+}
+
+.prism-editor__textarea {
+    outline: none;
+}
+
+h5.settings-subheading::after {
+    content: "";
+    display: block;
+    width: 50%;
+    padding-top: 8px;
+    border-bottom: 1px solid $dark-border-color;
+}
+
+.code-editor, .css-editor {
+    border-radius: var(--arbour-radius-sm);
+    overflow: hidden;
+}
+
+$shadow-box-padding: 20px;
+
+.shadow-box-with-fixed-bottom-bar {
+    padding-top: $shadow-box-padding;
+    padding-bottom: 0;
+    padding-right: $shadow-box-padding;
+    padding-left: $shadow-box-padding;
+}
+
+.fixed-bottom-bar {
+    position: sticky;
+    bottom: 0;
+    margin-left: -$shadow-box-padding;
+    margin-right: -$shadow-box-padding;
+    z-index: 100;
+    background-color: rgba($dark-header-bg, 0.9);
+    backdrop-filter: blur(2px);
+    border-radius: 0 0 var(--arbour-radius) var(--arbour-radius);
+}
+
+.vue-image-crop-upload .vicp-wrap {
+    border-radius: var(--arbour-radius);
+}
+
+// Responsive table
 @media (max-width: 550px) {
     .table-shadow-box {
-        padding: 10px !important;
+        padding: 10px;
 
         thead {
             display: none;
@@ -215,13 +498,17 @@ optgroup {
 
         tbody {
             .shadow-box {
-                background-color: white;
+                background-color: $dark-bg2;
+
+                td {
+                    border-bottom: 1px solid $dark-border-color;
+                }
             }
         }
 
         tr {
-            margin-top: 0 !important;
-            padding: 4px 10px !important;
+            margin-top: 0;
+            padding: 4px 10px;
             display: block;
             margin-bottom: 6px;
 
@@ -252,248 +539,29 @@ optgroup {
     }
 }
 
-// New Bootstrap dark theme
+// Bootstrap dark theme alignment
 [data-bs-theme="dark"] {
-  --bs-body-color: $dark-font-color;
-  --bs-body-bg: #090c10;
-
-  .form-control::placeholder {
-    color: $dark-font-color3;
-  }
+    --bs-body-color: #{$dark-font-color};
+    --bs-body-bg: #090c10;
 }
 
-// Dark Theme override here
-.dark {
-    background-color: #090c10;
-    color: $dark-font-color;
-
-    mark, .mark {
-        background-color: #b6ad86;
-    }
-
-    &::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb {
-        background: $dark-border-color;
-    }
-
-    .shadow-box {
-        &:not(.alert) {
-            background-color: $dark-bg;
-        }
-    }
-
-    .form-check-input {
-        background-color: $dark-bg2;
-        border-color: $dark-border-color;
-    }
-
-    .input-group-text {
-        background-color: #282f39;
-        border-color: $dark-border-color;
-        color: $dark-font-color;
-    }
-
-    .form-check-input:checked {
-        border-color: $primary; // Re-apply bootstrap border
-    }
-
-    .form-switch .form-check-input {
-        background-color: #232f3b;
-    }
-
-    a:not(.btn),
-    .table,
-    .nav-link {
-        color: $dark-font-color;
-
-        &.btn-info {
-            color: white;
-        }
-    }
-
-    .incident a,
-    .bg-maintenance a {
-        color: inherit;
-    }
-
-    .form-control,
-    .form-control:focus,
-    .form-select,
-    .form-select:focus {
-        color: $dark-font-color;
-        background-color: $dark-bg2;
-    }
-
-    .form-select:disabled {
-        color: rgba($dark-font-color, 0.7);
-        background-color: $dark-bg;
-    }
-
-    .form-control, .form-select {
-        border-color: $dark-border-color;
-    }
-
-    .form-control:disabled, .form-control[readonly] {
-        background-color: #232f3b;
-        opacity: 1;
-    }
-
-    .table-hover > tbody > tr:hover > * {
-        --bs-table-accent-bg: #070a10;
-        color: $dark-font-color;
-    }
-
-    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-        color: $dark-font-color2;
-        background: $primary-gradient;
-
-        &:hover {
-            background: $primary-gradient-active;
-        }
-    }
-
-    .bg-primary {
-        color: $dark-font-color2;
-        background: $primary-gradient;
-    }
-
-    .bg-info {
-        color: $dark-font-color2;
-        background-color: $info !important;
-    }
-
-    .text-info {
-        color: $info !important;
-    }
-
-    .btn-secondary {
-        color: white;
-    }
-
-    .btn-normal {
-        $bg-color: $dark-header-bg;
-
-        color: $dark-font-color4;
-        background-color: $bg-color;
-        border-color: $bg-color;
-
-        &:hover {
-            $hover-color: lighten($bg-color, 8%);
-            background-color: $hover-color;
-            border-color: $hover-color;
-        }
-    }
-
-    .btn-info {
-        color: $dark-font-color2;
-
-        &:hover {
-            $hover-color: darken($info, 8%);
-            background-color: $hover-color;
-            border-color: $hover-color;
-        }
-        
-        &:hover, &:active, &:focus, &.active {
-            color: $dark-font-color2;
-        }
-    }
-
-    .btn-warning {
-        color: $dark-font-color2;
-
-        &:hover {
-            $hover-color: darken($warning, 8%);
-            background-color: $hover-color;
-            border-color: $hover-color;
-        }
-
-        &:hover, &:active, &:focus, &.active {
-            color: $dark-font-color2;
-        }
-    }
-
-    .btn-close {
-        box-shadow: none;
-        filter: invert(1);
-
-        &:hover {
-            opacity: 0.6;
-        }
-    }
-
-    .modal-header {
-        border-color: $dark-bg;
-    }
-
-    .modal-footer {
-        border-color: $dark-bg;
-    }
-
-    // Pagination
-    .page-item.disabled .page-link {
-        background-color: $dark-bg;
-        border-color: $dark-border-color;
-    }
-
-    .page-link {
-        background-color: $dark-bg;
-        border-color: $dark-border-color;
-        color: $dark-font-color;
-    }
-
-    .stack-list {
-        .item {
-            &:hover {
-                background-color: $dark-bg2;
-            }
-
-            &.active {
-                background-color: $dark-bg2;
-            }
-        }
-    }
-
-    @media (max-width: 550px) {
-        .table-shadow-box {
-            tbody {
-                .shadow-box {
-                    background-color: $dark-bg2;
-
-                    td {
-                        border-bottom: 1px solid $dark-border-color;
-                    }
-                }
-            }
-        }
-    }
-
-    .alert {
-        &.bg-info,
-        &.bg-warning,
-        &.bg-danger,
-        &.bg-maintenance,
-        &.bg-light {
-            color: $dark-font-color2;
-        }
+// Toast responsive
+@media (max-width: 769px) {
+    .toast-container {
+        margin-bottom: 100px;
     }
 }
 
-// Floating Label
-.form-floating > .form-control:focus ~ label::after, .form-floating > .form-control:not(:placeholder-shown) ~ label::after, .form-floating > .form-control-plaintext ~ label::after, .form-floating > .form-select ~ label::after {
-    background-color: transparent;
-}
-
-.form-floating > label {
-    .dark & {
-        color: $dark-font-color3 !important;
+@media (max-width: 550px) {
+    .toast-container {
+        margin-bottom: 126px;
     }
 }
-
 
 /*
  * Transitions
  */
 
-// page-change
 .slide-fade-enter-active {
     transition: all 0.2s $easing-in;
 }
@@ -534,183 +602,6 @@ optgroup {
 .slide-fade-up-leave-to {
     transform: translateY(-50px);
     opacity: 0;
-}
-
-.stack-list {
-    &.scrollbar {
-        overflow-y: auto;
-    }
-
-    @media (max-width: 769px) {
-        &.scrollbar {
-            height: calc(100% - 97px);
-        }
-    }
-
-    .item {
-        display: flex;
-        align-items: center;
-        height: 52px;
-        text-decoration: none;
-        border-radius: 10px;
-        transition: all ease-in-out 0.15s;
-        width: 100%;
-        padding: 0 8px;
-
-        &.disabled {
-            opacity: 0.3;
-        }
-
-        &:hover {
-            background-color: $highlight-white;
-        }
-
-        &.active {
-            background-color: #cdf8f4;
-        }
-
-        .title {
-            display: inline-block;
-            margin-top: -4px;
-        }
-    }
-}
-
-.alert-success {
-    color: #122f21;
-    background-color: $primary;
-    border-color: $primary;
-}
-
-.alert-info {
-    color: #055160;
-    background-color: #cff4fc;
-    border-color: #cff4fc;
-}
-
-.alert-danger {
-    color: #842029;
-    background-color: #f8d7da;
-    border-color: #f8d7da;
-}
-
-.btn-success {
-    color: #fff;
-    background-color: #4caf50;
-    border-color: #4caf50;
-}
-
-
-[contenteditable=true] {
-    transition: all $easing-in 0.2s;
-    
-    border-radius: 8px;
-
-    &.no-bg {
-        background-color: transparent !important;
-    }
-
-    /*
-    &::after {
-        margin-left: 5px;
-        content: "🖊️";
-        font-size: 13px;
-        color: #eee;
-    }
-    */
-
-}
-
-.action {
-    transition: all $easing-in 0.2s;
-
-    &:hover {
-        cursor: pointer;
-        transform: scale(1.2);
-    }
-}
-
-.vue-image-crop-upload .vicp-wrap {
-    border-radius: 10px !important;
-}
-
-.spinner {
-    color: $primary;
-}
-
-.prism-editor__textarea {
-    outline: none !important;
-}
-
-h5.settings-subheading::after {
-    content: "";
-    display: block;
-    width: 50%;
-    padding-top: 8px;
-    border-bottom: 1px solid $dark-border-color;
-}
-
-/* CodeMirror editor container */
-.code-editor, .css-editor {
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-
-$shadow-box-padding: 20px;
-
-.shadow-box-with-fixed-bottom-bar {
-    padding-top: $shadow-box-padding;
-    padding-bottom: 0;
-    padding-right: $shadow-box-padding;
-    padding-left: $shadow-box-padding;
-}
-
-.fixed-bottom-bar {
-    position: sticky;
-    bottom: 0;
-    margin-left: -$shadow-box-padding;
-    margin-right: -$shadow-box-padding;
-    z-index: 100;
-    background-color: rgba(white, 0.2);
-    backdrop-filter: blur(2px);
-    border-radius: 0 0 10px 10px;
-
-    .dark & {
-        background-color: rgba($dark-header-bg, 0.9);
-    }
-}
-
-@media (max-width: 769px) {
-    .toast-container {
-        margin-bottom: 100px !important;
-    }
-}
-
-@media (max-width: 550px) {
-    .toast-container {
-        margin-bottom: 126px !important;
-    }
-}
-
-code {
-    padding: .2em .4em;
-    margin: 0;
-    font-size: 85%;
-    white-space: break-spaces;
-    background-color: rgba(239, 239, 239, 0.15);
-
-    border-radius: 6px;
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    color: black;
-
-    .dark & {
-        color: $dark-font-color;
-    }
-}
-
-.form-text {
-    color: $dark-font-color3;
 }
 
 // Localization

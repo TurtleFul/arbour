@@ -169,9 +169,12 @@ export default {
 <style lang="scss" scoped>
 @import "../styles/vars.scss";
 
-.nav-link {
-    &.status-page {
-        background-color: rgba(255, 255, 255, 0.1);
+header {
+    background-color: $dark-header-bg;
+    border-bottom-color: $dark-header-bg;
+
+    span {
+        color: #f0f6fc;
     }
 }
 
@@ -182,8 +185,8 @@ export default {
     height: calc(60px + env(safe-area-inset-bottom));
     width: 100%;
     left: 0;
-    background-color: #fff;
-    box-shadow: 0 15px 47px 0 rgba(0, 0, 0, 0.05), 0 5px 14px 0 rgba(0, 0, 0, 0.05);
+    background-color: $dark-bg;
+    box-shadow: 0 15px 47px 0 rgba(0, 0, 0, 0.3), 0 5px 14px 0 rgba(0, 0, 0, 0.2);
     text-align: center;
     white-space: nowrap;
     padding: 0 10px env(safe-area-inset-bottom);
@@ -195,7 +198,7 @@ export default {
         height: 100%;
         padding: 8px 10px 0;
         font-size: 13px;
-        color: #c1c1c1;
+        color: $dark-font-color3;
         overflow: hidden;
         text-decoration: none;
 
@@ -247,13 +250,16 @@ main {
         transition: all 0.2s;
         padding-left: 0;
         padding-bottom: 0;
-        margin-top: 8px !important;
-        border-radius: 16px;
+        margin-top: 8px;
+        border-radius: var(--arbour-radius-lg);
         overflow: hidden;
+        background-color: $dark-bg;
+        color: $dark-font-color;
+        border-color: $dark-border-color;
 
         .dropdown-divider {
             margin: 0;
-            border-top: 1px solid rgba(0, 0, 0, 0.4);
+            border-top: 1px solid $dark-border-color;
             background-color: transparent;
         }
 
@@ -264,24 +270,15 @@ main {
 
         .dropdown-item {
             padding: 0.7rem 1rem;
-        }
-
-        .dark & {
-            background-color: $dark-bg;
             color: $dark-font-color;
-            border-color: $dark-border-color;
 
-            .dropdown-item {
-                color: $dark-font-color;
+            &.active {
+                color: $dark-font-color2;
+                background-color: $highlight;
+            }
 
-                &.active {
-                    color: $dark-font-color2;
-                    background-color: $highlight !important;
-                }
-
-                &:hover {
-                    background-color: $dark-bg2;
-                }
+            &:hover {
+                background-color: $dark-bg2;
             }
         }
     }
@@ -295,24 +292,9 @@ main {
         width: 24px;
         height: 24px;
         margin-right: 5px;
-        border-radius: 50rem;
+        border-radius: var(--arbour-radius-pill);
         font-weight: bold;
         font-size: 10px;
-    }
-}
-
-.dark {
-    header {
-        background-color: $dark-header-bg;
-        border-bottom-color: $dark-header-bg !important;
-
-        span {
-            color: #f0f6fc;
-        }
-    }
-
-    .bottom-nav {
-        background-color: $dark-bg;
     }
 }
 

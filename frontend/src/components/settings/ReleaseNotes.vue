@@ -47,11 +47,7 @@ export default {
 .release + .release {
     margin-top: 2.5rem;
     padding-top: 2rem;
-    border-top: 1px solid #dee2e6;
-
-    .dark & {
-        border-top-color: #333;
-    }
+    border-top: 1px solid #333;
 }
 
 .release-header {
@@ -71,29 +67,17 @@ export default {
 .release-title {
     font-weight: 400;
     font-size: 1.1rem;
-    color: #666;
-
-    .dark & {
-        color: #aaa;
-    }
+    color: #aaa;
 }
 
 .release-date {
     font-size: 0.9rem;
     color: #888;
-
-    .dark & {
-        color: #888;
-    }
 }
 
 .release-summary {
     margin: 0 0 1.25rem;
-    color: #555;
-
-    .dark & {
-        color: #bbb;
-    }
+    color: #bbb;
 }
 
 .release-section {
