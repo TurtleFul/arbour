@@ -5,31 +5,31 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
 
 // ─── Arbour — Forest Green (default) ──────────────────────────────────────────
 :root {
-    --arbour-primary: #4ade80;
-    --arbour-secondary: #6b8f6e;
-    --arbour-info: #38bdf8;
-    --arbour-danger: #f87171;
-    --arbour-warning: #fbbf24;
-    --arbour-maintenance: #818cf8;
-    --arbour-highlight: #86efac;
+    --arbour-primary: #5dbf75;
+    --arbour-secondary: #7a9b7d;
+    --arbour-info: #7dd3fc;
+    --arbour-danger: #fca5a5;
+    --arbour-warning: #fcd34d;
+    --arbour-maintenance: #a5b4fc;
+    --arbour-highlight: #86d9a0;
 
-    --arbour-bg-body: #090f09;
-    --arbour-bg: #192e1b;
-    --arbour-bg-deep: #060b06;
-    --arbour-bg-input-group: #1e3822;
-    --arbour-bg-disabled: #172c1b;
-    --arbour-border: #335e39;
-    --arbour-bg-header: #1e3c22;
-    --arbour-bg-header-active: #2c5232;
+    --arbour-bg-body: #080c09;
+    --arbour-bg: #0f1712;
+    --arbour-bg-deep: #060907;
+    --arbour-bg-input-group: #1c261e;
+    --arbour-bg-disabled: #162018;
+    --arbour-border: #243626;
+    --arbour-bg-header: #111a13;
+    --arbour-bg-header-active: #1a2b1c;
 
-    --arbour-text: #c8ddc9;
-    --arbour-text-on-primary: #061509;
-    --arbour-text-on-warning: #061509;
-    --arbour-text-muted: #6b8a6e;
-    --arbour-text-subtle: #8aaa8d;
+    --arbour-text: #bdd0bf;
+    --arbour-text-on-primary: #061209;
+    --arbour-text-on-warning: #061209;
+    --arbour-text-muted: #587258;
+    --arbour-text-subtle: #90a892;
 
-    --arbour-gradient: linear-gradient(135deg, #4ade80 0%, #34d399 100%);
-    --arbour-gradient-active: linear-gradient(135deg, #34d399 0%, #4ade80 100%);
+    --arbour-gradient: linear-gradient(135deg, #5dbf75 0%, #4aac61 100%);
+    --arbour-gradient-active: linear-gradient(135deg, #4aac61 0%, #5dbf75 100%);
 
     --arbour-radius-sm: 6px;
     --arbour-radius: 10px;
@@ -102,6 +102,9 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-warning: #d4850a;
     --arbour-maintenance: #7c5cbf;
     --arbour-highlight: #6dd5c8;
+    --arbour-logo-1: #1a6560;
+    --arbour-logo-2: #0f4a45;
+    --arbour-logo-3: #3a2a18;
 
     --arbour-bg-body: #f0ead8;
     --arbour-bg: #f8f4ec;
@@ -130,6 +133,9 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-warning: #f59e0b;
     --arbour-maintenance: #10b981;
     --arbour-highlight: #fda4af;
+    --arbour-logo-1: #9d174d;
+    --arbour-logo-2: #6b21a8;
+    --arbour-logo-3: #3b0764;
 
     --arbour-bg-body: #fff0f9;
     --arbour-bg: #ffffff;

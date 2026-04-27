@@ -222,17 +222,20 @@ optgroup {
 
 .btn-normal {
     color: var(--arbour-text-subtle);
-    background-color: var(--arbour-bg-header);
-    border-color: var(--arbour-bg-header);
+    background-color: var(--arbour-bg-input-group);
+    border-color: var(--arbour-border);
 
     &:hover {
         background-color: var(--arbour-bg-header-active);
-        border-color: var(--arbour-bg-header-active);
+        border-color: var(--arbour-border);
+        color: var(--arbour-text);
     }
 }
 
 .btn-warning {
     --bs-btn-color: var(--arbour-text-on-warning);
+    --bs-btn-bg: var(--arbour-warning);
+    --bs-btn-border-color: var(--arbour-warning);
     color: var(--arbour-text-on-warning);
 
     &:hover, &:active, &:focus, &.active {
@@ -244,6 +247,8 @@ optgroup {
 
 .btn-info {
     --bs-btn-color: var(--arbour-text-on-primary);
+    --bs-btn-bg: var(--arbour-info);
+    --bs-btn-border-color: var(--arbour-info);
     color: var(--arbour-text-on-primary);
 
     &:hover, &:active, &:focus, &.active {
@@ -300,8 +305,16 @@ optgroup {
 }
 
 .btn-danger {
-    --bs-btn-color: #ffffff;
-    color: #ffffff;
+    --bs-btn-color: var(--arbour-text-on-primary);
+    --bs-btn-bg: var(--arbour-danger);
+    --bs-btn-border-color: var(--arbour-danger);
+    color: var(--arbour-text-on-primary);
+
+    &:hover, &:active, &:focus, &.active {
+        color: var(--arbour-text-on-primary);
+        background-color: color-mix(in srgb, var(--arbour-danger) 85%, black);
+        border-color: color-mix(in srgb, var(--arbour-danger) 85%, black);
+    }
 }
 
 // Nav pills
@@ -373,7 +386,7 @@ optgroup {
 }
 
 .alert-danger {
-    color: white;
+    color: var(--arbour-text-on-primary);
     background-color: var(--arbour-danger);
     border-color: var(--arbour-danger);
 }

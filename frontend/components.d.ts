@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     About: typeof import('./src/components/settings/About.vue')['default']
     Appearance: typeof import('./src/components/settings/Appearance.vue')['default']
+    AppLogo: typeof import('./src/components/AppLogo.vue')['default']
     ArrayInput: typeof import('./src/components/ArrayInput.vue')['default']
     ArraySelect: typeof import('./src/components/ArraySelect.vue')['default']
     BApp: typeof import('bootstrap-vue-next')['BApp']

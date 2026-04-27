@@ -1,7 +1,7 @@
 <template>
     <div class="d-flex justify-content-center align-items-center">
         <div class="logo d-flex flex-column justify-content-center align-items-center">
-            <img class="my-4" width="200" height="200" src="/icon.svg" />
+            <AppLogo class="my-4" :size="200" />
             <div class="fs-4 fw-bold">Arbour</div>
             <div>{{ $t("Version") }}: {{ $root.info.version }}</div>
             <div class="frontend-version">{{ $t("Frontend Version") }}: {{ $root.frontendVersion }}</div>
@@ -26,7 +26,13 @@
 </template>
 
 <script>
+import AppLogo from "../AppLogo.vue";
+
 export default {
+    components: {
+        AppLogo,
+    },
+
     computed: {
         settings() {
             return this.$parent.$parent.$parent.settings;
