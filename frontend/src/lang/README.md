@@ -1,19 +1,25 @@
 # Translations
 
-A simple guide on how to translate `Dockge` in your native language.
+Arbour ships with translations for 30+ languages. All translation files live in this directory as `<lang-code>.ts` files.
 
-## How to Translate
+## Adding or Improving a Translation
 
-(11-26-2023) Updated
+1. Find your language file (e.g. `de.ts` for German, `zh-TW.ts` for Traditional Chinese).
+2. Copy any missing keys from `en.ts` and translate the values.
+3. Open a pull request with your changes.
 
-1. Go to <https://weblate.kuma.pet>
-2. Register an account on Weblate
-3. Make sure your GitHub email is matched with Weblate's account, so that it could show you as a contributor on GitHub
-4. Choose your language on Weblate and start translating.
+If your language does not have a file yet:
 
-## How to add a new language in the dropdown
+1. Copy `en.ts` to a new file named with the [BCP 47 language tag](https://en.wikipedia.org/wiki/IETF_language_tag) (e.g. `fi.ts` for Finnish).
+2. Translate all values.
+3. Add your language to the `languageList` in `frontend/src/i18n.ts`:
+   ```ts
+   "fi": "Suomi"
+   ```
+4. Open a pull request.
 
-1. Add your Language at <https://weblate.kuma.pet/projects/dockge/dockge/>.
-2. Find the language code (You can find it at the end of the URL)
-3. Add your language at the end of `languageList` in `frontend/src/i18n.ts`, format: `"zh-TW": "繁體中文 (台灣)"`,
-4. Commit to new branch and make a new Pull Request for me to approve.
+## Notes
+
+- Only translate the **values**, never the keys.
+- Use `{0}`, `{1}`, etc. as placeholders where you see them in `en.ts` — keep them in the translation.
+- The English file (`en.ts`) is the source of truth. When new strings are added there, other languages will fall back to English until translated.

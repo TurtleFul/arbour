@@ -108,7 +108,7 @@ backend/__tests__/settings.test.ts
 ## Type Checking
 
 ```bash
-bun run check-ts
+bun run typecheck
 ```
 
 ## Linting
@@ -116,6 +116,12 @@ bun run check-ts
 ```bash
 bun run lint        # check
 bun run fmt         # fix
+```
+
+## Running Everything at Once
+
+```bash
+bun run verify   # fmt + typecheck + test in one command
 ```
 
 ## Building the Frontend

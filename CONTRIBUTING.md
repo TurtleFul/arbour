@@ -24,18 +24,19 @@ Open <http://localhost:5000>.
 Run the full local check suite:
 
 ```bash
-bun run lint        # eslint
-bun run check-ts    # tsc --noEmit
+bun run verify   # fmt + typecheck + test in one command
+```
+
+Or individually:
+
+```bash
+bun run lint        # eslint (check only)
+bun run fmt         # eslint --fix
+bun run typecheck   # vue-tsc --noEmit
 bun test            # unit tests
 ```
 
-All three must pass. CI runs the same via Dagger (`dagger call ci --source=.`).
-
-Auto-fix most style issues:
-
-```bash
-bun run fmt
-```
+All must pass. CI runs the same checks via Dagger (`dagger call ci --source=.`).
 
 ## Commit Messages
 
@@ -44,7 +45,7 @@ Keep them short and descriptive. No strict convention required — look at `git 
 ## Pull Request Checklist
 
 - [ ] Branch is up to date with `main`
-- [ ] `bun run lint`, `bun run check-ts`, and `bun test` all pass
+- [ ] `bun run verify` passes (fmt + typecheck + test)
 - [ ] New behavior has tests where reasonable
 - [ ] User-visible changes are noted in `CHANGELOG.md`
 - [ ] No secrets, personal data, or large binaries committed

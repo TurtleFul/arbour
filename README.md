@@ -15,12 +15,16 @@ It is a fork of [dockge](https://github.com/louislam/dockge), continued under a 
 ## Features
 
 - Manage Docker Compose stacks via a web UI
-- Interactive compose file editor
+- Interactive compose file editor with YAML syntax highlighting
 - Start, stop, restart, update, and delete stacks
+- Per-service operations — start, stop, restart, update individual services
+- Automatic image updates — immediate or scheduled, configurable per stack
+- Stack importing — adopt existing compose files without moving them
 - Real-time container logs and terminal access
+- Service event history — lifecycle events recorded per container
 - Multi-host support via agents
-- Image update detection
-- Docker resource management (images, volumes, networks, containers)
+- Docker resource management (images, volumes, networks, containers) with inspect views
+- Multiple UI themes (Arbour, Dockge Classic, SunDown, Retro, Unicorn)
 
 ## Getting Started
 
