@@ -10,6 +10,7 @@ import { StackFilter, StackStatusInfo } from "../../../common/util-common";
 let socket : Socket;
 
 let terminalMap : Map<string, Terminal> = new Map();
+let filterRebuildTimer : ReturnType<typeof setTimeout> | null = null;
 
 export default defineComponent({
     data() {
@@ -115,28 +116,31 @@ export default defineComponent({
         },
 
         completeStackList() {
-            const agents = new Set<string>();
-            const status = new Set<string>();
-
-            for (const stackData of Object.values(this.completeStackList)) {
-                agents.add(stackData.endpoint);
-                status.add(StackStatusInfo.get(stackData.status).label);
+            if (filterRebuildTimer !== null) {
+                clearTimeout(filterRebuildTimer);
             }
+            filterRebuildTimer = setTimeout(() => {
+                filterRebuildTimer = null;
+                const agents = new Set<string>();
+                const status = new Set<string>();
 
-            this.stackFilter.agents.options = Object.fromEntries(
-                [ ...agents ]
-                    .map(a => [ this.getAgentName(a), a ])
-                    .sort((a1, a2) => {
-                        return a1[0].localeCompare(a2[0]);
-                    }
-                    )
-            );
+                for (const stackData of Object.values(this.completeStackList)) {
+                    agents.add(stackData.endpoint);
+                    status.add(StackStatusInfo.get(stackData.status).label);
+                }
 
-            this.stackFilter.status.options = Object.fromEntries(
-                StackStatusInfo.ALL.filter(i => status.has(i.label)).map(i => [ i.label, i.label ])
-            );
+                this.stackFilter.agents.options = Object.fromEntries(
+                    [ ...agents ]
+                        .map(a => [ this.getAgentName(a), a ])
+                        .sort((a1, a2) => a1[0].localeCompare(a2[0]))
+                );
 
-            this.stackFilter.attributes.options = { imageUpdatesAvailable: "imageUpdatesAvailable" };
+                this.stackFilter.status.options = Object.fromEntries(
+                    StackStatusInfo.ALL.filter(i => status.has(i.label)).map(i => [ i.label, i.label ])
+                );
+
+                this.stackFilter.attributes.options = { imageUpdatesAvailable: "imageUpdatesAvailable" };
+            }, 500);
         },
 
         remember() {
@@ -290,6 +294,20 @@ export default defineComponent({
                             };
                         }
                         this.allAgentStackList[res.endpoint].stackList = res.stackList;
+                    }
+                }
+            });
+
+            // Single-stack patch — avoids replacing the full list on every operation
+            agentSocket.on("stackUpdate", (res) => {
+                if (res.ok) {
+                    if (!res.endpoint) {
+                        this.stackList[res.stackName] = res.stackData;
+                    } else {
+                        if (!this.allAgentStackList[res.endpoint]) {
+                            this.allAgentStackList[res.endpoint] = { stackList: {} };
+                        }
+                        this.allAgentStackList[res.endpoint].stackList[res.stackName] = res.stackData;
                     }
                 }
             });

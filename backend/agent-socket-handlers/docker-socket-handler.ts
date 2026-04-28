@@ -128,7 +128,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Started",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
 
                 stack.joinCombinedTerminal(socket);
 
@@ -154,7 +154,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Stopped",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -177,7 +177,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Restarted",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -208,7 +208,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Updated",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -231,7 +231,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Downed",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -258,7 +258,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Stopped",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -285,7 +285,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Started",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -312,7 +312,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Restarted",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -339,7 +339,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Recreated",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -374,7 +374,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Updated",
                     msgi18n: true,
                 }, callback);
-                server.sendStackList();
+                server.sendStack(stackName);
             } catch (e) {
                 callbackError(e, callback);
             }

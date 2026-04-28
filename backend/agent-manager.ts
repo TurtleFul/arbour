@@ -2,12 +2,11 @@ import { ArbourSocket } from "./util-server";
 import { io, Socket as SocketClient } from "socket.io-client";
 import { log } from "./log";
 import { Agent } from "./models/agent";
-import { isDev, LooseObject, sleep } from "../common/util-common";
+import { isDev, LooseObject } from "../common/util-common";
 import semver from "semver";
 import { getDb } from "./db/index";
 import { agent as agentTable } from "./db/schema";
 import { eq } from "drizzle-orm";
-import dayjs, { Dayjs } from "dayjs";
 import { AgentData } from "../common/types";
 
 /**
@@ -19,14 +18,9 @@ export class AgentManager {
     protected socket : ArbourSocket;
     protected agentSocketList : Record<string, SocketClient> = {};
     protected agentLoggedInList : Record<string, boolean> = {};
-    protected _firstConnectTime : Dayjs = dayjs();
 
     constructor(socket: ArbourSocket) {
         this.socket = socket;
-    }
-
-    get firstConnectTime() : Dayjs {
-        return this._firstConnectTime;
     }
 
     test(url : string, username : string, password : string) : Promise<void> {
@@ -239,8 +233,6 @@ export class AgentManager {
     }
 
     async connectAll() {
-        this._firstConnectTime = dayjs();
-
         if (this.socket.endpoint) {
             log.info("agent-manager", "This connection is connected as an agent, skip connectAll()");
             return;
@@ -276,29 +268,44 @@ export class AgentManager {
         }
 
         if (!client.connected || !this.agentLoggedInList[endpoint]) {
-            // Maybe the request is too quick, the socket is not connected yet, check firstConnectTime
-            // If it is within 10 seconds, we should apply retry logic here
-            let diff = dayjs().diff(this.firstConnectTime, "second");
-            log.debug("agent-manager", endpoint + ": diff: " + diff);
-            let ok = false;
-            while (diff < 10) {
-                if (client.connected && this.agentLoggedInList[endpoint]) {
-                    log.debug("agent-manager", `${endpoint}: Connected & Logged in`);
-                    ok = true;
-                    break;
-                }
-                log.debug("agent-manager", endpoint + ": not ready yet, retrying in 1 second...");
-                await sleep(1000);
-                diff = dayjs().diff(this.firstConnectTime, "second");
-            }
-
-            if (!ok) {
-                log.error("agent-manager", `${endpoint}: Socket client not connected`);
-                throw new Error("Socket client not connected for endpoint: " + endpoint);
-            }
+            log.debug("agent-manager", endpoint + ": not ready yet, waiting...");
+            await this.waitForReady(endpoint, client);
         }
 
         client.emit("agent", endpoint, eventName, ...args);
+    }
+
+    private waitForReady(endpoint: string, client: SocketClient, timeoutMs = 10000): Promise<void> {
+        if (client.connected && this.agentLoggedInList[endpoint]) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+            let pollTimer: ReturnType<typeof setInterval>;
+
+            const done = (err?: Error) => {
+                clearTimeout(timeoutTimer);
+                clearInterval(pollTimer);
+                client.off("connect_error", onConnectError);
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            };
+
+            const onConnectError = () => done(new Error(`Socket client not connected for endpoint: ${endpoint}`));
+            const timeoutTimer = setTimeout(() => done(new Error(`Timeout waiting for agent: ${endpoint}`)), timeoutMs);
+
+            client.once("connect_error", onConnectError);
+
+            pollTimer = setInterval(() => {
+                if (client.connected && this.agentLoggedInList[endpoint]) {
+                    log.debug("agent-manager", `${endpoint}: Connected & Logged in`);
+                    done();
+                }
+            }, 100);
+        });
     }
 
     emitToAllEndpoints(eventName: string, ...args : unknown[]) {

@@ -1,7 +1,7 @@
 import { log } from "./log";
 import { getDb } from "./db/index";
 import { setting } from "./db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { LooseObject } from "../common/util-common";
 
 export class Settings {
@@ -91,33 +91,45 @@ export class Settings {
     }
 
     static async setSettings(type: string, data: LooseObject) {
-        const db = getDb();
-        for (const key of Object.keys(data)) {
-            const existing = db.select({ id: setting.id,
-                type: setting.type })
-                .from(setting)
-                .where(eq(setting.key, key))
-                .get();
-
-            const serialised = JSON.stringify(data[key]);
-
-            if (existing) {
-                if (existing.type === type) {
-                    db.update(setting)
-                        .set({ value: serialised })
-                        .where(eq(setting.key, key))
-                        .run();
-                }
-            } else {
-                db.insert(setting)
-                    .values({ key,
-                        value: serialised,
-                        type })
-                    .run();
-            }
+        const keys = Object.keys(data);
+        if (keys.length === 0) {
+            return;
         }
 
-        Settings.deleteCache(Object.keys(data));
+        const db = getDb();
+
+        // One SELECT for all keys instead of one per key
+        const existingRows = db.select({ key: setting.key,
+            type: setting.type })
+            .from(setting)
+            .where(inArray(setting.key, keys))
+            .all();
+
+        const existing = new Map(existingRows.map(r => [ r.key, r.type ]));
+
+        db.transaction((tx) => {
+            for (const key of keys) {
+                const serialised = JSON.stringify(data[key]);
+                const existingType = existing.get(key);
+
+                if (existingType !== undefined) {
+                    if (existingType === type) {
+                        tx.update(setting)
+                            .set({ value: serialised })
+                            .where(eq(setting.key, key))
+                            .run();
+                    }
+                } else {
+                    tx.insert(setting)
+                        .values({ key,
+                            value: serialised,
+                            type })
+                        .run();
+                }
+            }
+        });
+
+        Settings.deleteCache(keys);
     }
 
     static deleteCache(keyList: string[]) {

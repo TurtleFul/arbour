@@ -166,30 +166,22 @@ export default defineComponent({
         statusInfos(): StackStatusInfo[] {
             return StackStatusInfo.ALL;
         },
-        stackStatusCountByEndpoint(): Map<string, Map<number, number>> {
-            const counts = new Map<string, Map<number, number>>();
+        stackStatusCounts(): { byEndpoint: Map<string, Map<number, number>>, overall: Map<number, number> } {
+            const byEndpoint = new Map<string, Map<number, number>>();
+            const overall = new Map<number, number>();
+
             for (const stackData of Object.values(this.stackList) as SimpleStackData[]) {
-                let endpointCounts = counts.get(stackData.endpoint);
+                let endpointCounts = byEndpoint.get(stackData.endpoint);
                 if (!endpointCounts) {
                     endpointCounts = new Map<number, number>();
-                    counts.set(stackData.endpoint, endpointCounts);
+                    byEndpoint.set(stackData.endpoint, endpointCounts);
                 }
-
                 endpointCounts.set(stackData.status, (endpointCounts.get(stackData.status) ?? 0) + 1);
+                overall.set(stackData.status, (overall.get(stackData.status) ?? 0) + 1);
             }
 
-            return counts;
-        },
-        stackStatusCountOverall(): Map<number, number> {
-            const counts = new Map<number, number>();
-
-            for (const [ , innerMap ] of this.stackStatusCountByEndpoint) {
-                for (const [ status, value ] of innerMap) {
-                    counts.set(status, (counts.get(status) ?? 0) + value);
-                }
-            }
-
-            return counts;
+            return { byEndpoint,
+                overall };
         },
     },
 
@@ -237,11 +229,11 @@ export default defineComponent({
         },
 
         getStatusCount(status: number[]): number {
-            return status.reduce((acc, s) => acc + (this.stackStatusCountOverall.get(s) ?? 0), 0);
+            return status.reduce((acc, s) => acc + (this.stackStatusCounts.overall.get(s) ?? 0), 0);
         },
 
         getEndpointStatusCount(endpoint: string, status: number[]): number {
-            return status.reduce((acc, s) => acc + (this.stackStatusCountByEndpoint.get(endpoint)?.get(s) ?? 0), 0);
+            return status.reduce((acc, s) => acc + (this.stackStatusCounts.byEndpoint.get(endpoint)?.get(s) ?? 0), 0);
         },
 
         filterStackList(endpoint: string | undefined, statusInfo: StackStatusInfo) {

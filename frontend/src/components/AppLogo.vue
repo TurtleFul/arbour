@@ -8,14 +8,22 @@
             </linearGradient>
         </defs>
 
-        <path d="M 56 100 L 456 100"
-              stroke="url(#arbour-logo-g)" stroke-width="40" stroke-linecap="round" fill="none" />
-        <path d="M 86 150 L 426 150"
-              stroke="url(#arbour-logo-g)" stroke-width="20" stroke-linecap="round" fill="none" />
-        <path d="M 132 170 L 132 462"
-              stroke="url(#arbour-logo-g)" stroke-width="40" stroke-linecap="round" fill="none" />
-        <path d="M 380 170 L 380 462"
-              stroke="url(#arbour-logo-g)" stroke-width="40" stroke-linecap="round" fill="none" />
+        <path
+            d="M 56 100 L 456 100"
+            stroke="url(#arbour-logo-g)" stroke-width="40" stroke-linecap="round" fill="none"
+        />
+        <path
+            d="M 86 150 L 426 150"
+            stroke="url(#arbour-logo-g)" stroke-width="20" stroke-linecap="round" fill="none"
+        />
+        <path
+            d="M 132 170 L 132 462"
+            stroke="url(#arbour-logo-g)" stroke-width="40" stroke-linecap="round" fill="none"
+        />
+        <path
+            d="M 380 170 L 380 462"
+            stroke="url(#arbour-logo-g)" stroke-width="40" stroke-linecap="round" fill="none"
+        />
         <rect x="166" y="252" width="180" height="34" rx="9" fill="url(#arbour-logo-g)" />
         <rect x="166" y="298" width="180" height="34" rx="9" fill="url(#arbour-logo-g)" />
         <rect x="166" y="344" width="180" height="34" rx="9" fill="url(#arbour-logo-g)" />

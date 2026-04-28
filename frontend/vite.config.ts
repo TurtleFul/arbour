@@ -35,6 +35,7 @@ export default defineConfig({
         vue(),
         Components({
             resolvers: [ BootstrapVueNextResolver() ],
+            globs: [ "**/*.vue", "!**/CodeEditor.vue" ],
         }),
         viteCompression({
             algorithm: "gzip",

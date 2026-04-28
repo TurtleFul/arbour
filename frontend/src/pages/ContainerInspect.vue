@@ -16,7 +16,9 @@
 </template>
 
 <script>
-import CodeEditor from "../components/CodeEditor.vue";
+import { defineAsyncComponent } from "vue";
+
+const CodeEditor = defineAsyncComponent(() => import("../components/CodeEditor.vue"));
 
 export default {
     components: {

@@ -87,6 +87,10 @@ export class ArbourServer {
 
     stacksDir : string = "";
 
+    private _stackListHash = "";
+    private _networkListCache: string[] | null = null;
+    private _networkListCacheExpiry = 0;
+
     /**
      *
      */
@@ -407,11 +411,10 @@ export class ArbourServer {
                 log.info("server", `Listening on ${this.config.port}`);
             }
 
-            // Run every 10 seconds
-            new Cron("*/10 * * * * *", {
-                protect: true,  // Enabled over-run protection.
+            // Safety-net sync every 30 seconds — skipped automatically when nothing changed
+            new Cron("*/30 * * * * *", {
+                protect: true,
             }, () => {
-                //log.debug("server", "Cron job running");
                 this.sendStackList(true);
             });
 
@@ -664,27 +667,35 @@ export class ArbourServer {
      * @param useCache
      */
     async sendStackList(useCache = false) {
-        let socketList = this.io.sockets.sockets.values();
+        const socketList = [ ...this.io.sockets.sockets.values() ];
+        const hasLoggedInUser = socketList.some(s => (s as ArbourSocket).userID);
 
-        let stackList;
+        if (!hasLoggedInUser) {
+            return;
+        }
 
-        for (let socket of socketList) {
-            let arbourSocket = socket as ArbourSocket;
+        const stackList = await Stack.getStackList(this, useCache);
 
-            // Check if the room is a number (user id)
+        // Skip broadcast when called from cron and nothing changed
+        if (useCache) {
+            const hash = Array.from(stackList.entries())
+                .map(([ name, stack ]) => `${name}:${stack.status}`)
+                .sort()
+                .join(",");
+            if (hash === this._stackListHash) {
+                return;
+            }
+            this._stackListHash = hash;
+        }
+
+        for (const socket of socketList) {
+            const arbourSocket = socket as ArbourSocket;
+
             if (arbourSocket.userID) {
-
-                // Get the list only if there is a logged in user
-                if (!stackList) {
-                    stackList = await Stack.getStackList(this, useCache);
-                }
-
-                let map : Map<string, object> = new Map();
-
-                for (let [ stackName, stack ] of stackList) {
+                const map = new Map<string, object>();
+                for (const [ stackName, stack ] of stackList) {
                     map.set(stackName, stack.getSimpleData(arbourSocket.endpoint));
                 }
-
                 log.debug("server", "Send stack list to user: " + arbourSocket.id + " (" + arbourSocket.endpoint + ")");
                 arbourSocket.emitAgent("stackList", {
                     ok: true,
@@ -694,22 +705,50 @@ export class ArbourServer {
         }
     }
 
+    /**
+     * Send a single stack's data to all connected sockets.
+     * Used for hot-path operations (start/stop/restart/etc.) to avoid
+     * broadcasting the full list on every action.
+     */
+    async sendStack(stackName: string) {
+        let stack: Stack;
+        try {
+            stack = await Stack.getStack(this, stackName, false);
+        } catch {
+            return this.sendStackList();
+        }
+
+        // Invalidate hash so the next cron tick broadcasts the change
+        this._stackListHash = "";
+
+        for (const socket of this.io.sockets.sockets.values()) {
+            const arbourSocket = socket as ArbourSocket;
+            if (arbourSocket.userID) {
+                arbourSocket.emitAgent("stackUpdate", {
+                    ok: true,
+                    stackName,
+                    stackData: stack.getSimpleData(arbourSocket.endpoint),
+                });
+            }
+        }
+    }
+
     async getDockerNetworkList() : Promise<string[]> {
+        const now = Date.now();
+        if (this._networkListCache && now < this._networkListCacheExpiry) {
+            return this._networkListCache;
+        }
+
         let res = await exec("docker", [ "network", "ls", "--format", "{{.Name}}" ]);
 
         if (!res.stdout) {
             return [];
         }
 
-        let list = res.stdout.split("\n");
+        let list = res.stdout.split("\n").filter((item: string) => item !== "").sort((a: string, b: string) => a.localeCompare(b));
 
-        // Remove empty string item
-        list = list.filter((item: string) => {
-            return item !== "";
-        }).sort((a: string, b: string) => {
-            return a.localeCompare(b);
-        });
-
+        this._networkListCache = list;
+        this._networkListCacheExpiry = now + 60_000;
         return list;
     }
 

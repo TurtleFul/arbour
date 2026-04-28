@@ -13,6 +13,164 @@ export interface ReleaseNote {
 
 export const releaseNotes: ReleaseNote[] = [
     {
+        version: "0.4.0",
+        date: "TBD",
+        title: "Performance",
+        summary: "A focused performance release that reduces unnecessary network traffic, shrinks the initial bundle, and cuts redundant database and Docker API work.",
+        sections: [
+            {
+                title: "Back-end",
+                items: [
+                    "Added a targeted stackUpdate socket event — hot-path operations (start, stop, restart, update) now push a single stack diff instead of rebroadcasting the entire stack list.",
+                    "Stack list broadcast skipped entirely when state has not changed (hash comparison).",
+                    "Settings batch writes consolidated into a single SELECT + transaction instead of one query per key.",
+                    "Docker network list cached for 60 seconds to avoid redundant Docker API calls.",
+                    "Stack polling interval relaxed from every 10 s to every 30 s; real-time events cover the gap.",
+                    "Agent reconnect loop replaced with a proper event-driven wait instead of a polling sleep.",
+                ],
+            },
+            {
+                title: "Front-end",
+                items: [
+                    "CodeMirror editor (compose and inspect views) is now lazy-loaded via defineAsyncComponent, splitting it into a separate chunk and reducing the initial bundle by ~430 KB.",
+                    "Stack status counts for the dashboard computed in a single pass over the stack list.",
+                    "completeStackList filter rebuild debounced to 500 ms to avoid redundant recalculation on rapid updates.",
+                ],
+            },
+        ],
+    },
+    {
+        version: "0.3.5",
+        date: "2026-04-27",
+        title: "Theme Refinements",
+        summary: "Polishes the theming system introduced in 0.3.4, with a theme-aware logo, better accent colour palette, and improved button contrast.",
+        sections: [
+            {
+                title: "Theming",
+                items: [
+                    "New theme-aware AppLogo SVG component — gradient colours follow the active theme via CSS custom properties.",
+                    "Fixed logo visibility in light themes (Retro, Unicorn) by setting darker gradient stops for those palettes.",
+                    "Accent colours (info, danger, warning, maintenance) switched to pastels for better readability on dark backgrounds.",
+                    "btn-normal, btn-danger, btn-warning, and btn-info now correctly inherit theme accent colours instead of hard-coded Bootstrap defaults.",
+                    "Improved contrast for btn-normal so it is clearly distinguishable from the surrounding background.",
+                ],
+            },
+        ],
+    },
+    {
+        version: "0.3.4",
+        date: "2026-04-26",
+        title: "Themes",
+        summary: "Introduces a theme system with four built-in options and an Appearance settings page to switch between them.",
+        sections: [
+            {
+                title: "Themes",
+                items: [
+                    "Four built-in themes: Arbour (default dark green), Dockge Classic (the original Dockge dark look), SunDown (warm dark), Retro (light amber), and Unicorn (light purple).",
+                    "New Appearance tab in Settings to select the active theme.",
+                    "Theme preference persisted in the database and restored on next login.",
+                    "CSS custom properties (--arbour-*) drive all theme colours, making it straightforward to add community themes.",
+                ],
+            },
+            {
+                title: "Styling",
+                items: [
+                    "General styling cleanup and consistency pass across the application.",
+                ],
+            },
+        ],
+    },
+    {
+        version: "0.3.3",
+        date: "2026-04-25",
+        title: "Network Info and Service Logging",
+        summary: "Adds network inspection, improves how Docker artefacts are presented, and expands service-level event logging.",
+        sections: [
+            {
+                title: "Networking",
+                items: [
+                    "Network inspect modal — click any network badge to view its full Docker inspect output inline.",
+                    "Networks now shown as interactive badges alongside volumes and images in the stack view.",
+                ],
+            },
+            {
+                title: "Service Logging",
+                items: [
+                    "Additional service lifecycle events (network connect/disconnect, exec create) captured in the service event log.",
+                    "Docker artefact display improved for volumes and images.",
+                ],
+            },
+        ],
+    },
+    {
+        version: "0.3.2",
+        date: "2026-04-25",
+        title: "More Update Options and Service History",
+        summary: "Gives per-service control over image updates and introduces a persistent event log for individual services.",
+        sections: [
+            {
+                title: "Updates",
+                items: [
+                    "Per-service update operations — update a single service's image without restarting the whole stack.",
+                    "Per-service recreate and restart actions available from the service detail view.",
+                ],
+            },
+            {
+                title: "Service Event Log",
+                items: [
+                    "New service event history panel — start, stop, restart, and error events are recorded and displayed per container.",
+                    "Event log persisted in the database so history survives page reloads.",
+                ],
+            },
+            {
+                title: "CI",
+                items: [
+                    "Dagger pipeline functions updated and consolidated.",
+                    "Added a verify script (type-check + lint + test in one command).",
+                    "Bun set as the explicit runtime target for all CI steps.",
+                ],
+            },
+        ],
+    },
+    {
+        version: "0.3.1",
+        date: "2026-04-19",
+        title: "Auto-Update Fix",
+        summary: "Bug-fix release for the auto-update feature introduced in 0.3.0.",
+        sections: [
+            {
+                title: "Bug Fixes",
+                items: [
+                    "Auto-update setting now takes effect immediately when the update-available trigger fires, instead of waiting for the next scheduled check cycle.",
+                ],
+            },
+        ],
+    },
+    {
+        version: "0.3.0",
+        date: "2026-04-19",
+        title: "Auto-Updates and Stack Importing",
+        summary: "Two major quality-of-life features: automated image updates for stacks and a way to import existing compose files into Arbour.",
+        sections: [
+            {
+                title: "Stack Auto-Updates",
+                items: [
+                    "Automatic image update support for managed stacks — enable per-stack from the stack settings.",
+                    "Two trigger modes: update immediately when a new image is available, or schedule updates for a specific time.",
+                    "Background StackAutoUpdateManager polls registries and applies updates without manual intervention.",
+                    "Update status and last-checked time shown in the stack UI.",
+                ],
+            },
+            {
+                title: "Stack Importing",
+                items: [
+                    "Import existing compose stacks into Arbour management without moving files — point Arbour at a directory and it adopts the stack.",
+                    "Imported stacks behave identically to stacks created through the UI.",
+                ],
+            },
+        ],
+    },
+    {
         version: "0.2.0",
         date: "2026-04-18",
         title: "First public release of Arbour",

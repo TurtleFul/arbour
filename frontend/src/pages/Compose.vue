@@ -334,9 +334,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, defineAsyncComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import CodeEditor from "../components/CodeEditor.vue";
+const CodeEditor = defineAsyncComponent(() => import("../components/CodeEditor.vue"));
 import {
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
