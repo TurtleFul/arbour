@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, spyOn } from "bun:test";
 import { Stack } from "../stack";
 import { ArbourServer } from "../arbour-server";
 import { ValidationError } from "../util-server";
@@ -256,6 +256,9 @@ describe("Stack.save()", () => {
         const stack = new Stack(mockServer(tmpDir), "myapp",
             "services:\n  web:\n    image: nginx:latest\n", "FOO=bar");
 
+        // validate() shells out to docker — mock it so this test has no external deps
+        const validateSpy = spyOn(Stack.prototype, "validate").mockImplementation(async () => {});
+
         try {
             await stack.save(true);
             expect(fs.existsSync(path.join(tmpDir, "myapp"))).toBe(true);
@@ -263,13 +266,8 @@ describe("Stack.save()", () => {
             expect(fs.existsSync(path.join(tmpDir, "myapp", ".env"))).toBe(true);
             const written = fs.readFileSync(path.join(tmpDir, "myapp", "compose.yaml"), "utf-8");
             expect(written).toContain("nginx:latest");
-        } catch (e) {
-            // validate() calls docker — skip if docker not available
-            if ((e as NodeJS.ErrnoException)?.code === "ENOENT" || String(e).includes("docker")) {
-                return;
-            }
-            throw e;
         } finally {
+            validateSpy.mockRestore();
             fs.rmSync(tmpDir, { recursive: true,
                 force: true });
         }
