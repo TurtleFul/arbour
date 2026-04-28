@@ -710,14 +710,7 @@ export class ArbourServer {
      * Used for hot-path operations (start/stop/restart/etc.) to avoid
      * broadcasting the full list on every action.
      */
-    async sendStack(stackName: string) {
-        let stack: Stack;
-        try {
-            stack = await Stack.getStack(this, stackName, false);
-        } catch {
-            return this.sendStackList();
-        }
-
+    emitStack(stack: Stack) {
         // Invalidate hash so the next cron tick broadcasts the change
         this._stackListHash = "";
 
@@ -726,11 +719,21 @@ export class ArbourServer {
             if (arbourSocket.userID) {
                 arbourSocket.emitAgent("stackUpdate", {
                     ok: true,
-                    stackName,
+                    stackName: stack.name,
                     stackData: stack.getSimpleData(arbourSocket.endpoint),
                 });
             }
         }
+    }
+
+    async sendStack(stackName: string) {
+        let stack: Stack;
+        try {
+            stack = await Stack.getStack(this, stackName, false);
+        } catch {
+            return this.sendStackList();
+        }
+        this.emitStack(stack);
     }
 
     async getDockerNetworkList() : Promise<string[]> {

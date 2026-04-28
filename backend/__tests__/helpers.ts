@@ -5,8 +5,9 @@ import type { DB } from "../db/index";
 
 import migration0000 from "../db/migrations/0000_baseline.sql" with { type: "text" };
 import migration0001 from "../db/migrations/0001_stack_auto_update.sql" with { type: "text" };
+import migration0002 from "../db/migrations/0002_service_event_log.sql" with { type: "text" };
 
-const allMigrations = [ migration0000, migration0001 ];
+const allMigrations = [ migration0000, migration0001, migration0002 ];
 
 function runMigrations(sqlite: Database) {
     for (const migration of allMigrations) {

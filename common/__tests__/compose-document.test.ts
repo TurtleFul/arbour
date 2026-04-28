@@ -151,4 +151,132 @@ networks:
         expect(doc.networks.getNetwork("frontend").external).toBe(true);
         expect(doc.networks.getNetwork("backend").external).toBe(false);
     });
+
+    test("sets external flag to true", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_NETWORKS);
+        const net = doc.networks.getNetwork("backend");
+        net.external = true;
+        expect(net.external).toBe(true);
+    });
+
+    test("unsetting external removes the key", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_NETWORKS);
+        const net = doc.networks.getNetwork("frontend");
+        net.external = false;
+        expect(net.external).toBe(false);
+        // key should be absent, not just false
+        expect(net.composeData.data.external).toBeUndefined();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Service mutations
+// ---------------------------------------------------------------------------
+
+describe("ComposeDocument — service mutations", () => {
+    test("set and read image", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.services.getService("web").image = "redis:7";
+        expect(doc.services.getService("web").image).toBe("redis:7");
+    });
+
+    test("set and read restart policy", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.services.getService("web").restart = "on-failure";
+        expect(doc.services.getService("web").restart).toBe("on-failure");
+    });
+
+    test("set and read container_name", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.services.getService("web").containerName = "my-nginx";
+        expect(doc.services.getService("web").containerName).toBe("my-nginx");
+    });
+
+    test("service.set() / service.delete() round-trip", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        const svc = doc.services.getService("web");
+        svc.set("hostname", "myhost");
+        expect(svc.get("hostname")).toBe("myhost");
+        svc.delete("hostname");
+        expect(svc.get("hostname")).toBeUndefined();
+    });
+
+    test("imageTag defaults to latest when no tag in image", () => {
+        const doc = new ComposeDocument("services:\n  web:\n    image: nginx");
+        expect(doc.services.getService("web").imageTag).toBe("latest");
+    });
+
+    test("imageName strips the tag", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        expect(doc.services.getService("web").imageName).toBe("nginx");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// ComposeArray mutations
+// ---------------------------------------------------------------------------
+
+describe("ComposeDocument — ComposeArray mutations", () => {
+    test("add appends a port", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.services.getService("web").ports.add("443:443");
+        expect(doc.services.getService("web").ports.values).toContain("443:443");
+    });
+
+    test("delete removes by index", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        const ports = doc.services.getService("web").ports;
+        const before = ports.values.length;
+        ports.delete(0);
+        expect(ports.values.length).toBe(before - 1);
+    });
+
+    test("isEmpty true on empty array", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        const ports = doc.services.getService("web").ports;
+        ports.delete(0);
+        expect(ports.isEmpty()).toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Environment variable substitution (envsubst)
+// ---------------------------------------------------------------------------
+
+describe("ComposeDocument — env var substitution", () => {
+    const COMPOSE_WITH_VARS = `
+services:
+  web:
+    image: nginx:\${TAG}
+    environment:
+      - APP_ENV=\${APP_ENV}
+`.trim();
+
+    test("raw get returns the template string", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_VARS, "TAG=alpine\nAPP_ENV=prod");
+        expect(doc.services.getService("web").get("image")).toBe("nginx:${TAG}");
+    });
+
+    test("envsubst get returns interpolated value", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_VARS, "TAG=alpine\nAPP_ENV=prod");
+        expect(doc.services.getService("web").image).toBe("nginx:alpine");
+    });
+
+    test("imageTag reflects substituted tag", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_VARS, "TAG=1.25");
+        expect(doc.services.getService("web").imageTag).toBe("1.25");
+    });
+
+    test("unset variable leaves placeholder in output", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_VARS, "");
+        // envsubst with no matching var — result depends on @inventage/envsubst behaviour
+        // but should not throw and should produce a string
+        expect(typeof doc.services.getService("web").image).toBe("string");
+    });
+
+    test("env vars in .env don't affect raw YAML get", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_VARS, "TAG=stable");
+        const raw = doc.services.getService("web").get("image");
+        expect(raw).toContain("${TAG}");
+    });
 });

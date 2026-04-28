@@ -13,10 +13,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn" :class="btnStyle" data-bs-dismiss="modal" @click="yes">
-                        {{ yesText }}
+                        {{ yesText || $t('Yes') }}
                     </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="no">
-                        {{ noText }}
+                        {{ noText || $t('No') }}
                     </button>
                 </div>
             </div>
@@ -34,15 +34,13 @@ export default {
             type: String,
             default: "btn-primary",
         },
-        /** Text to use as yes */
         yesText: {
             type: String,
-            default: "Yes",     // TODO: No idea what to translate this
+            default: "",
         },
-        /** Text to use as no */
         noText: {
             type: String,
-            default: "No",
+            default: "",
         },
         /** Title to show on modal. Defaults to translated version of "Config" */
         title: {

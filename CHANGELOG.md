@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.4.0] — 2026-04-28
 
 ### Added
 - Targeted `stackUpdate` socket event — hot-path operations push a single stack diff instead of rebroadcasting the full list.
@@ -15,12 +15,11 @@ All notable changes to this project are documented here. The format is based on 
 - Stack polling interval relaxed from 10 s to 30 s.
 - Settings batch writes consolidated into a single `SELECT` + transaction.
 - `completeStackList` filter rebuild debounced to 500 ms.
+- xterm pinned to specific beta versions to prevent silent breakage on `bun update`.
 
 ### Removed
 - `drizzle-kit`, `@actions/github`, `@fortawesome/free-regular-svg-icons` (unused dependencies).
 - `vue-tsc` moved from `dependencies` to `devDependencies`.
-
----
 
 ## [0.3.5] — 2026-04-27
 
@@ -95,7 +94,7 @@ First public release of the Arbour fork. Renamed from Dockge and refocused on lo
 - Broken release scripts (`release-final`, `release-beta`, `mark-as-nightly`) that referenced missing files.
 - Obsolete `.vscode/tasks.json` entries (npm-based, pre-Bun).
 
-[Unreleased]: https://github.com/turtleful/arbour/compare/v0.3.5...HEAD
+[0.4.0]: https://github.com/turtleful/arbour/compare/v0.3.5...v0.4.0
 [0.3.5]: https://github.com/turtleful/arbour/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/turtleful/arbour/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/turtleful/arbour/compare/v0.3.2...v0.3.3

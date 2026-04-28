@@ -10,6 +10,11 @@ import {
     getAgentMaintenanceTerminalName,
     isRecord,
     getNested,
+    getCryptoRandomInt,
+    StackStatusInfo,
+    StackFilter,
+    StackFilterCategory,
+    RUNNING, RUNNING_AND_EXITED, UNHEALTHY, EXITED, UNKNOWN, CREATED_FILE, CREATED_STACK,
 } from "../util-common";
 
 // ---------------------------------------------------------------------------
@@ -175,5 +180,168 @@ describe("getNested", () => {
 
     test("returns undefined for non-object intermediaries", () => {
         expect(getNested({ a: 1 }, [ "a", "b" ])).toBeUndefined();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// getCryptoRandomInt
+// ---------------------------------------------------------------------------
+
+describe("getCryptoRandomInt", () => {
+    test("result is within [min, max]", () => {
+        for (let i = 0; i < 50; i++) {
+            const n = getCryptoRandomInt(5, 10);
+            expect(n).toBeGreaterThanOrEqual(5);
+            expect(n).toBeLessThanOrEqual(10);
+        }
+    });
+
+    test("min === max returns that value", () => {
+        expect(getCryptoRandomInt(7, 7)).toBe(7);
+    });
+
+    test("produces values across the full range", () => {
+        const seen = new Set<number>();
+        for (let i = 0; i < 200; i++) {
+            seen.add(getCryptoRandomInt(0, 3));
+        }
+        expect(seen.size).toBe(4); // 0, 1, 2, 3 all seen
+    });
+});
+
+// ---------------------------------------------------------------------------
+// StackStatusInfo
+// ---------------------------------------------------------------------------
+
+describe("StackStatusInfo.get()", () => {
+    test("RUNNING maps to active", () => {
+        expect(StackStatusInfo.get(RUNNING).label).toBe("active");
+    });
+
+    test("RUNNING_AND_EXITED maps to partially", () => {
+        expect(StackStatusInfo.get(RUNNING_AND_EXITED).label).toBe("partially");
+    });
+
+    test("UNHEALTHY maps to unhealthy", () => {
+        expect(StackStatusInfo.get(UNHEALTHY).label).toBe("unhealthy");
+    });
+
+    test("EXITED maps to exited", () => {
+        expect(StackStatusInfo.get(EXITED).label).toBe("exited");
+    });
+
+    test("CREATED_FILE maps to inactive", () => {
+        expect(StackStatusInfo.get(CREATED_FILE).label).toBe("inactive");
+    });
+
+    test("CREATED_STACK maps to inactive", () => {
+        expect(StackStatusInfo.get(CREATED_STACK).label).toBe("inactive");
+    });
+
+    test("UNKNOWN falls back to default", () => {
+        expect(StackStatusInfo.get(UNKNOWN).label).toBe("?");
+    });
+
+    test("unknown id falls back to default", () => {
+        expect(StackStatusInfo.get(999).label).toBe("?");
+    });
+
+    test("ALL contains 5 entries", () => {
+        expect(StackStatusInfo.ALL).toHaveLength(5);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// StackFilterCategory
+// ---------------------------------------------------------------------------
+
+describe("StackFilterCategory", () => {
+    test("starts with no selection", () => {
+        const cat = new StackFilterCategory<string>("test");
+        expect(cat.isFilterSelected()).toBe(false);
+    });
+
+    test("hasOptions false when empty", () => {
+        const cat = new StackFilterCategory<string>("test");
+        expect(cat.hasOptions()).toBe(false);
+    });
+
+    test("hasOptions true when options added", () => {
+        const cat = new StackFilterCategory<string>("test");
+        cat.options["a"] = "alpha";
+        expect(cat.hasOptions()).toBe(true);
+    });
+
+    test("toggleSelected adds a value", () => {
+        const cat = new StackFilterCategory<string>("test");
+        cat.options["a"] = "alpha";
+        cat.toggleSelected("alpha");
+        expect(cat.selected.has("alpha")).toBe(true);
+    });
+
+    test("toggleSelected removes an already-selected value", () => {
+        const cat = new StackFilterCategory<string>("test");
+        cat.options["a"] = "alpha";
+        cat.toggleSelected("alpha");
+        cat.toggleSelected("alpha");
+        expect(cat.selected.has("alpha")).toBe(false);
+    });
+
+    test("isFilterSelected true only when selected value exists in options", () => {
+        const cat = new StackFilterCategory<string>("test");
+        cat.options["a"] = "alpha";
+        cat.selected.add("alpha");
+        expect(cat.isFilterSelected()).toBe(true);
+    });
+
+    test("isFilterSelected false when selected value not in options", () => {
+        const cat = new StackFilterCategory<string>("test");
+        cat.options["a"] = "alpha";
+        cat.selected.add("beta"); // not in options
+        expect(cat.isFilterSelected()).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// StackFilter
+// ---------------------------------------------------------------------------
+
+describe("StackFilter", () => {
+    test("isFilterSelected false when nothing selected", () => {
+        const filter = new StackFilter();
+        expect(filter.isFilterSelected()).toBe(false);
+    });
+
+    test("isFilterSelected true when an agent category has a match", () => {
+        const filter = new StackFilter();
+        filter.agents.options["host1"] = "host1";
+        filter.agents.selected.add("host1");
+        expect(filter.isFilterSelected()).toBe(true);
+    });
+
+    test("isFilterSelected true when a status category has a match", () => {
+        const filter = new StackFilter();
+        filter.status.options["active"] = "active";
+        filter.status.selected.add("active");
+        expect(filter.isFilterSelected()).toBe(true);
+    });
+
+    test("clear resets all categories", () => {
+        const filter = new StackFilter();
+        filter.agents.options["host1"] = "host1";
+        filter.agents.selected.add("host1");
+        filter.status.options["active"] = "active";
+        filter.status.selected.add("active");
+
+        filter.clear();
+
+        expect(filter.isFilterSelected()).toBe(false);
+        expect(filter.agents.selected.size).toBe(0);
+        expect(filter.status.selected.size).toBe(0);
+    });
+
+    test("has three categories: agents, status, attributes", () => {
+        const filter = new StackFilter();
+        expect(filter.categories).toHaveLength(3);
     });
 });

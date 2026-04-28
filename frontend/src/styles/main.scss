@@ -339,13 +339,23 @@ optgroup {
     background-color: var(--arbour-info);
 }
 
+.bg-warning {
+    color: var(--arbour-text-on-warning);
+    background-color: var(--arbour-warning);
+}
+
+.bg-danger {
+    color: var(--arbour-text-on-danger);
+    background-color: var(--arbour-danger);
+}
+
 .bg-dark {
     color: white;
     background-color: var(--arbour-bg-header);
 }
 
 .bg-maintenance {
-    color: white;
+    color: var(--arbour-text-on-maintenance);
     background-color: var(--arbour-maintenance);
 }
 

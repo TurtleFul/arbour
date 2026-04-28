@@ -14,7 +14,7 @@ export interface ReleaseNote {
 export const releaseNotes: ReleaseNote[] = [
     {
         version: "0.4.0",
-        date: "TBD",
+        date: "2026-04-28",
         title: "Performance",
         summary: "A focused performance release that reduces unnecessary network traffic, shrinks the initial bundle, and cuts redundant database and Docker API work.",
         sections: [

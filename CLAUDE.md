@@ -64,7 +64,7 @@ data/             Runtime data dir — SQLite DB lives here (gitignored)
 - Compose labels: `arbour.status.ignore`, `arbour.imageupdates.check`, etc.
 - CSS custom properties: `--arbour-primary-color`, etc.
 - i18n keys: `arbourAgent`, `arbourURL`, `stackNotManagedByArbourMsg`
-- Docker image target: `ghcr.io/turtleful/arbour` (published via `.github/workflows/publish.yml`)
+- Docker image target: `ghcr.io/turtleful/arbour` (published via `.github/workflows/ci.yml` — publish job runs on every push to main and on semver tags)
 - Database file: `data/arbour.db`
 - Internal sentinel: `##ALL_ARBOUR_ENDPOINTS##`
 
@@ -74,6 +74,5 @@ See [docs/development.md](docs/development.md).
 
 ## Known TODOs / Not Yet Done
 
-- Docker image `ghcr.io/turtleful/arbour` — first release tag (`v0.2.0`) needed to populate GHCR; workflow at `.github/workflows/publish.yml`
-- `bun run lint` still has pre-existing errors/warnings carried over from dockge — ongoing cleanup
-- Inline TODOs scattered in frontend components (Container.vue, StackList.vue, Terminal.vue) inherited from upstream — cosmetic, not blocking
+- Core backend logic (stack.ts, socket handlers, agent-manager.ts) has no test coverage — most impactful gap
+- `release:*` scripts in package.json call `npm version`; Bun has no equivalent subcommand so this dependency on npm being installed is intentional

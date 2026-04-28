@@ -29,6 +29,8 @@
     "saveStackDraft": "Save",
     "notAvailableShort": "N/A",
     "deleteStackMsg": "Are you sure you want to delete this stack?",
+    "Yes": "Yes",
+    "No": "No",
     "cancel": "Cancel",
     "stackNotManagedByArbourMsg": "This stack is not managed by Arbour.",
     "primaryHostname": "Primary Hostname",

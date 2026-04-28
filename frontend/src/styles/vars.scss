@@ -25,6 +25,8 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-text: #bdd0bf;
     --arbour-text-on-primary: #061209;
     --arbour-text-on-warning: #061209;
+    --arbour-text-on-danger: #3d0a0a;
+    --arbour-text-on-maintenance: #100a30;
     --arbour-text-muted: #587258;
     --arbour-text-subtle: #90a892;
 
@@ -58,6 +60,9 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
 
     --arbour-text: #b1b8c0;
     --arbour-text-on-primary: #020b05;
+    --arbour-text-on-warning: #1a1a1a;
+    --arbour-text-on-danger: #ffffff;
+    --arbour-text-on-maintenance: #ffffff;
     --arbour-text-muted: #575c62;
     --arbour-text-subtle: #d1d1d1;
 
@@ -86,6 +91,9 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
 
     --arbour-text: #ede5ff;
     --arbour-text-on-primary: #1a0540;
+    --arbour-text-on-warning: #1a0540;
+    --arbour-text-on-danger: #3d0a0a;
+    --arbour-text-on-maintenance: #0a2040;
     --arbour-text-muted: #7c6a9e;
     --arbour-text-subtle: #b8a8d8;
 
@@ -117,6 +125,9 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
 
     --arbour-text: #2c2820;
     --arbour-text-on-primary: #ffffff;
+    --arbour-text-on-warning: #2a1a00;
+    --arbour-text-on-danger: #ffffff;
+    --arbour-text-on-maintenance: #ffffff;
     --arbour-text-muted: #504840;
     --arbour-text-subtle: #3a3530;
 
@@ -149,6 +160,8 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-text: #1e0030;
     --arbour-text-on-primary: #ffffff;
     --arbour-text-on-warning: #1e0030;
+    --arbour-text-on-danger: #ffffff;
+    --arbour-text-on-maintenance: #0a2010;
     --arbour-text-muted: #7c3aed;
     --arbour-text-subtle: #9333ea;
 

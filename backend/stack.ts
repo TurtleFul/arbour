@@ -120,6 +120,10 @@ export class Stack {
         return this._status == RUNNING || this._status == RUNNING_AND_EXITED || this._status == UNHEALTHY;
     }
 
+    setStatus(status: number) {
+        this._status = status;
+    }
+
     async validate() {
         // Check name, allows [a-z][0-9] _ - only
         if (!this.name.match(/^[a-z0-9_-]+$/)) {

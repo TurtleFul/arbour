@@ -3,6 +3,7 @@ import { ArbourServer } from "../arbour-server";
 import { callbackError, callbackResult, checkLogin, ArbourSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
+import { EXITED, RUNNING } from "../../common/util-common";
 import { promises as fsAsync } from "fs";
 import path from "path";
 import { logServiceEvent, getServiceEvents } from "../service-event-logger";
@@ -128,12 +129,18 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Started",
                     msgi18n: true,
                 }, callback);
-                server.sendStack(stackName);
+                // Optimistic: push RUNNING to dashboard immediately
+                stack.setStatus(RUNNING);
+                server.emitStack(stack);
 
                 stack.joinCombinedTerminal(socket);
 
             } catch (e) {
                 callbackError(e, callback);
+                // Sync actual state after failure
+                if (typeof stackName === "string") {
+                    server.sendStack(stackName);
+                }
             }
         });
 
@@ -154,9 +161,15 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Stopped",
                     msgi18n: true,
                 }, callback);
-                server.sendStack(stackName);
+                // Optimistic: push EXITED to dashboard immediately
+                stack.setStatus(EXITED);
+                server.emitStack(stack);
             } catch (e) {
                 callbackError(e, callback);
+                // Sync actual state after failure
+                if (typeof stackName === "string") {
+                    server.sendStack(stackName);
+                }
             }
         });
 
@@ -177,9 +190,15 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Restarted",
                     msgi18n: true,
                 }, callback);
-                server.sendStack(stackName);
+                // Optimistic: push RUNNING to dashboard immediately
+                stack.setStatus(RUNNING);
+                server.emitStack(stack);
             } catch (e) {
                 callbackError(e, callback);
+                // Sync actual state after failure
+                if (typeof stackName === "string") {
+                    server.sendStack(stackName);
+                }
             }
         });
 

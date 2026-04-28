@@ -739,6 +739,7 @@ export default defineComponent({
             this.$root.emitAgent(this.endpoint, "startStack", this.stack.name, (res) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
+                this.updateStackData();
             });
         },
 
@@ -748,6 +749,7 @@ export default defineComponent({
             this.$root.emitAgent(this.endpoint, "stopStack", this.stack.name, (res) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
+                this.updateStackData();
             });
         },
 
@@ -757,6 +759,7 @@ export default defineComponent({
             this.$root.emitAgent(this.endpoint, "downStack", this.stack.name, (res) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
+                this.updateStackData();
             });
         },
 
@@ -766,6 +769,7 @@ export default defineComponent({
             this.$root.emitAgent(this.endpoint, "restartStack", this.stack.name, (res) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
+                this.updateStackData();
             });
         },
 
