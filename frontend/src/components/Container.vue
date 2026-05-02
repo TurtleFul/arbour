@@ -1,10 +1,8 @@
 <template>
     <div class="shadow-box big-padding mb-3 container">
-        <div class="row">
-            <div class="col-12 col-xxl-7">
-                <h4>{{ name }}</h4>
-            </div>
-            <div class="col-12 col-xxl-5 mb-2 d-flex justify-content-xxl-end align-items-start">
+        <div class="service-header">
+            <h4 class="service-title">{{ name }}</h4>
+            <div class="service-actions">
                 <button
                     v-if="!isEditMode && service.recreateNecessary"
                     class="btn btn-sm btn-info me-2"
@@ -671,6 +669,29 @@ export default defineComponent({
 
 .container {
     max-width: 100%;
+
+    .service-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: 12px;
+        row-gap: 6px;
+        margin-bottom: 8px;
+
+        .service-title {
+            margin: 0;
+            margin-right: auto;
+        }
+
+        .service-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+    }
+
 
     .image {
         font-size: 0.8rem;
