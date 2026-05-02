@@ -6,6 +6,7 @@ import { Terminal } from "@xterm/xterm";
 import { AgentSocket } from "../../../common/agent-socket";
 import { AgentData, SimpleStackData } from "../../../common/types";
 import { StackFilter, StackStatusInfo } from "../../../common/util-common";
+import type { SocketRes } from "../vue-augmentation";
 
 let socket : Socket;
 
@@ -16,7 +17,7 @@ export default defineComponent({
     data() {
         return {
             socketIO: {
-                token: null,
+                token: null as string | null,
                 firstConnect: true,
                 connected: false,
                 connectCount: 0,
@@ -25,31 +26,25 @@ export default defineComponent({
                 showReverseProxyGuide: true,
                 connecting: false,
             },
-            info: {
-
-            },
+            info: {} as Record<string, unknown>,
             remember: (localStorage.remember !== "0"),
             loggedIn: false,
             allowLoginDialog: false,
-            username: null,
+            username: null as string | null,
             composeTemplate: "",
 
-            stackList: {},
+            stackList: {} as Record<string, SimpleStackData>,
 
             stackFilter: new StackFilter(),
 
             // All stack list from all agents
-            allAgentStackList: {} as Record<string, object>,
+            allAgentStackList: {} as Record<string, { stackList: Record<string, SimpleStackData> }>,
 
             // online / offline / connecting
-            agentStatusList: {
-
-            },
+            agentStatusList: {} as Record<string, string>,
 
             // Agent List
-            agentList: {
-
-            },
+            agentList: {} as Record<string, AgentData>,
         };
     },
     computed: {
@@ -206,7 +201,7 @@ export default defineComponent({
             // Handling events from agents
             let agentSocket = new AgentSocket();
             socket.on("agent", (eventName : unknown, ...args : unknown[]) => {
-                agentSocket.call(eventName, ...args);
+                agentSocket.call(eventName as string, ...args);
             });
 
             socket.on("connect", () => {
@@ -274,40 +269,45 @@ export default defineComponent({
                 this.$router.push("/setup");
             });
 
-            agentSocket.on("terminalWrite", (terminalName, data) => {
+            agentSocket.on("terminalWrite", (...args) => {
+                const terminalName = args[0] as string;
+                const data = args[1] as string | Uint8Array;
                 const terminal = terminalMap.get(terminalName);
                 if (!terminal) {
-                    //console.error("Terminal not found: " + terminalName);
                     return;
                 }
                 terminal.write(data);
             });
 
-            agentSocket.on("stackList", (res) => {
+            agentSocket.on("stackList", (...args) => {
+                const res = args[0] as SocketRes;
                 if (res.ok) {
                     if (!res.endpoint) {
-                        this.stackList = res.stackList;
+                        this.stackList = res.stackList as Record<string, SimpleStackData>;
                     } else {
-                        if (!this.allAgentStackList[res.endpoint]) {
-                            this.allAgentStackList[res.endpoint] = {
+                        const endpoint = res.endpoint as string;
+                        if (!this.allAgentStackList[endpoint]) {
+                            this.allAgentStackList[endpoint] = {
                                 stackList: {},
                             };
                         }
-                        this.allAgentStackList[res.endpoint].stackList = res.stackList;
+                        this.allAgentStackList[endpoint].stackList = res.stackList as Record<string, SimpleStackData>;
                     }
                 }
             });
 
             // Single-stack patch — avoids replacing the full list on every operation
-            agentSocket.on("stackUpdate", (res) => {
+            agentSocket.on("stackUpdate", (...args) => {
+                const res = args[0] as SocketRes;
                 if (res.ok) {
                     if (!res.endpoint) {
-                        this.stackList[res.stackName] = res.stackData;
+                        this.stackList[res.stackName as string] = res.stackData as SimpleStackData;
                     } else {
-                        if (!this.allAgentStackList[res.endpoint]) {
-                            this.allAgentStackList[res.endpoint] = { stackList: {} };
+                        const endpoint = res.endpoint as string;
+                        if (!this.allAgentStackList[endpoint]) {
+                            this.allAgentStackList[endpoint] = { stackList: {} };
                         }
-                        this.allAgentStackList[res.endpoint].stackList[res.stackName] = res.stackData;
+                        this.allAgentStackList[endpoint].stackList[res.stackName as string] = res.stackData as SimpleStackData;
                     }
                 }
             });
@@ -323,17 +323,17 @@ export default defineComponent({
                 }
             });*/
 
-            socket.on("agentStatus", (res) => {
-                this.agentStatusList[res.endpoint] = res.status;
+            socket.on("agentStatus", (res: SocketRes) => {
+                this.agentStatusList[res.endpoint as string] = res.status as string;
 
                 if (res.msg) {
-                    this.toastError(res.msg);
+                    this.toastError(res.msg as string);
                 }
             });
 
-            socket.on("agentList", (res) => {
+            socket.on("agentList", (res: SocketRes) => {
                 if (res.ok) {
-                    this.agentList = res.agentList;
+                    this.agentList = res.agentList as Record<string, AgentData>;
                 }
             });
 
@@ -379,21 +379,21 @@ export default defineComponent({
          * @param {loginCB} callback Callback to call with result
          * @returns {void}
          */
-        login(username : string, password : string, token : string, callback) {
+        login(username : string, password : string, token : string, callback: (res: SocketRes) => void) {
             this.getSocket().emit("login", {
                 username,
                 password,
                 token,
-            }, (res) => {
+            }, (res: SocketRes) => {
                 if (res.tokenRequired) {
                     callback(res);
                 }
 
                 if (res.ok) {
-                    this.storage().token = res.token;
-                    this.socketIO.token = res.token;
+                    this.storage().token = res.token as string;
+                    this.socketIO.token = res.token as string;
                     this.loggedIn = true;
-                    this.username = this.getJWTPayload()?.username;
+                    this.username = (this.getJWTPayload() as { username?: string })?.username ?? null;
 
                     this.afterLogin();
 
@@ -411,14 +411,14 @@ export default defineComponent({
          * @returns {void}
          */
         loginByToken(token : string) {
-            socket.emit("loginByToken", token, (res) => {
+            socket.emit("loginByToken", token, (res: SocketRes) => {
                 this.allowLoginDialog = true;
 
                 if (! res.ok) {
                     this.logout();
                 } else {
                     this.loggedIn = true;
-                    this.username = this.getJWTPayload()?.username;
+                    this.username = (this.getJWTPayload() as { username?: string })?.username ?? null;
                     this.afterLogin();
                 }
             });
@@ -448,11 +448,19 @@ export default defineComponent({
 
         },
 
+        toastRes(_res: SocketRes): void {
+            // provided by root component via mixin merge
+        },
+
+        toastError(_msg: string): void {
+            // provided by root component via mixin merge
+        },
+
         bindTerminal(endpoint : string, terminalName : string, terminal : Terminal) {
             // Load terminal, get terminal screen
-            this.emitAgent(endpoint, "terminalJoin", terminalName, (res) => {
+            this.emitAgent(endpoint, "terminalJoin", terminalName, (res: SocketRes) => {
                 if (res.ok) {
-                    terminal.write(res.buffer);
+                    terminal.write(res.buffer as string);
                     terminalMap.set(terminalName, terminal);
                 } else {
                     this.toastRes(res);
@@ -461,7 +469,7 @@ export default defineComponent({
         },
 
         unbindTerminal(endpoint : string, terminalName : string) {
-            this.emitAgent(endpoint, "terminalLeave", terminalName, (res) => {
+            this.emitAgent(endpoint, "terminalLeave", terminalName, (res: SocketRes) => {
                 if (!res.ok) {
                     this.toastRes(res);
                 }

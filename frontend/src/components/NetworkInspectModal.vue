@@ -99,7 +99,7 @@ function fetchData() {
     error.value = null;
     data.value = null;
 
-    root.emitAgent(props.endpoint, "getNetworkInspect", props.networkId, (res) => {
+    root.emitAgent(props.endpoint, "getNetworkInspect", props.networkId, (res: { ok: boolean; data: NetworkInspectData; msg?: string }) => {
         loading.value = false;
         if (res.ok) {
             data.value = res.data;

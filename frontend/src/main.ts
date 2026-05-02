@@ -6,6 +6,7 @@ import App from "./App.vue";
 import { router } from "./router";
 import { FontAwesomeIcon } from "./icon.js";
 import { i18n } from "./i18n";
+import type { SocketRes } from "./vue-augmentation";
 
 // Dependencies
 import "bootstrap";
@@ -83,13 +84,13 @@ function rootApp() {
              * @param {object} res Response object
              * @returns {void}
              */
-            toastRes(res) {
+            toastRes(res: SocketRes) {
                 let msg = res.msg;
                 if (res.msgi18n) {
                     if (msg != null && typeof msg === "object") {
                         msg = this.$t(msg.key, msg.values);
                     } else {
-                        msg = this.$t(msg);
+                        msg = this.$t(msg ?? "");
                     }
                 }
 

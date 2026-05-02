@@ -29,7 +29,7 @@ export default defineComponent({
          * @returns {Promise<void>}
          */
         async changeLang(lang : string) {
-            const message = (await langModules["../lang/" + lang + ".json"]()).default;
+            const message = ((await langModules["../lang/" + lang + ".json"]()) as { default: Record<string, unknown> }).default;
             this.$i18n.setLocaleMessage(lang, message);
             this.$i18n.locale = lang;
             localStorage.locale = lang;

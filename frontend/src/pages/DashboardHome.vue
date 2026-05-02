@@ -125,6 +125,7 @@ stackStatusList<template>
 import { defineComponent } from "vue";
 import { AgentData, SimpleStackData } from "../../../common/types";
 import { StackFilter, StackStatusInfo } from "../../../common/util-common";
+import type { SocketRes } from "../vue-augmentation";
 
 export default defineComponent({
     components: {
@@ -142,14 +143,14 @@ export default defineComponent({
                 chunksNavigation: "scroll",
             },
             importantHeartBeatListLength: 0,
-            displayedRecords: [],
+            displayedRecords: [] as unknown[],
             dockerRunCommand: "",
             showAgentForm: false,
-            showRemoveAgentDialog: {},
-            showEditAgentNameDialog: {},
-            editAgentNewName: {},
+            showRemoveAgentDialog: {} as Record<string, boolean>,
+            showEditAgentNameDialog: {} as Record<string, boolean>,
+            editAgentNewName: {} as Record<string, string>,
             connectingAgent: false,
-            newAgent: {}
+            newAgent: {} as AgentData
         };
     },
 
@@ -216,11 +217,11 @@ export default defineComponent({
             return `color: var(--arbour-${info.textColor}-color);`;
         },
 
-        getAgentName(agent) {
+        getAgentName(agent: AgentData) {
             return this.$root.getAgentName(agent.endpoint);
         },
 
-        getAgentRouteLink(agent) {
+        getAgentRouteLink(agent: AgentData) {
             if (!!agent.endpoint) {
                 return `/agent/${agent.endpoint}`;
             } else {
@@ -257,13 +258,14 @@ export default defineComponent({
                 username: "",
                 password: "",
                 name: "",
+                endpoint: "",
             };
         },
 
-        addAgent(bvModalEvt) {
+        addAgent(bvModalEvt: { preventDefault(): void }) {
             bvModalEvt.preventDefault();
             this.connectingAgent = true;
-            this.$root.getSocket().emit("addAgent", this.newAgent, (res) => {
+            this.$root.getSocket().emit("addAgent", this.newAgent, (res: SocketRes) => {
                 this.$root.toastRes(res);
 
                 if (res.ok) {
@@ -275,7 +277,7 @@ export default defineComponent({
         },
 
         removeAgent(agent: AgentData) {
-            this.$root.getSocket().emit("removeAgent", agent.url, (res) => {
+            this.$root.getSocket().emit("removeAgent", agent.url, (res: SocketRes) => {
                 if (res.ok) {
                     this.$root.toastRes(res);
 
@@ -291,14 +293,8 @@ export default defineComponent({
         },
 
         updateAgentName(agent: AgentData, updatedName: string) {
-            this.$root.getSocket().emit("updateAgent", agent.url, updatedName, (res) => {
+            this.$root.getSocket().emit("updateAgent", agent.url, updatedName, (res: SocketRes) => {
                 this.$root.toastRes(res);
-
-                if (res.ok) {
-                    this.agent = {
-                        updatedName: "",
-                    };
-                }
             });
         },
 
@@ -309,9 +305,9 @@ export default defineComponent({
 
             // composerize is working in dev, but after "vite build", it is not working
             // So pass to backend to do the conversion
-            this.$root.getSocket().emit("composerize", this.dockerRunCommand, (res) => {
+            this.$root.getSocket().emit("composerize", this.dockerRunCommand, (res: SocketRes) => {
                 if (res.ok) {
-                    this.$root.composeTemplate = res.composeTemplate;
+                    this.$root.composeTemplate = res.composeTemplate as string;
                     this.$router.push("/compose");
                 } else {
                     this.$root.toastRes(res);
@@ -324,7 +320,7 @@ export default defineComponent({
          * @param {object} heartbeat - The heartbeat object received.
          * @returns {void}
          */
-        onNewImportantHeartbeat(heartbeat) {
+        onNewImportantHeartbeat(heartbeat: unknown) {
             if (this.page === 1) {
                 this.displayedRecords.unshift(heartbeat);
                 if (this.displayedRecords.length > this.perPage) {
@@ -339,9 +335,9 @@ export default defineComponent({
          * @returns {void}
          */
         getImportantHeartbeatListLength() {
-            this.$root.getSocket().emit("monitorImportantHeartbeatListCount", null, (res) => {
+            this.$root.getSocket().emit("monitorImportantHeartbeatListCount", null, (res: SocketRes) => {
                 if (res.ok) {
-                    this.importantHeartBeatListLength = res.count;
+                    this.importantHeartBeatListLength = res.count as number;
                     this.getImportantHeartbeatListPaged();
                 }
             });
@@ -353,9 +349,9 @@ export default defineComponent({
          */
         getImportantHeartbeatListPaged() {
             const offset = (this.page - 1) * this.perPage;
-            this.$root.getSocket().emit("monitorImportantHeartbeatListPaged", null, offset, this.perPage, (res) => {
+            this.$root.getSocket().emit("monitorImportantHeartbeatListPaged", null, offset, this.perPage, (res: SocketRes) => {
                 if (res.ok) {
-                    this.displayedRecords = res.data;
+                    this.displayedRecords = res.data as unknown[];
                 }
             });
         },
@@ -365,8 +361,8 @@ export default defineComponent({
          * @returns {void}
          */
         updatePerPage() {
-            const tableContainer = this.$refs.tableContainer;
-            const tableContainerHeight = tableContainer.offsetHeight;
+            const tableContainer = this.$refs.tableContainer as Element;
+            const tableContainerHeight = tableContainer.clientHeight;
             const availableHeight = window.innerHeight - tableContainerHeight;
             const additionalPerPage = Math.floor(availableHeight / 58);
 

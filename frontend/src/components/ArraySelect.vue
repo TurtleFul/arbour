@@ -8,7 +8,7 @@
                         <option v-for="option in options" :key="String(option)" :value="option">{{ option }}</option>
                     </select>
 
-                    <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="composeArray.delete(index)" />
+                    <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="composeArray.delete(index as number)" />
                 </li>
             </ul>
 

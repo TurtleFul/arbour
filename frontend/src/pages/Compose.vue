@@ -81,7 +81,7 @@
             <!-- URLs -->
             <div v-if="urls.length > 0" class="mb-3">
                 <a v-for="(urlItem, index) in urls" :key="index" target="_blank" :href="urlItem.url">
-                    <span class="badge bg-secondary text-truncate me-2" style="max-width: 100%;">{{ url.display }}</span>
+                    <span class="badge bg-secondary text-truncate me-2" style="max-width: 100%;">{{ urlItem.display }}</span>
                 </a>
             </div>
 
@@ -218,6 +218,9 @@
                         <button v-if="isEditMode" v-b-modal.compose-editor-modal class="expand-button yaml-expand-button">
                             <font-awesome-icon icon="expand" />
                         </button>
+                        <button v-if="!isEditMode && !isAdd" class="expand-button yaml-copy-button" :title="$t('copyYAML')" @click="copyYAML">
+                            <font-awesome-icon :icon="yamlCopied ? 'check' : 'copy'" />
+                        </button>
                         <CodeEditor
                             v-model="stack.composeYAML"
                             class="yaml-editor"
@@ -345,6 +348,7 @@ import {
     UNKNOWN
 } from "../../../common/util-common";
 import { StackData, StackAutoUpdateSettings, AutoUpdateMode } from "../../../common/types";
+import type { SocketRes } from "../vue-augmentation";
 import { ComposeDocument } from "../../../common/compose-document";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
@@ -374,11 +378,11 @@ export default defineComponent({
         BModal,
     },
 
-    beforeRouteUpdate(to, from, next) {
+    beforeRouteUpdate(_to: unknown, _from: unknown, next: (val?: boolean | Error) => void) {
         this.exitConfirm(next);
     },
 
-    beforeRouteLeave(to, from, next) {
+    beforeRouteLeave(_to: unknown, _from: unknown, next: (val?: boolean | Error) => void) {
         this.exitConfirm(next);
     },
 
@@ -390,8 +394,8 @@ export default defineComponent({
             processing: false,
             combinedTerminalRows: COMBINED_TERMINAL_ROWS,
             combinedTerminalCols: COMBINED_TERMINAL_COLS,
-            stack: {},
-            serviceStats: undefined,
+            stack: {} as StackData,
+            serviceStats: undefined as Record<string, unknown> | undefined,
             isEditMode: false,
             showDeleteDialog: false,
             newContainerName: "",
@@ -407,6 +411,7 @@ export default defineComponent({
             showImportDialog: false,
             showImportRelativePathWarning: false,
             importSourceDir: "",
+            yamlCopied: false,
         };
     },
 
@@ -474,7 +479,7 @@ export default defineComponent({
         },
 
         endpoint(): string {
-            return this.stack.endpoint || this.$route.params.endpoint || "";
+            return this.stack.endpoint || this.$route.params.endpoint as string || "";
         },
 
         url(): string {
@@ -565,6 +570,7 @@ export default defineComponent({
                 name: "",
                 status: UNKNOWN,
                 started: false,
+                recreateNecessary: false,
                 imageUpdatesAvailable: false,
                 tags: [],
                 composeYAML: composeYAML,
@@ -577,7 +583,7 @@ export default defineComponent({
             };
             this.yamlCodeChange();
         } else {
-            this.stack.name = this.$route.params.stackName;
+            this.stack.name = this.$route.params.stackName as string;
             this.loadStack();
         }
 
@@ -606,9 +612,9 @@ export default defineComponent({
 
         updateStackData() {
             if (!this.isAdd && !this.isEditMode) {
-                this.$root.emitAgent(this.endpoint, "updateStackData", this.stack.name, (res) => {
+                this.$root.emitAgent(this.endpoint, "updateStackData", this.stack.name, (res: SocketRes) => {
                     if (res.ok) {
-                        this.stack = res.stack;
+                        this.stack = res.stack as StackData;
                     }
                 });
             }
@@ -627,9 +633,9 @@ export default defineComponent({
 
         updateServiceStats() {
             if (!this.isAdd && !this.isEditMode) {
-                this.$root.emitAgent(this.endpoint, "updateServiceStats", this.stack.name, (res) => {
+                this.$root.emitAgent(this.endpoint, "updateServiceStats", this.stack.name, (res: SocketRes) => {
                     if (res.ok) {
-                        this.serviceStats = res.serviceStats;
+                        this.serviceStats = res.serviceStats as Record<string, unknown> | undefined;
                     }
                 });
             }
@@ -639,15 +645,15 @@ export default defineComponent({
             }
         },
 
-        getServiceData(serviceName) {
+        getServiceData(serviceName: string) {
             return this.stack.services[serviceName];
         },
 
-        getServiceStats(serviceName) {
+        getServiceStats(serviceName: string) {
             return this.serviceStats?.[this.getServiceData(serviceName)?.containerName];
         },
 
-        exitConfirm(next) {
+        exitConfirm(next: (val?: boolean | Error) => void) {
             if (this.isEditMode) {
                 if (confirm(this.$t("confirmLeaveStack"))) {
                     this.exitAction();
@@ -678,9 +684,9 @@ export default defineComponent({
         },
 
         loadStack() {
-            this.$root.emitAgent(this.endpoint, "getStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "getStack", this.stack.name, (res: SocketRes) => {
                 if (res.ok) {
-                    this.stack = res.stack;
+                    this.stack = res.stack as StackData;
                     this.yamlCodeChange();
                     this.processing = false;
                     this.loadAutoUpdateSettings();
@@ -708,7 +714,7 @@ export default defineComponent({
 
             this.startComposeAction();
 
-            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
 
@@ -722,7 +728,7 @@ export default defineComponent({
         saveStack() {
             this.processing = true;
 
-            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res: SocketRes) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -736,7 +742,7 @@ export default defineComponent({
         startStack() {
             this.startComposeAction();
 
-            this.$root.emitAgent(this.endpoint, "startStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "startStack", this.stack.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
                 this.updateStackData();
@@ -746,7 +752,7 @@ export default defineComponent({
         stopStack() {
             this.startComposeAction();
 
-            this.$root.emitAgent(this.endpoint, "stopStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "stopStack", this.stack.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
                 this.updateStackData();
@@ -756,7 +762,7 @@ export default defineComponent({
         downStack() {
             this.startComposeAction();
 
-            this.$root.emitAgent(this.endpoint, "downStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "downStack", this.stack.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
                 this.updateStackData();
@@ -766,7 +772,7 @@ export default defineComponent({
         restartStack() {
             this.startComposeAction();
 
-            this.$root.emitAgent(this.endpoint, "restartStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "restartStack", this.stack.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
                 this.updateStackData();
@@ -777,14 +783,14 @@ export default defineComponent({
             this.showUpdateDialog = false;
             this.startComposeAction();
 
-            this.$root.emitAgent(this.endpoint, "updateStack", this.stack.name, this.updateDialogData.pruneAfterUpdate, this.updateDialogData.pruneAllAfterUpdate, (res) => {
+            this.$root.emitAgent(this.endpoint, "updateStack", this.stack.name, this.updateDialogData.pruneAfterUpdate, this.updateDialogData.pruneAllAfterUpdate, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
             });
         },
 
         deleteDialog() {
-            this.$root.emitAgent(this.endpoint, "deleteStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "deleteStack", this.stack.name, (res: SocketRes) => {
                 this.$root.toastRes(res);
                 if (res.ok) {
                     this.$router.push("/");
@@ -808,12 +814,13 @@ export default defineComponent({
 
                 clearTimeout(yamlErrorTimeout);
 
+                const msg = e instanceof Error ? e.message : String(e);
                 if (this.yamlError) {
-                    this.yamlError = e.message;
+                    this.yamlError = msg;
 
                 } else {
                     yamlErrorTimeout = setTimeout(() => {
-                        this.yamlError = e.message;
+                        this.yamlError = msg;
                     }, 3000);
                 }
             }
@@ -846,11 +853,19 @@ export default defineComponent({
             );
 
             this.newContainerName = "";
-            let element = this.$refs.containerList.lastElementChild;
-            element.scrollIntoView({
+            const element = (this.$refs.containerList as Element).lastElementChild;
+            element?.scrollIntoView({
                 block: "start",
                 behavior: "smooth"
             });
+        },
+
+        async copyYAML() {
+            await navigator.clipboard.writeText(this.stack.composeYAML ?? "");
+            this.yamlCopied = true;
+            setTimeout(() => {
+                this.yamlCopied = false;
+            }, 2000);
         },
 
         stackNameToLowercase() {
@@ -858,9 +873,9 @@ export default defineComponent({
         },
 
         importStack() {
-            this.$root.emitAgent(this.endpoint, "importStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "importStack", this.stack.name, (res: SocketRes) => {
                 if (res.ok) {
-                    this.importSourceDir = res.sourceDir;
+                    this.importSourceDir = res.sourceDir as string;
                     if (res.hasRelativePaths) {
                         this.showImportRelativePathWarning = true;
                     }
@@ -872,9 +887,9 @@ export default defineComponent({
         },
 
         loadAutoUpdateSettings() {
-            this.$root.emitAgent(this.endpoint, "getStackAutoUpdate", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "getStackAutoUpdate", this.stack.name, (res: SocketRes) => {
                 if (res.ok) {
-                    const s: StackAutoUpdateSettings = res.settings;
+                    const s: StackAutoUpdateSettings = res.settings as StackAutoUpdateSettings;
                     this.autoUpdateMode = s.mode;
                     this.autoUpdateCustomSchedule = s.schedule ?? "";
                 }
@@ -892,7 +907,7 @@ export default defineComponent({
                 mode: this.autoUpdateMode,
                 schedule
             };
-            this.$root.emitAgent(this.endpoint, "setStackAutoUpdate", this.stack.name, settings, (res) => {
+            this.$root.emitAgent(this.endpoint, "setStackAutoUpdate", this.stack.name, settings, (res: SocketRes) => {
                 this.autoUpdateSaving = false;
                 this.$root.toastRes(res);
             });
@@ -933,6 +948,18 @@ export default defineComponent({
     right: 15px;
     top: 15px;
     z-index: 10;
+}
+
+.yaml-copy-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 10;
+}
+
+.yaml-copy-button svg {
+    width: 14px;
+    height: 14px;
 }
 
 .agent-name {

@@ -25,6 +25,8 @@
     "startStack": "Start",
     "downStack": "Stop & Inactive",
     "editStack": "Edit",
+    "copyYAML": "Copy YAML",
+    "copiedYAML": "Copied!",
     "discardStack": "Discard",
     "saveStackDraft": "Save",
     "notAvailableShort": "N/A",

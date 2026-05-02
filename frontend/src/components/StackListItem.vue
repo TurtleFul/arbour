@@ -100,7 +100,7 @@ export default defineComponent({
             if (storage !== null) {
                 storageObject = JSON.parse(storage);
             }
-            storageObject[`stack_${this.stack.id}`] = this.isCollapsed;
+            (storageObject as Record<string, unknown>)[`stack_${(this.stack as unknown as { id?: string }).id ?? this.stack.name}`] = this.isCollapsed;
 
             window.localStorage.setItem("stackCollapsed", JSON.stringify(storageObject));
         },

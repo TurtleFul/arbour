@@ -35,21 +35,22 @@ const languageList = {
     "de-CH": "Schwiizerdütsch",
 };
 
-let messages = {
+const messages: Record<string, unknown> = {
     en,
 };
 
-for (let lang in languageList) {
+for (const lang in languageList) {
     messages[lang] = {
-        languageName: languageList[lang]
+        languageName: (languageList as Record<string, string>)[lang]
     };
 }
 
 const rtlLangs = [ "fa", "ar-SY", "ur", "ar" ];
 
+const langMap = languageList as Record<string, string>;
 export const currentLocale = () => localStorage.locale
-    || languageList[navigator.language] && navigator.language
-    || languageList[navigator.language.substring(0, 2)] && navigator.language.substring(0, 2)
+    || langMap[navigator.language] && navigator.language
+    || langMap[navigator.language.substring(0, 2)] && navigator.language.substring(0, 2)
     || "en";
 
 export const localeDirection = () => {

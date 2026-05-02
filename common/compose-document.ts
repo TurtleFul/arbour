@@ -459,7 +459,7 @@ export class ComposeLabels extends ComposeNode {
         return value ? value : defaultVal;
     }
 
-    set(key: string, value: string) {
+    set(key: string, value: string | boolean) {
         const labels = this.getLabels();
         labels[key] = value;
         this.setLabels(labels);

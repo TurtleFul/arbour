@@ -134,8 +134,8 @@ export function loadToastSettings() {
         containerClassName: "toast-container",
         showCloseButtonOnHover: true,
 
-        filterBeforeCreate: (toast, toasts) => {
-            if (toast.timeout === 0) {
+        filterBeforeCreate: (toast: unknown, toasts: unknown[]) => {
+            if ((toast as { timeout: number }).timeout === 0) {
                 return false;
             } else {
                 return toast;
@@ -149,7 +149,7 @@ export function loadToastSettings() {
  * @returns {(number|boolean)} Timeout in ms. If false timeout disabled.
  */
 export function getToastSuccessTimeout() {
-    let successTimeout = 20000;
+    let successTimeout: number | false = 20000;
 
     if (localStorage.toastSuccessTimeout !== undefined) {
         const parsedTimeout = parseInt(localStorage.toastSuccessTimeout);
@@ -170,7 +170,7 @@ export function getToastSuccessTimeout() {
  * @returns {(number|boolean)} Timeout in ms. If false timeout disabled.
  */
 export function getToastErrorTimeout() {
-    let errorTimeout = -1;
+    let errorTimeout: number | false = -1;
 
     if (localStorage.toastErrorTimeout !== undefined) {
         const parsedTimeout = parseInt(localStorage.toastErrorTimeout);

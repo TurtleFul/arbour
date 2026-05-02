@@ -47,32 +47,44 @@
 import { defineComponent } from "vue";
 import { ComposeDocument, ComposeNetwork } from "../../../common/compose-document";
 import { StackData } from "../../../common/types";
+import type { SocketRes } from "../vue-augmentation";
+
+interface ComposePage {
+    composeDocument: ComposeDocument;
+    stack: StackData;
+    editorFocus: boolean;
+    endpoint: string;
+}
 
 export default defineComponent({
 
     data() {
         return {
-            networkList: [],
-            externalList: {},
-            selectedExternalList: {},
-            externalNetworkList: [],
+            networkList: [] as { name: string; data: unknown }[],
+            externalList: {} as Record<string, Record<string, unknown>>,
+            selectedExternalList: {} as Record<string, boolean>,
+            externalNetworkList: [] as string[],
         };
     },
     computed: {
+        composePage(): ComposePage {
+            return this.$parent!.$parent as unknown as ComposePage;
+        },
+
         composeDocument(): ComposeDocument {
-            return this.$parent.$parent.composeDocument;
+            return this.composePage.composeDocument;
         },
 
         stack(): StackData {
-            return this.$parent.$parent.stack;
+            return this.composePage.stack;
         },
 
         editorFocus() {
-            return this.$parent.$parent.editorFocus;
+            return this.composePage.editorFocus;
         },
 
         endpoint() {
-            return this.$parent.$parent.endpoint;
+            return this.composePage.endpoint;
         },
     },
     watch: {
@@ -143,9 +155,9 @@ export default defineComponent({
         },
 
         loadExternalNetworkList() {
-            this.$root.emitAgent(this.endpoint, "getDockerNetworkList", (res) => {
+            this.$root.emitAgent(this.endpoint, "getDockerNetworkList", (res: SocketRes) => {
                 if (res.ok) {
-                    this.externalNetworkList = res.dockerNetworkList.filter((n) => {
+                    this.externalNetworkList = (res.dockerNetworkList as string[]).filter((n) => {
                         // Filter out this stack networks
                         if (n.startsWith(this.stack.name + "_")) {
                             return false;
@@ -180,7 +192,7 @@ export default defineComponent({
                 return;
             }
 
-            const networks = {};
+            const networks: Record<string, unknown> = {};
 
             // Internal networks
             for (const networkRow of this.networkList) {

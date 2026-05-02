@@ -132,7 +132,7 @@ function loadData() {
 
     fetchingData.value = true;
 
-    root.emitAgent(props.endpoint, "getDockerArtefactData", props.artefact.name, (res) => {
+    root.emitAgent(props.endpoint, "getDockerArtefactData", props.artefact.name, (res: { ok: boolean; data: DockerArtefactData }) => {
         fetchingData.value = false;
 
         data.value = res.data;
@@ -221,7 +221,7 @@ function checkOpenPullDialog() {
 function executeAction(action: DockerArtefactAction) {
     startAction?.();
 
-    root.emitAgent(props.endpoint, "executeDockerArtefactAction", props.artefact.name, action, selectedItems.value.map(id => dataMap.get(id)?.actionIds[action] ?? id), (res) => {
+    root.emitAgent(props.endpoint, "executeDockerArtefactAction", props.artefact.name, action, selectedItems.value.map(id => dataMap.get(id)?.actionIds[action] ?? id), (res: { ok: boolean }) => {
         stopAction?.();
         root.toastRes(res);
         loadData();

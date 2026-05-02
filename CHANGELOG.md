@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.3] — 2026-05-02
+
+### Added
+- Copy-to-clipboard button on the YAML editor (visible in view mode only) — icon briefly swaps to a check mark on success.
+
+### Fixed
+- Frontend TypeScript errors eliminated — `frontend/tsconfig.json` and `vue-augmentation.d.ts` added so Volar and `vue-tsc` correctly type-check all Vue files.
+- `$t`, `$root`, and common socket callback types now properly declared via Vue `ComponentCustomProperties` augmentation.
+- Several minor property-name bugs and unused import warnings cleaned up.
+
 ## [0.4.0] — 2026-04-28
 
 ### Added
@@ -94,6 +104,7 @@ First public release of the Arbour fork. Renamed from Dockge and refocused on lo
 - Broken release scripts (`release-final`, `release-beta`, `mark-as-nightly`) that referenced missing files.
 - Obsolete `.vscode/tasks.json` entries (npm-based, pre-Bun).
 
+[0.4.3]: https://github.com/turtleful/arbour/compare/v0.4.2...v0.4.3
 [0.4.0]: https://github.com/turtleful/arbour/compare/v0.3.5...v0.4.0
 [0.3.5]: https://github.com/turtleful/arbour/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/turtleful/arbour/compare/v0.3.3...v0.3.4

@@ -105,6 +105,7 @@ import Confirm from "./Confirm.vue";
 import StackListItem from "./StackListItem.vue";
 import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, RUNNING_AND_EXITED, StackFilter, StackStatusInfo, UNHEALTHY, UNKNOWN } from "../../../common/util-common";
 import { SimpleStackData } from "../../../common/types";
+import type { SocketRes } from "../vue-augmentation";
 
 export default defineComponent({
     components: {
@@ -207,9 +208,9 @@ export default defineComponent({
                 // filter by tags TODO
                 let tagsMatch = true;
                 /**
-                if (this.filterState.tags != null && this.filterState.tags.length > 0) {
+                if (this.stackFilter.tags != null && this.stackFilter.tags.length > 0) {
                     tagsMatch = stack.tags.map(tag => tag.tag_id) // convert to array of tag IDs
-                        .filter(stackTagId => this.filterState.tags.includes(stackTagId)) // perform Array Intersaction between filter and stack's tags
+                        .filter(stackTagId => this.stackFilter.tags.includes(stackTagId)) // perform Array Intersaction between filter and stack's tags
                         .length > 0;
                 }*/
 
@@ -310,7 +311,7 @@ export default defineComponent({
          * @returns {boolean} True if any filter is active, false otherwise.
          */
         filtersActive() {
-            return this.filterState.status != null || this.filterState.active != null || this.filterState.tags != null || this.searchText !== "";
+            return this.stackFilter.isFilterSelected() || this.searchText !== "";
         }
     },
     watch: {
@@ -320,7 +321,7 @@ export default defineComponent({
 
         searchText() {
             for (let stack of this.agentStackList) {
-                if (!this.selectedStacks[stack.id]) {
+                if (!(this.selectedStacks as Record<string, boolean>)[(stack as unknown as { id: string }).id]) {
                     if (this.selectAll) {
                         this.disableSelectAllWatcher = true;
                         this.selectAll = false;
@@ -335,7 +336,7 @@ export default defineComponent({
 
                 if (this.selectAll) {
                     this.agentStackList.forEach((item) => {
-                        this.selectedStacks[item.id] = true;
+                        (this.selectedStacks as Record<string, boolean>)[(item as unknown as { id: string }).id] = true;
                     });
                 }
             } else {
@@ -382,7 +383,7 @@ export default defineComponent({
 
         checkForUpdates() {
             this.checkingForUpdates = true;
-            this.$root.emitAgent("", "checkForUpdates", (res) => {
+            this.$root.emitAgent("", "checkForUpdates", (res: SocketRes) => {
                 this.checkingForUpdates = false;
                 this.$root.toastRes(res);
             });
@@ -392,23 +393,23 @@ export default defineComponent({
          * @param {number} id ID of stack
          * @returns {void}
          */
-        deselect(id) {
-            delete this.selectedStacks[id];
+        deselect(id: string) {
+            delete (this.selectedStacks as Record<string, boolean>)[id];
         },
         /**
          * Select a stack
          * @param {number} id ID of stack
          * @returns {void}
          */
-        select(id) {
-            this.selectedStacks[id] = true;
+        select(id: string) {
+            (this.selectedStacks as Record<string, boolean>)[id] = true;
         },
         /**
          * Determine if stack is selected
          * @param {number} id ID of stack
          * @returns {bool} Is the stack selected?
          */
-        isSelected(id) {
+        isSelected(id: string) {
             return id in this.selectedStacks;
         },
         /**
@@ -424,7 +425,7 @@ export default defineComponent({
          * @returns {void}
          */
         pauseDialog() {
-            this.$refs.confirmPause.show();
+            (this.$refs.confirmPause as { show(): void }).show();
         },
         /**
          * Pause each selected stack
@@ -432,7 +433,7 @@ export default defineComponent({
          */
         pauseSelected() {
             Object.keys(this.selectedStacks)
-                .filter(id => this.$root.stackList[id].active)
+                .filter(id => (this.$root.stackList[id] as unknown as Record<string, unknown>)["active"])
                 .forEach(id => this.$root.getSocket().emit("pauseStack", id, () => { }));
 
             this.cancelSelectMode();
@@ -443,7 +444,7 @@ export default defineComponent({
          */
         resumeSelected() {
             Object.keys(this.selectedStacks)
-                .filter(id => !this.$root.stackList[id].active)
+                .filter(id => !(this.$root.stackList[id] as unknown as Record<string, unknown>)["active"])
                 .forEach(id => this.$root.getSocket().emit("resumeStack", id, () => { }));
 
             this.cancelSelectMode();

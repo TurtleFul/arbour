@@ -4,7 +4,7 @@
             <ul class="list-group">
                 <li v-for="(value, index) in array" :key="index" class="list-group-item">
                     <input v-model="array[index]" type="text" class="no-bg array-input" :placeholder="placeholder" />
-                    <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="composeArray.delete(index)" />
+                    <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="composeArray.delete(index as number)" />
                 </li>
             </ul>
 

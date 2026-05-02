@@ -110,7 +110,7 @@
                         </table>
                     </div>
                     <template #footer>
-                        <button class="btn btn-normal" @click="$refs[eventLogModalId].hide()">{{ $t('close') }}</button>
+                        <button class="btn btn-normal" @click="(($refs[eventLogModalId]) as { hide(): void }).hide()">{{ $t('close') }}</button>
                     </template>
                 </BModal>
 
@@ -308,6 +308,17 @@ import { parseDockerPort } from "../../../common/util-common";
 import { ServiceData, StatsData, StackData, ServiceEventEntry } from "../../../common/types";
 import { ComposeDocument, ComposeService } from "../../../common/compose-document";
 import { LABEL_STATUS_IGNORE, LABEL_IMAGEUPDATES_CHECK, LABEL_IMAGEUPDATES_IGNORE, LABEL_IMAGEUPDATES_CHANGELOG } from "../../../common/compose-labels";
+import type { SocketRes } from "../vue-augmentation";
+
+interface ComposePage {
+    endpoint: string;
+    stack: StackData;
+    composeDocument: ComposeDocument;
+    processing: boolean;
+    startComposeAction(): void;
+    stopComposeAction(): void;
+    saveStack(): void;
+}
 
 export default defineComponent({
     components: {
@@ -439,12 +450,16 @@ export default defineComponent({
             }
         },
 
+        composePage(): ComposePage {
+            return this.$parent!.$parent as unknown as ComposePage;
+        },
+
         endpoint(): string {
-            return this.$parent.$parent.endpoint;
+            return this.composePage.endpoint;
         },
 
         stack(): StackData {
-            return this.$parent.$parent.stack;
+            return this.composePage.stack;
         },
 
         stackName(): string {
@@ -452,7 +467,7 @@ export default defineComponent({
         },
 
         composeDocument(): ComposeDocument {
-            return this.$parent.$parent.composeDocument;
+            return this.composePage.composeDocument;
         },
 
         composeService(this: { composeDocument: ComposeDocument, name: string }): ComposeService {
@@ -488,7 +503,7 @@ export default defineComponent({
         },
 
         processing(): boolean {
-            return this.$parent.$parent.processing;
+            return this.composePage.processing;
         }
     },
     mounted() {
@@ -503,10 +518,10 @@ export default defineComponent({
 
         fetchEventLog() {
             this.eventLogLoading = true;
-            this.$root.emitAgent(this.endpoint, "getServiceEventLog", this.stackName, this.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "getServiceEventLog", this.stackName, this.name, (res: SocketRes) => {
                 this.eventLogLoading = false;
                 if (res.ok) {
-                    this.eventLogEntries = res.events;
+                    this.eventLogEntries = res.events as ServiceEventEntry[];
                 }
             });
         },
@@ -556,18 +571,18 @@ export default defineComponent({
         },
 
         startComposeAction() {
-            this.$parent.$parent.startComposeAction();
+            this.composePage.startComposeAction();
         },
 
         stopComposeAction() {
-            this.$parent.$parent.stopComposeAction();
+            this.composePage.stopComposeAction();
         },
 
         parsePort(port: string) {
             if (this.stack.endpoint) {
                 return parseDockerPort(port, this.stack.primaryHostname);
             } else {
-                let hostname = this.$root.info.primaryHostname || location.hostname;
+                let hostname = this.$root.info.primaryHostname as string || location.hostname;
                 return parseDockerPort(port, hostname);
             }
         },
@@ -576,49 +591,49 @@ export default defineComponent({
         },
         stopService() {
             this.startComposeAction();
-            this.$root.emitAgent(this.endpoint, "stopService", this.stack.name, this.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "stopService", this.stack.name, this.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
             });
         },
         startService() {
             this.startComposeAction();
-            this.$root.emitAgent(this.endpoint, "startService", this.stack.name, this.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "startService", this.stack.name, this.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
             });
         },
         restartService() {
             this.startComposeAction();
-            this.$root.emitAgent(this.endpoint, "restartService", this.stack.name, this.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "restartService", this.stack.name, this.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
             });
         },
         recreateService() {
             this.startComposeAction();
-            this.$root.emitAgent(this.endpoint, "recreateService", this.stack.name, this.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "recreateService", this.stack.name, this.name, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
             });
         },
         updateService() {
-            this.$refs[this.updateModalId].hide();
+            (this.$refs[this.updateModalId] as { hide(): void }).hide();
 
             this.startComposeAction();
-            this.$root.emitAgent(this.endpoint, "updateService", this.stack.name, this.name, this.updateDialogData.pruneAfterUpdate, this.updateDialogData.pruneAllAfterUpdate, (res) => {
+            this.$root.emitAgent(this.endpoint, "updateService", this.stack.name, this.name, this.updateDialogData.pruneAfterUpdate, this.updateDialogData.pruneAllAfterUpdate, (res: SocketRes) => {
                 this.stopComposeAction();
                 this.$root.toastRes(res);
             });
         },
         skipCurrentUpdate() {
-            this.$refs[this.updateModalId].hide();
+            (this.$refs[this.updateModalId] as { hide(): void }).hide();
 
             this.composeService.labels.set(LABEL_IMAGEUPDATES_IGNORE, this.service.remoteImageDigest);
 
             this.$nextTick(() => {
                 // Wait for the adaptation of the Yaml
-                this.$parent.$parent.saveStack();
+                this.composePage.saveStack();
             });
         },
         updateIgnoreStatus(checked: boolean) {

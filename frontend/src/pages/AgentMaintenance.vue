@@ -85,7 +85,7 @@ export default defineComponent({
         // State
         const processing = ref(false);
         const showSystemPruneDialog = ref(false);
-        const activeArtefactIndex = ref(0);
+        const activeArtefactIndex = ref<string | undefined>(undefined);
         const systemPruneData = reactive({
             all: false,
             volumes: false
@@ -107,7 +107,7 @@ export default defineComponent({
         function systemPrune() {
             startAction();
 
-            root.emitAgent(endpoint.value, "dockerSystemPrune", systemPruneData.all, systemPruneData.volumes, (res) => {
+            root.emitAgent(endpoint.value, "dockerSystemPrune", systemPruneData.all, systemPruneData.volumes, (res: { ok: boolean }) => {
                 stopAction();
                 root.toastRes(res);
                 reloadArtefactsData();
