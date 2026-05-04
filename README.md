@@ -8,7 +8,7 @@
 
 Arbour is a web UI for managing Docker Compose stacks across multiple hosts. It lets you create, edit, deploy, and monitor your compose stacks through a clean browser interface — no SSH required.
 
-It is a fork of [dockge](https://github.com/louislam/dockge), continued under a new name because the upstream project is no longer actively maintained. The goal is to build a tool with great UX that makes it easy to cultivate and maintain self-hosted services.
+It is a fork of [dockge](https://github.com/louislam/dockge), continued under a new name because the upstream project has been moving slowly lately. The goal is to build a tool with great UX that makes it easy to cultivate and maintain self-hosted services.
 
 **Forked from:** [hamphh/dockge](https://github.com/hamphh/dockge), itself a fork of [louislam/dockge](https://github.com/louislam/dockge).
 
