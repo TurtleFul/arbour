@@ -16,7 +16,8 @@ import { computed } from "vue";
 import { Codemirror } from "vue-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { json } from "@codemirror/lang-json";
-import { oneDark } from "@codemirror/theme-one-dark";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { tags } from "@lezer/highlight";
 import { EditorView } from "codemirror";
 
 const props = defineProps<{
@@ -31,14 +32,73 @@ defineEmits<{
     "blur": [];
 }>();
 
-const baseTheme = EditorView.theme({
+// Syntax token colors — CSS vars resolve at render time, so theme switches work automatically
+const arbourHighlight = HighlightStyle.define([
+    { tag: tags.keyword,       color: "var(--arbour-primary)" },
+    { tag: tags.bool,          color: "var(--arbour-primary)" },
+    { tag: tags.tagName,       color: "var(--arbour-primary)" },
+    { tag: tags.string,        color: "var(--arbour-warning)" },
+    { tag: tags.number,        color: "var(--arbour-danger)" },
+    { tag: tags.propertyName,  color: "var(--arbour-info)" },
+    { tag: tags.attributeName, color: "var(--arbour-info)" },
+    { tag: tags.labelName,     color: "var(--arbour-info)" },
+    { tag: tags.typeName,      color: "var(--arbour-maintenance)" },
+    { tag: tags.variableName,  color: "var(--arbour-text)" },
+    { tag: tags.null,          color: "var(--arbour-text-muted)" },
+    { tag: tags.comment,       color: "var(--arbour-text-muted)", fontStyle: "italic" },
+    { tag: tags.meta,          color: "var(--arbour-text-muted)" },
+    { tag: tags.operator,      color: "var(--arbour-text-subtle)" },
+    { tag: tags.punctuation,   color: "var(--arbour-text-subtle)" },
+    { tag: tags.link,          color: "var(--arbour-info)", textDecoration: "underline" },
+]);
+
+// Editor chrome for edit mode — themed background, gutter, cursor, selection
+const arbourEditorTheme = EditorView.theme({
     "&": {
-        backgroundColor: "transparent",
-        height: "100%",
+        backgroundColor: "var(--arbour-bg-deep)",
+        color: "var(--arbour-text)",
+    },
+    ".cm-content": {
+        caretColor: "var(--arbour-primary)",
+    },
+    ".cm-cursor, .cm-dropCursor": {
+        borderLeftColor: "var(--arbour-primary)",
     },
     ".cm-gutters": {
-        backgroundColor: "transparent",
-        border: "none",
+        backgroundColor: "var(--arbour-bg)",
+        color: "var(--arbour-text-muted)",
+        borderRight: "1px solid var(--arbour-border)",
+    },
+    ".cm-lineNumbers .cm-gutterElement": {
+        color: "var(--arbour-text-muted)",
+    },
+    ".cm-activeLineGutter": {
+        backgroundColor: "var(--arbour-bg-header)",
+    },
+    ".cm-activeLine": {
+        backgroundColor: "color-mix(in srgb, var(--arbour-primary) 5%, transparent)",
+    },
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+        backgroundColor: "color-mix(in srgb, var(--arbour-primary) 20%, transparent)",
+    },
+    ".cm-matchingBracket": {
+        color: "var(--arbour-primary) !important",
+        backgroundColor: "color-mix(in srgb, var(--arbour-primary) 15%, transparent)",
+    },
+    ".cm-tooltip": {
+        backgroundColor: "var(--arbour-bg)",
+        border: "1px solid var(--arbour-border)",
+        color: "var(--arbour-text)",
+    },
+    ".cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected]": {
+        backgroundColor: "var(--arbour-bg-header-active)",
+    },
+});
+
+// Base layout — font, height, transparent bg (used in both modes)
+const baseTheme = EditorView.theme({
+    "&": {
+        height: "100%",
     },
     ".cm-content": {
         fontFamily: "'JetBrains Mono', monospace",
@@ -51,7 +111,13 @@ const baseTheme = EditorView.theme({
 });
 
 const extensions = computed(() => {
-    const ext = [ oneDark, baseTheme, EditorView.lineWrapping ];
+    const ext = [ baseTheme, EditorView.lineWrapping ];
+
+    if (!props.readonly) {
+        ext.push(arbourEditorTheme);
+    }
+
+    ext.push(syntaxHighlighting(arbourHighlight));
 
     if (props.lang === "yaml" || props.lang === "env") {
         ext.push(yaml());
@@ -88,6 +154,7 @@ const extensions = computed(() => {
 .code-editor-readonly {
     :deep(.cm-editor) {
         background-color: transparent;
+        color: var(--arbour-text);
 
         .cm-gutters {
             display: none;

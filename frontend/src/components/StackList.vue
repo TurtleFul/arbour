@@ -477,10 +477,24 @@ export default defineComponent({
     background-color: var(--arbour-bg-header);
 }
 
+.btn-link {
+    color: var(--arbour-text-on-header);
+
+    &:hover {
+        color: var(--arbour-text-on-header);
+        opacity: 0.7;
+    }
+
+    &:disabled {
+        color: var(--arbour-text-on-header);
+        opacity: 0.4;
+    }
+}
+
 .search-icon {
     width: 40px;
     padding: 10px;
-    color: var(--arbour-text-muted);
+    color: var(--arbour-text-on-header);
 
     svg[data-icon="times"] {
         cursor: pointer;
@@ -499,7 +513,7 @@ export default defineComponent({
 
 .filter-icon {
     padding: 10px;
-    color: var(--arbour-text-muted) !important;
+    color: var(--arbour-text-on-header) !important;
     cursor: pointer;
     border: 1px solid transparent;
 }

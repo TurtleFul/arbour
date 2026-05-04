@@ -36,9 +36,14 @@ textarea.form-control {
     border-radius: 20px;
 }
 
-// Placeholder
-::placeholder {
+// Placeholder — match Bootstrap's .form-control::placeholder specificity
+.form-control::placeholder,
+.form-select::placeholder,
+.form-floating::placeholder,
+textarea::placeholder,
+input::placeholder {
     color: var(--arbour-text-muted);
+    opacity: 1;
 }
 
 // Forms
@@ -62,12 +67,18 @@ textarea.form-control {
 }
 
 .form-control,
-.form-control:focus,
-.form-select,
-.form-select:focus {
+.form-select {
     color: var(--arbour-text);
     background-color: var(--arbour-bg-deep);
     border-color: var(--arbour-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+    color: var(--arbour-text);
+    background-color: var(--arbour-bg-deep);
+    border-color: var(--arbour-primary);
+    box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--arbour-primary) 12%, transparent);
 }
 
 .form-select:disabled {
@@ -104,7 +115,7 @@ a:not(.btn),
     color: var(--arbour-text);
 
     &.btn-info {
-        color: white;
+        color: var(--arbour-text-on-primary);
     }
 }
 
@@ -202,6 +213,10 @@ optgroup {
 .btn {
     padding-left: 20px;
     padding-right: 20px;
+
+    &:focus-visible {
+        box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--arbour-primary) 18%, transparent);
+    }
 }
 
 .btn-sm {
@@ -210,14 +225,34 @@ optgroup {
 
 .btn-primary {
     --bs-btn-color: var(--arbour-text-on-primary);
+    --bs-btn-bg: var(--arbour-primary);
+    --bs-btn-border-color: var(--arbour-primary);
+    --bs-btn-hover-border-color: var(--arbour-highlight);
+    --bs-btn-active-border-color: var(--arbour-highlight);
+    --bs-btn-disabled-bg: var(--arbour-primary);
+    --bs-btn-disabled-border-color: var(--arbour-primary);
     color: var(--arbour-text-on-primary);
     background: var(--arbour-gradient);
+    border-color: var(--arbour-primary);
 
     &:hover, &:active, &:focus, &.active {
         color: var(--arbour-text-on-primary);
         background: var(--arbour-gradient-active);
         border-color: var(--arbour-highlight);
     }
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--arbour-primary);
+    --bs-btn-border-color: var(--arbour-primary);
+    --bs-btn-hover-color: var(--arbour-text-on-primary);
+    --bs-btn-hover-bg: var(--arbour-primary);
+    --bs-btn-hover-border-color: var(--arbour-primary);
+    --bs-btn-active-color: var(--arbour-text-on-primary);
+    --bs-btn-active-bg: var(--arbour-primary);
+    --bs-btn-active-border-color: var(--arbour-primary);
+    color: var(--arbour-primary);
+    border-color: var(--arbour-primary);
 }
 
 .btn-normal {
@@ -259,8 +294,8 @@ optgroup {
 }
 
 .btn-secondary {
-    --bs-btn-color: white;
-    color: white;
+    --bs-btn-color: var(--arbour-text);
+    color: var(--arbour-text);
 }
 
 .btn-dark {
@@ -282,7 +317,7 @@ optgroup {
 .btn-hover-danger:hover {
     background-color: var(--arbour-danger);
     border-color: var(--arbour-danger);
-    color: white;
+    color: var(--arbour-text-on-danger);
 }
 
 .btn-hover-primary:hover {
@@ -294,7 +329,7 @@ optgroup {
 .btn-hover-info:hover {
     background-color: var(--arbour-info);
     border-color: var(--arbour-info);
-    color: white;
+    color: var(--arbour-text-on-primary);
 }
 
 .btn-success {

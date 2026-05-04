@@ -226,8 +226,8 @@ main {
 
 .lost-connection {
     padding: 5px;
-    background-color: crimson;
-    color: white;
+    background-color: var(--arbour-danger);
+    color: var(--arbour-text-on-danger);
     position: fixed;
     width: 100%;
     z-index: 99999;
@@ -271,8 +271,8 @@ main {
             color: var(--arbour-text);
 
             &.active {
-                color: var(--arbour-text-on-primary);
-                background-color: var(--arbour-highlight);
+                color: var(--arbour-text);
+                background-color: var(--arbour-dropdown-selected);
             }
 
             &:hover:not(.active) {
@@ -285,7 +285,7 @@ main {
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: var(--arbour-text-on-primary);
         background-color: var(--arbour-primary);
         width: 24px;
         height: 24px;

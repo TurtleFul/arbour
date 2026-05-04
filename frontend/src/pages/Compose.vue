@@ -940,7 +940,7 @@ export default defineComponent({
 }
 
 .expand-button:hover {
-    color: white;
+    color: var(--arbour-text);
 }
 
 .yaml-expand-button {
@@ -984,11 +984,11 @@ export default defineComponent({
 
 :deep(.compose-dropdown-item-danger) {
     background-color: var(--arbour-danger);
-    color: white;
+    color: var(--arbour-text-on-danger);
 
     &:hover {
         background-color: color-mix(in srgb, var(--arbour-danger) 85%, black);
-        color: white;
+        color: var(--arbour-text-on-danger);
     }
 }
 

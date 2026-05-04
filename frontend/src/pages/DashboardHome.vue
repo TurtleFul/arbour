@@ -412,7 +412,7 @@ table {
 }
 
 .docker-run {
-    background-color: $dark-bg !important;
+    background-color: var(--arbour-bg-deep) !important;
     border: none;
     font-family: 'JetBrains Mono', monospace;
     font-size: 15px;
@@ -420,7 +420,7 @@ table {
 
 .action-icon {
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--arbour-text-muted);
 }
 
 .agent {

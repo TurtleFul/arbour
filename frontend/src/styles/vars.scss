@@ -5,11 +5,11 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
 
 // ─── Arbour — Forest Green (default) ──────────────────────────────────────────
 :root {
-    --arbour-primary: #5dbf75;
+    --arbour-primary: #5bbe74;
     --arbour-secondary: #7a9b7d;
-    --arbour-info: #7dd3fc;
-    --arbour-danger: #fca5a5;
-    --arbour-warning: #fcd34d;
+    --arbour-info: #84ccf0;
+    --arbour-danger: #f4a0a0;
+    --arbour-warning: #f5c640;
     --arbour-maintenance: #a5b4fc;
     --arbour-highlight: #86d9a0;
 
@@ -18,20 +18,23 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-bg-deep: #060907;
     --arbour-bg-input-group: #1c261e;
     --arbour-bg-disabled: #162018;
-    --arbour-border: #243626;
+    --arbour-border: #2b3e2e;
     --arbour-bg-header: #111a13;
-    --arbour-bg-header-active: #1a2b1c;
+    --arbour-bg-header-active: #1f3021;
 
-    --arbour-text: #bdd0bf;
+    --arbour-text: #c3d4c6;
     --arbour-text-on-primary: #061209;
-    --arbour-text-on-warning: #061209;
+    --arbour-text-on-warning: #1a1000;
     --arbour-text-on-danger: #3d0a0a;
     --arbour-text-on-maintenance: #100a30;
-    --arbour-text-muted: #587258;
-    --arbour-text-subtle: #90a892;
+    --arbour-text-muted: #7a9d7d;
+    --arbour-text-subtle: #96ab98;
 
-    --arbour-gradient: linear-gradient(135deg, #5dbf75 0%, #4aac61 100%);
-    --arbour-gradient-active: linear-gradient(135deg, #4aac61 0%, #5dbf75 100%);
+    --arbour-gradient: linear-gradient(135deg, #5bbe74 0%, #49b363 100%);
+    --arbour-gradient-active: linear-gradient(135deg, #49b363 0%, #5bbe74 100%);
+
+    --arbour-dropdown-selected: #111a13;
+    --arbour-text-on-header: var(--arbour-text-subtle);
 
     --arbour-radius-sm: 6px;
     --arbour-radius: 10px;
@@ -66,50 +69,56 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-text-muted: #575c62;
     --arbour-text-subtle: #d1d1d1;
 
+    --arbour-dropdown-selected: #161b22;
+    --arbour-text-on-header: var(--arbour-text-subtle);
+
     --arbour-gradient: linear-gradient(135deg, #74c2ff 0%, #74c2ff 75%, #86e6a9);
     --arbour-gradient-active: linear-gradient(135deg, #74c2ff 0%, #74c2ff 50%, #86e6a9);
 }
 
 // ─── SunDown — Purple & Amber ──────────────────────────────────────────────────
 [data-theme="sundown"] {
-    --arbour-primary: #a855f7;
+    --arbour-primary: #f0c030;
     --arbour-secondary: #7c5fa0;
-    --arbour-info: #f59e0b;
-    --arbour-danger: #f87171;
-    --arbour-warning: #fb923c;
+    --arbour-info: #9d4ef5;
+    --arbour-danger: #ef6b6b;
+    --arbour-warning: #f58528;
     --arbour-maintenance: #38bdf8;
-    --arbour-highlight: #c084fc;
+    --arbour-highlight: #f8d460;
 
     --arbour-bg-body: #0d0814;
     --arbour-bg: #1a1025;
     --arbour-bg-deep: #080510;
     --arbour-bg-input-group: #211330;
     --arbour-bg-disabled: #1a0f28;
-    --arbour-border: #4a2870;
+    --arbour-border: #3c2160;
     --arbour-bg-header: #1f1135;
     --arbour-bg-header-active: #2e1a4a;
 
     --arbour-text: #ede5ff;
-    --arbour-text-on-primary: #1a0540;
-    --arbour-text-on-warning: #1a0540;
-    --arbour-text-on-danger: #3d0a0a;
+    --arbour-text-on-primary: #1a0e00;
+    --arbour-text-on-warning: #1a0800;
+    --arbour-text-on-danger: #3d0808;
     --arbour-text-on-maintenance: #0a2040;
-    --arbour-text-muted: #7c6a9e;
+    --arbour-text-muted: #9485ba;
     --arbour-text-subtle: #b8a8d8;
 
-    --arbour-gradient: linear-gradient(135deg, #a855f7 0%, #f59e0b 100%);
-    --arbour-gradient-active: linear-gradient(135deg, #f59e0b 0%, #a855f7 100%);
+    --arbour-dropdown-selected: #1f1135;
+    --arbour-text-on-header: var(--arbour-text-subtle);
+
+    --arbour-gradient: linear-gradient(135deg, #f0c030 0%, #e89010 100%);
+    --arbour-gradient-active: linear-gradient(135deg, #e89010 0%, #f0c030 100%);
 }
 
 // ─── Retro — Beige Keyboard ───────────────────────────────────────────────────
 [data-theme="retro"] {
-    --arbour-primary: #4aada0;
+    --arbour-primary: #3da098;
     --arbour-secondary: #7a8f8c;
-    --arbour-info: #5b8fc9;
-    --arbour-danger: #c0392b;
-    --arbour-warning: #d4850a;
-    --arbour-maintenance: #7c5cbf;
-    --arbour-highlight: #6dd5c8;
+    --arbour-info: #4f83b8;
+    --arbour-danger: #a83225;
+    --arbour-warning: #c97a08;
+    --arbour-maintenance: #6b50a8;
+    --arbour-highlight: #5dc8bc;
     --arbour-logo-1: #1a6560;
     --arbour-logo-2: #0f4a45;
     --arbour-logo-3: #3a2a18;
@@ -120,19 +129,22 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-bg-input-group: #ede8dc;
     --arbour-bg-disabled: #ddd8cc;
     --arbour-border: #b8b0a0;
-    --arbour-bg-header: #8c8680;
-    --arbour-bg-header-active: #7a7470;
+    --arbour-bg-header: #7a7165;
+    --arbour-bg-header-active: #686055;
 
     --arbour-text: #2c2820;
     --arbour-text-on-primary: #ffffff;
-    --arbour-text-on-warning: #2a1a00;
+    --arbour-text-on-warning: #2a1400;
     --arbour-text-on-danger: #ffffff;
     --arbour-text-on-maintenance: #ffffff;
-    --arbour-text-muted: #504840;
-    --arbour-text-subtle: #3a3530;
+    --arbour-text-muted: #6a5e50;
+    --arbour-text-subtle: #48403a;
 
-    --arbour-gradient: linear-gradient(135deg, #4aada0 0%, #5b8fc9 100%);
-    --arbour-gradient-active: linear-gradient(135deg, #5b8fc9 0%, #4aada0 100%);
+    --arbour-dropdown-selected: #7a7165;
+    --arbour-text-on-header: #d4ccbe;
+
+    --arbour-gradient: linear-gradient(135deg, #3da098 0%, #4f83b8 100%);
+    --arbour-gradient-active: linear-gradient(135deg, #4f83b8 0%, #3da098 100%);
 }
 
 // ─── Unicorn — Bright Light Pink ──────────────────────────────────────────────
@@ -140,7 +152,7 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-primary: #ec4899;
     --arbour-secondary: #a855f7;
     --arbour-info: #6366f1;
-    --arbour-danger: #ef4444;
+    --arbour-danger: #e05050;
     --arbour-warning: #f59e0b;
     --arbour-maintenance: #10b981;
     --arbour-highlight: #fda4af;
@@ -151,9 +163,9 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-bg-body: #fff0f9;
     --arbour-bg: #ffffff;
     --arbour-bg-deep: #ffe4f5;
-    --arbour-bg-input-group: #fff5fc;
+    --arbour-bg-input-group: #fceaf8;
     --arbour-bg-disabled: #f5d0ea;
-    --arbour-border: #f9a8d4;
+    --arbour-border: #f472b6;
     --arbour-bg-header: #ec4899;
     --arbour-bg-header-active: #db2777;
 
@@ -162,8 +174,11 @@ $easing-in-out: cubic-bezier(0.79, 0.14, 0.15, 0.86);
     --arbour-text-on-warning: #1e0030;
     --arbour-text-on-danger: #ffffff;
     --arbour-text-on-maintenance: #0a2010;
-    --arbour-text-muted: #7c3aed;
-    --arbour-text-subtle: #9333ea;
+    --arbour-text-muted: #8840b0;
+    --arbour-text-subtle: #a860c8;
+
+    --arbour-dropdown-selected: #ec4899;
+    --arbour-text-on-header: rgba(255, 255, 255, 0.85);
 
     --arbour-gradient: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
     --arbour-gradient-active: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
