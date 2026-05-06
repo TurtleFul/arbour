@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Git source integration for stacks.** Import a new stack directly from a Git repository, or link an existing stack to a repo and pull updates on demand. Works with any Git host over HTTPS (GitHub, GitLab, Gitea, self-hosted) using Personal Access Tokens for private repos.
+  - Per-stack git config: repository URL, branch, subdirectory, optional credential.
+  - Shared credential store (`Settings → Git Credentials`) — one PAT covers multiple stacks.
+  - "Pull from Git" pulls the latest, replaces compose files, and (optionally) redeploys.
+  - Stack deletion cleans up the linked git source and cached repo.
+  - Tokens are redacted from any error output surfaced to the UI.
+
 ## [0.4.3] — 2026-05-02
 
 ### Added

@@ -20,6 +20,7 @@ It is a fork of [dockge](https://github.com/louislam/dockge), continued under a 
 - Per-service operations — start, stop, restart, update individual services
 - Automatic image updates — immediate or scheduled, configurable per stack
 - Stack importing — adopt existing compose files without moving them
+- Git source integration — import or link a stack to a GitHub/GitLab/Gitea repo, pull updates with one click, optionally redeploy
 - Real-time container logs and terminal access
 - Service event history — lifecycle events recorded per container
 - Multi-host support via agents

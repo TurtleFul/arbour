@@ -108,7 +108,8 @@ function submit() {
         saving.value = false;
         if (res.ok) {
             emit("update:modelValue", false);
-            emit("imported", { ...res, stackName: form.value.stackName });
+            emit("imported", { ...res,
+                stackName: form.value.stackName });
         } else {
             error.value = res.msg || "Error";
         }

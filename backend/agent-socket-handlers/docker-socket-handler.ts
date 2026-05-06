@@ -684,7 +684,8 @@ export class DockerSocketHandler extends AgentSocketHandler {
                         .where(eq(stackGitSourceTable.stackName, stackName.trim()))
                         .get();
                     if (existingSource) {
-                        await fsAsync.rm(stackDir, { recursive: true, force: true });
+                        await fsAsync.rm(stackDir, { recursive: true,
+                            force: true });
                     } else {
                         throw new ValidationError("Stack name already exists");
                     }
@@ -739,7 +740,8 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     await gitManager.deleteCachedRepo(stackName.trim());
                     getDb().delete(stackGitSourceTable).where(eq(stackGitSourceTable.stackName, stackName.trim())).run();
                     if (await fileExists(stackDir)) {
-                        await fsAsync.rm(stackDir, { recursive: true, force: true });
+                        await fsAsync.rm(stackDir, { recursive: true,
+                            force: true });
                     }
                     throw e;
                 }

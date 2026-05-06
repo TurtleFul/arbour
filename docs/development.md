@@ -82,10 +82,11 @@ Bun loads `.env` natively — no `dotenv` import needed.
 
 At runtime Arbour creates:
 
-- `data/arbour.db` — SQLite database (users, settings, agents)
+- `data/arbour.db` — SQLite database (users, settings, agents, git source links)
 - `data/db-config.json` — Database configuration
+- `data/git-repos/<stackName>/` — cached git clones for stacks linked to a repository (recreated on next pull if removed)
 
-Both are gitignored. Delete `data/` to reset the app to a clean state.
+All are gitignored. Delete `data/` to reset the app to a clean state.
 
 The database is managed with [Drizzle ORM](https://orm.drizzle.team). The schema lives in `backend/db/schema.ts`. Migrations are plain SQL files in `backend/db/migrations/` and run automatically on startup.
 

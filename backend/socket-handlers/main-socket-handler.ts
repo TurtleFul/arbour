@@ -381,7 +381,9 @@ export class MainSocketHandler extends SocketHandler {
                     })
                     .returning({ id: gitCredentialTable.id })
                     .get();
-                callbackResult({ ok: true, id: result?.id, msg: "Saved" }, callback);
+                callbackResult({ ok: true,
+                    id: result?.id,
+                    msg: "Saved" }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -412,7 +414,8 @@ export class MainSocketHandler extends SocketHandler {
                     .set(updateData)
                     .where(eq(gitCredentialTable.id, id))
                     .run();
-                callbackResult({ ok: true, msg: "Saved" }, callback);
+                callbackResult({ ok: true,
+                    msg: "Saved" }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -432,7 +435,8 @@ export class MainSocketHandler extends SocketHandler {
                     .delete(gitCredentialTable)
                     .where(eq(gitCredentialTable.id, id))
                     .run();
-                callbackResult({ ok: true, msg: "Deleted" }, callback);
+                callbackResult({ ok: true,
+                    msg: "Deleted" }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
