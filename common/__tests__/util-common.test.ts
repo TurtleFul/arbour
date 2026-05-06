@@ -14,6 +14,8 @@ import {
     StackStatusInfo,
     StackFilter,
     StackFilterCategory,
+    compareVersions,
+    sleep,
     RUNNING, RUNNING_AND_EXITED, UNHEALTHY, EXITED, UNKNOWN, CREATED_FILE, CREATED_STACK,
 } from "../util-common";
 
@@ -343,5 +345,56 @@ describe("StackFilter", () => {
     test("has three categories: agents, status, attributes", () => {
         const filter = new StackFilter();
         expect(filter.categories).toHaveLength(3);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// compareVersions
+// ---------------------------------------------------------------------------
+
+describe("compareVersions", () => {
+    test("returns 0 for equal versions", () => {
+        expect(compareVersions("1.2.3", "1.2.3")).toBe(0);
+    });
+
+    test("returns 1 when a > b", () => {
+        expect(compareVersions("2.0.0", "1.9.9")).toBe(1);
+    });
+
+    test("returns -1 when a < b", () => {
+        expect(compareVersions("1.0.0", "1.0.1")).toBe(-1);
+    });
+
+    test("strips leading 'v' prefix", () => {
+        expect(compareVersions("v1.2.3", "v1.2.3")).toBe(0);
+        expect(compareVersions("v2.0.0", "v1.0.0")).toBe(1);
+    });
+
+    test("handles missing patch segment (treats as 0)", () => {
+        expect(compareVersions("1.2", "1.2.0")).toBe(0);
+    });
+
+    test("handles major-only versions", () => {
+        expect(compareVersions("2", "1")).toBe(1);
+    });
+
+    test("compares minor correctly when major matches", () => {
+        expect(compareVersions("1.10.0", "1.9.0")).toBe(1);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// sleep
+// ---------------------------------------------------------------------------
+
+describe("sleep", () => {
+    test("resolves after the given delay", async () => {
+        const start = Date.now();
+        await sleep(50);
+        expect(Date.now() - start).toBeGreaterThanOrEqual(40);
+    });
+
+    test("resolves immediately for 0ms", async () => {
+        await expect(sleep(0)).resolves.toBeUndefined();
     });
 });

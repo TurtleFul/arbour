@@ -692,7 +692,6 @@ export default defineComponent({
         }
     }
 
-
     .image {
         font-size: 0.8rem;
         color: var(--arbour-text-muted);

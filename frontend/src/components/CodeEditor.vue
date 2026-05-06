@@ -34,25 +34,54 @@ defineEmits<{
 
 // Syntax token colors — CSS vars resolve at render time, so theme switches work automatically
 const arbourHighlight = HighlightStyle.define([
-    { tag: tags.keyword,       color: "var(--arbour-primary)" },
-    { tag: tags.bool,          color: "var(--arbour-primary)" },
-    { tag: tags.tagName,       color: "var(--arbour-primary)" },
-    { tag: tags.string,        color: "var(--arbour-warning)" },
-    { tag: tags.number,        color: "var(--arbour-danger)" },
-    { tag: tags.propertyName,  color: "var(--arbour-info)" },
-    { tag: tags.attributeName, color: "var(--arbour-info)" },
-    { tag: tags.labelName,     color: "var(--arbour-info)" },
-    { tag: tags.typeName,      color: "var(--arbour-maintenance)" },
-    { tag: tags.variableName,  color: "var(--arbour-text)" },
-    { tag: tags.null,          color: "var(--arbour-text-muted)" },
-    { tag: tags.comment,       color: "var(--arbour-text-muted)", fontStyle: "italic" },
-    { tag: tags.meta,          color: "var(--arbour-text-muted)" },
-    { tag: tags.operator,      color: "var(--arbour-text-subtle)" },
-    { tag: tags.punctuation,   color: "var(--arbour-text-subtle)" },
-    { tag: tags.link,          color: "var(--arbour-info)", textDecoration: "underline" },
+    { tag: tags.keyword,
+        color: "var(--arbour-primary)" },
+    { tag: tags.bool,
+        color: "var(--arbour-primary)" },
+    { tag: tags.tagName,
+        color: "var(--arbour-primary)" },
+    { tag: tags.string,
+        color: "var(--arbour-warning)" },
+    { tag: tags.number,
+        color: "var(--arbour-danger)" },
+    { tag: tags.propertyName,
+        color: "var(--arbour-info)" },
+    { tag: tags.attributeName,
+        color: "var(--arbour-info)" },
+    { tag: tags.labelName,
+        color: "var(--arbour-info)" },
+    { tag: tags.typeName,
+        color: "var(--arbour-maintenance)" },
+    { tag: tags.variableName,
+        color: "var(--arbour-text)" },
+    { tag: tags.null,
+        color: "var(--arbour-text-muted)" },
+    { tag: tags.comment,
+        color: "var(--arbour-text-muted)",
+        fontStyle: "italic" },
+    { tag: tags.meta,
+        color: "var(--arbour-text-muted)" },
+    { tag: tags.operator,
+        color: "var(--arbour-text-subtle)" },
+    { tag: tags.punctuation,
+        color: "var(--arbour-text-subtle)" },
+    { tag: tags.link,
+        color: "var(--arbour-info)",
+        textDecoration: "underline" },
 ]);
 
-// Editor chrome for edit mode — themed background, gutter, cursor, selection
+// Selection theme — applies in both edit and readonly modes
+const arbourSelectionTheme = EditorView.theme({
+    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground": {
+        backgroundColor: "var(--arbour-selection-bg)",
+    },
+    ".cm-content ::selection": {
+        backgroundColor: "var(--arbour-selection-bg)",
+        color: "var(--arbour-selection-color)",
+    },
+});
+
+// Editor chrome for edit mode — themed background, gutter, cursor
 const arbourEditorTheme = EditorView.theme({
     "&": {
         backgroundColor: "var(--arbour-bg-deep)",
@@ -77,9 +106,6 @@ const arbourEditorTheme = EditorView.theme({
     },
     ".cm-activeLine": {
         backgroundColor: "color-mix(in srgb, var(--arbour-primary) 5%, transparent)",
-    },
-    "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
-        backgroundColor: "color-mix(in srgb, var(--arbour-primary) 20%, transparent)",
     },
     ".cm-matchingBracket": {
         color: "var(--arbour-primary) !important",
@@ -111,7 +137,7 @@ const baseTheme = EditorView.theme({
 });
 
 const extensions = computed(() => {
-    const ext = [ baseTheme, EditorView.lineWrapping ];
+    const ext = [ baseTheme, arbourSelectionTheme, EditorView.lineWrapping ];
 
     if (!props.readonly) {
         ext.push(arbourEditorTheme);

@@ -413,7 +413,7 @@ export class Stack {
                         } else {
                             ignoredExitedCount++;
                         }
-                    } else if (serviceInfo.State !== "created") {
+                    } else if (serviceInfo.State === "created") {
                         createdCount++;
                     } else {
                         log.warn("updateStackData", "Unexpected service state '" + serviceInfo.State + "'");

@@ -9,7 +9,7 @@ export interface KumaRateLimiterOpts extends RateLimiterOpts {
 
 export type KumaRateLimiterCallback = (err : object) => void;
 
-class KumaRateLimiter {
+export class KumaRateLimiter {
 
     errorMessage : string;
     rateLimiter : RateLimiter;

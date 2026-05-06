@@ -9,6 +9,24 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../common/util-common";
 
+function makeTimestampTransform(mode) {
+    if (mode === "full") {
+        return null;
+    }
+    // Regex literals with /g are stateful; create fresh ones per call via factory
+    const iso = () => /\d{4}-\d{2}-\d{2}T(\d{2}:\d{2}:\d{2})(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?/g;
+    const apache = () => /\[\d{2}\/\w+\/\d{4}:(\d{2}:\d{2}:\d{2}) [+-]\d{4}\]/g;
+    const spaceDate = () => /\d{4}[-/]\d{2}[-/]\d{2} (\d{2}:\d{2}:\d{2})(?:\.\d+)?/g;
+    if (mode === "none") {
+        return (data) => data.replace(iso(), "").replace(apache(), "").replace(spaceDate(), "");
+    }
+    // "short" — keep only HH:MM:SS
+    return (data) => data
+        .replace(iso(), (_, t) => t)
+        .replace(apache(), (_, t) => t)
+        .replace(spaceDate(), (_, t) => t);
+}
+
 export default {
     /**
      * @type {Terminal}
@@ -63,7 +81,13 @@ export default {
         mode: {
             type: String,
             default: "displayOnly",
-        }
+        },
+
+        // "full" = show all timestamps, "short" = HH:MM:SS only, "none" = strip timestamps
+        timestampMode: {
+            type: String,
+            default: "full",
+        },
     },
     emits: [ "has-data" ],
     data() {
@@ -71,6 +95,13 @@ export default {
             terminalInputBuffer: "",
             cursorPosition: 0,
         };
+    },
+    watch: {
+        timestampMode(mode) {
+            this.$root.setTerminalTransform(this.name, makeTimestampTransform(mode));
+            this.clearTerminal();
+            this.bind();
+        },
     },
     created() {
 
@@ -113,6 +144,7 @@ export default {
             this.$emit("has-data");
         });
 
+        this.$root.setTerminalTransform(this.name, makeTimestampTransform(this.timestampMode));
         this.bind();
 
         // Create a new Terminal
@@ -132,10 +164,17 @@ export default {
 
         window.removeEventListener("resize", this.onResizeEvent); // Remove the resize event listener from the window object.
         this.$root.unbindTerminal(this.endpoint, this.name);
+        this.$root.setTerminalTransform(this.name, null);
         this.terminal.dispose();
     },
 
     methods: {
+        rebind() {
+            this.$root.setTerminalTransform(this.name, makeTimestampTransform(this.timestampMode));
+            this.clearTerminal();
+            this.bind();
+        },
+
         bind(endpoint, name) {
             // Workaround: normally this.name should be set, but it is not sometimes, so we use the parameter, but eventually this.name and name must be the same name
             if (name) {

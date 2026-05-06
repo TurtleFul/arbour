@@ -95,7 +95,12 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Terminal name must be a string.");
                 }
 
-                let buffer : string = Terminal.getTerminal(terminalName)?.getBuffer() ?? "";
+                const terminal = Terminal.getTerminal(terminalName);
+                // Re-subscribe this socket in case it previously left (e.g. modal close/rebind).
+                // socketList is keyed by socket.id so calling join twice is idempotent.
+                terminal?.join(socket);
+
+                const buffer : string = terminal?.getBuffer() ?? "";
 
                 if (!buffer) {
                     log.debug("console", "No buffer found.");

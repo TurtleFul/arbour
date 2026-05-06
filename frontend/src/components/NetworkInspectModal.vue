@@ -18,7 +18,6 @@
         </div>
 
         <div v-else-if="data" class="network-panel">
-
             <!-- Header card -->
             <div class="net-header mb-4">
                 <div class="net-header-icon">

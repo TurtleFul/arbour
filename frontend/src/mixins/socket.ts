@@ -11,6 +11,7 @@ import type { SocketRes } from "../vue-augmentation";
 let socket : Socket;
 
 let terminalMap : Map<string, Terminal> = new Map();
+let terminalTransformMap : Map<string, (data: string) => string> = new Map();
 let filterRebuildTimer : ReturnType<typeof setTimeout> | null = null;
 
 export default defineComponent({
@@ -271,10 +272,16 @@ export default defineComponent({
 
             agentSocket.on("terminalWrite", (...args) => {
                 const terminalName = args[0] as string;
-                const data = args[1] as string | Uint8Array;
+                let data = args[1] as string | Uint8Array;
                 const terminal = terminalMap.get(terminalName);
                 if (!terminal) {
                     return;
+                }
+                if (typeof data === "string") {
+                    const transform = terminalTransformMap.get(terminalName);
+                    if (transform) {
+                        data = transform(data);
+                    }
                 }
                 terminal.write(data);
             });
@@ -460,7 +467,12 @@ export default defineComponent({
             // Load terminal, get terminal screen
             this.emitAgent(endpoint, "terminalJoin", terminalName, (res: SocketRes) => {
                 if (res.ok) {
-                    terminal.write(res.buffer as string);
+                    let buffer = res.buffer as string;
+                    const transform = terminalTransformMap.get(terminalName);
+                    if (transform && typeof buffer === "string") {
+                        buffer = transform(buffer);
+                    }
+                    terminal.write(buffer);
                     terminalMap.set(terminalName, terminal);
                 } else {
                     this.toastRes(res);
@@ -476,6 +488,14 @@ export default defineComponent({
             });
 
             terminalMap.delete(terminalName);
+        },
+
+        setTerminalTransform(terminalName: string, transform: ((data: string) => string) | null) {
+            if (transform) {
+                terminalTransformMap.set(terminalName, transform);
+            } else {
+                terminalTransformMap.delete(terminalName);
+            }
         },
 
     }

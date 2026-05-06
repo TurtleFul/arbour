@@ -98,12 +98,7 @@ bun run test:watch # re-run on file changes
 
 Tests use `bun:test` (built-in, no extra packages needed). Backend tests that need a database use an in-memory SQLite instance — no setup required.
 
-Test files live next to their subjects in `__tests__/` directories:
-```
-common/__tests__/util-common.test.ts
-common/__tests__/compose-document.test.ts
-backend/__tests__/settings.test.ts
-```
+Test files live next to their subjects in `__tests__/` directories under `common/` and `backend/`.
 
 ## Type Checking
 

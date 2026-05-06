@@ -1,7 +1,6 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import pluginVue from "eslint-plugin-vue";
-import jsdoc from "eslint-plugin-jsdoc";
 import vueParser from "vue-eslint-parser";
 import globals from "globals";
 
@@ -27,9 +26,6 @@ export default [
         },
     },
     {
-        plugins: {
-            jsdoc,
-        },
         rules: {
             "yoda": "error",
             "linebreak-style": ["error", "unix"],

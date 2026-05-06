@@ -66,6 +66,7 @@ interface ArbourRootInstance {
     storage(): Storage;
     bindTerminal(endpoint: string, terminalName: string, terminal: Terminal): void;
     unbindTerminal(endpoint: string, terminalName: string): void;
+    setTerminalTransform(terminalName: string, transform: ((data: string) => string) | null): void;
     changeLang(lang: string): Promise<void>;
     applyColorTheme(theme: string): void;
 }

@@ -154,16 +154,47 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">{{ $t("log") }}</h4>
-                        <Terminal
-                            ref="combinedTerminal"
-                            class="mb-3 terminal"
-                            :name="combinedTerminalName"
-                            :endpoint="endpoint"
-                            :rows="combinedTerminalRows"
-                            :cols="combinedTerminalCols"
-                            style="height: 315px;"
-                        ></Terminal>
+                        <div class="log-section-header mb-3">
+                            <h4>{{ $t("log") }}</h4>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button
+                                    v-for="opt in timestampOptions"
+                                    :key="opt.value"
+                                    type="button"
+                                    class="btn"
+                                    :class="logTimestampMode === opt.value ? 'btn-primary' : 'btn-normal'"
+                                    @click="setLogTimestampMode(opt.value)"
+                                >
+                                    {{ opt.label }}
+                                </button>
+                                <button type="button" class="btn btn-normal" :title="$t('expand')" @click="logExpanded = true">
+                                    <font-awesome-icon icon="expand" />
+                                </button>
+                            </div>
+                        </div>
+                        <div class="log-terminal-wrap mb-3">
+                            <Terminal
+                                v-show="!logExpanded"
+                                ref="combinedTerminal"
+                                class="terminal"
+                                :name="combinedTerminalName"
+                                :endpoint="endpoint"
+                                :rows="combinedTerminalRows"
+                                :cols="combinedTerminalCols"
+                                :timestamp-mode="logTimestampMode"
+                                style="height: 315px;"
+                            ></Terminal>
+                        </div>
+                        <BModal v-model="logExpanded" :title="$t('log')" size="xl" no-footer>
+                            <Terminal
+                                v-if="logExpanded"
+                                ref="modalTerminal"
+                                :name="combinedTerminalName"
+                                :endpoint="endpoint"
+                                :timestamp-mode="logTimestampMode"
+                                style="height: 70vh;"
+                            />
+                        </BModal>
                     </div>
 
                     <!-- Auto Update Settings -->
@@ -412,6 +443,16 @@ export default defineComponent({
             showImportRelativePathWarning: false,
             importSourceDir: "",
             yamlCopied: false,
+            logTimestampMode: (localStorage.getItem("logTimestampMode") ?? "full") as string,
+            logExpanded: false,
+            timestampOptions: [
+                { value: "full",
+                    label: "Full" },
+                { value: "short",
+                    label: "Short" },
+                { value: "none",
+                    label: "None" },
+            ] as { value: string; label: string }[],
         };
     },
 
@@ -540,9 +581,19 @@ export default defineComponent({
             deep: true,
         },
 
-        $route(to, from) {
-
-        }
+        logExpanded(val: boolean) {
+            if (val) {
+                setTimeout(() => {
+                    (this.$refs.modalTerminal as { updateTerminalSize(): void } | undefined)?.updateTerminalSize();
+                }, 350);
+            } else {
+                // Modal terminal unmount deleted the shared terminal name from terminalMap
+                // and cleared the transform. Rebind the inline terminal to restore it.
+                this.$nextTick(() => {
+                    (this.$refs.combinedTerminal as { rebind(): void } | undefined)?.rebind();
+                });
+            }
+        },
     },
 
     mounted() {
@@ -596,6 +647,11 @@ export default defineComponent({
     },
 
     methods: {
+        setLogTimestampMode(mode: string) {
+            this.logTimestampMode = mode;
+            localStorage.setItem("logTimestampMode", mode);
+        },
+
         resetUpdateDialog() {
             this.updateDialogData = {
                 pruneAfterUpdate: false,
@@ -923,6 +979,16 @@ export default defineComponent({
     height: 200px;
 }
 
+.log-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h4 {
+        margin: 0;
+    }
+}
+
 .editor-box {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
@@ -948,6 +1014,10 @@ export default defineComponent({
     right: 15px;
     top: 15px;
     z-index: 10;
+}
+
+.log-terminal-wrap {
+    position: relative;
 }
 
 .yaml-copy-button {

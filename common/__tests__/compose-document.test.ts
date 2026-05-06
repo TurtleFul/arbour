@@ -280,3 +280,90 @@ services:
         expect(raw).toContain("${TAG}");
     });
 });
+
+// ---------------------------------------------------------------------------
+// toYAML()
+// ---------------------------------------------------------------------------
+
+describe("ComposeDocument — toYAML()", () => {
+    test("produces a non-empty string", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        expect(typeof doc.toYAML()).toBe("string");
+        expect(doc.toYAML().length).toBeGreaterThan(0);
+    });
+
+    test("round-trip preserves service image", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        const doc2 = new ComposeDocument(doc.toYAML());
+        expect(doc2.services.getService("web").image).toBe("nginx:latest");
+    });
+
+    test("mutation is reflected in toYAML() output", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.services.getService("web").image = "alpine:3";
+        expect(doc.toYAML()).toContain("alpine:3");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// ComposeServices — has / delete / set
+// ---------------------------------------------------------------------------
+
+describe("ComposeServices — structural mutations", () => {
+    test("has() returns true for existing service", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        expect(doc.services.has("web")).toBe(true);
+    });
+
+    test("has() returns false for unknown service", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        expect(doc.services.has("nonexistent")).toBe(false);
+    });
+
+    test("delete() removes a key from a service", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        const svc = doc.services.getService("web");
+        svc.delete("restart");
+        expect(svc.get("restart")).toBeUndefined();
+    });
+
+    test("set() writes a new key on a service", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.services.getService("web").set("mem_limit", "512m");
+        expect(doc.services.getService("web").get("mem_limit")).toBe("512m");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// ComposeNetworks
+// ---------------------------------------------------------------------------
+
+const COMPOSE_WITH_NETWORK = `
+services:
+  web:
+    image: nginx
+    networks:
+      - frontend
+networks:
+  frontend:
+    external: true
+`.trim();
+
+describe("ComposeDocument — networks", () => {
+    test("reads network names", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_NETWORK);
+        expect(Object.keys(doc.networks.getNetworks())).toContain("frontend");
+    });
+
+    test("reads external flag", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_NETWORK);
+        expect(doc.networks.getNetwork("frontend").external).toBe(true);
+    });
+
+    test("sets external to false", () => {
+        const doc = new ComposeDocument(COMPOSE_WITH_NETWORK);
+        const net = doc.networks.getNetwork("frontend");
+        net.external = false;
+        expect(net.external).toBe(false);
+    });
+});

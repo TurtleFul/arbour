@@ -40,7 +40,7 @@ export class User {
 
     async resetPassword(newPassword: string) {
         await User.resetPassword(this.id, newPassword);
-        this.password = newPassword;
+        this.password = generatePasswordHash(newPassword);
     }
 
     static createJWT(user: User, jwtSecret: string): string {
