@@ -46,3 +46,20 @@ export const serviceEventLog = sqliteTable("service_event_log", {
     timestamp: integer("timestamp").notNull(),
     success: integer("success", { mode: "boolean" }),
 });
+
+export const gitCredential = sqliteTable("git_credential", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name", { length: 255 }).notNull(),
+    username: text("username", { length: 255 }).notNull().default(""),
+    token: text("token", { length: 1024 }).notNull(),
+});
+
+export const stackGitSource = sqliteTable("stack_git_source", {
+    stackName: text("stack_name", { length: 255 }).primaryKey(),
+    repoUrl: text("repo_url", { length: 1024 }).notNull(),
+    branch: text("branch", { length: 255 }).notNull().default("main"),
+    subdir: text("subdir", { length: 1024 }).notNull().default(""),
+    credentialId: integer("credential_id").references(() => gitCredential.id, { onDelete: "set null" }),
+    lastPulledAt: integer("last_pulled_at"),
+    lastCommit: text("last_commit", { length: 64 }).notNull().default(""),
+});

@@ -128,3 +128,19 @@ export type DockerArtefactData = {
     info: DockerArtefactInfo,
     data: DockerArtefactItem[]
 }
+
+export type GitCredentialData = {
+    id: number;
+    name: string;
+    username: string;
+};
+
+export type GitSourceData = {
+    stackName: string;
+    repoUrl: string;
+    branch: string;
+    subdir: string;
+    credentialId: number | null;
+    lastPulledAt: number | null;
+    lastCommit: string;
+};

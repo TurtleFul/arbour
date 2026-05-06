@@ -113,6 +113,18 @@ stackStatusList<template>
                     </div>
 
                     <button class="btn-normal btn mb-4" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
+
+                    <h2 class="mb-3">{{ $t("gitSource") }}</h2>
+                    <button class="btn btn-normal mb-4" @click="showGitImportDialog = true">
+                        <font-awesome-icon icon="code-branch" class="me-1" />
+                        {{ $t("importFromGit") }}
+                    </button>
+
+                    <GitImportDialog
+                        v-model="showGitImportDialog"
+                        :endpoint="''"
+                        @imported="onGitImported"
+                    />
                     <!-- Agent List -->
                 </div>
             </div>
@@ -126,10 +138,11 @@ import { defineComponent } from "vue";
 import { AgentData, SimpleStackData } from "../../../common/types";
 import { StackFilter, StackStatusInfo } from "../../../common/util-common";
 import type { SocketRes } from "../vue-augmentation";
+import GitImportDialog from "../components/GitImportDialog.vue";
 
 export default defineComponent({
     components: {
-
+        GitImportDialog,
     },
     props: {
     },
@@ -150,6 +163,7 @@ export default defineComponent({
             showEditAgentNameDialog: {} as Record<string, boolean>,
             editAgentNewName: {} as Record<string, string>,
             connectingAgent: false,
+            showGitImportDialog: false,
             newAgent: {} as AgentData
         };
     },
@@ -313,6 +327,13 @@ export default defineComponent({
                     this.$root.toastRes(res);
                 }
             });
+        },
+
+        onGitImported(res: SocketRes & { stackName?: string }) {
+            this.$root.toastRes(res);
+            if (res.ok && res.stackName) {
+                this.$router.push(`/compose/${res.stackName}`);
+            }
         },
 
         /**

@@ -10,47 +10,51 @@
             </h1>
 
             <div v-if="stack.isManagedByArbour" class="mb-3">
-                <BButtonGroup class="me-2">
-                    <button v-if="isEditMode" class="btn btn-primary me-1" data-toggle="tooltip" :title="$t('tooltipStackDeploy')" :disabled="processing" @click="deployStack">
+                <!-- Edit mode -->
+                <BButtonGroup v-if="isEditMode" class="me-2">
+                    <button class="btn btn-primary me-1" :disabled="processing" @click="deployStack">
                         <font-awesome-icon icon="rocket" class="me-1" />
                         {{ $t("deployStack") }}
                     </button>
-
-                    <button v-if="isEditMode" class="btn btn-normal me-1" data-toggle="tooltip" :title="$t('tooltipStackSave')" :disabled="processing" @click="saveStack">
+                    <button class="btn btn-normal me-1" :disabled="processing" @click="saveStack">
                         <font-awesome-icon icon="save" class="me-1" />
                         {{ $t("saveStackDraft") }}
                     </button>
+                    <button v-if="!isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">
+                        {{ $t("discardStack") }}
+                    </button>
+                </BButtonGroup>
 
-                    <button v-if="!isEditMode" class="btn btn-normal me-1" data-toggle="tooltip" :title="$t('tooltipStackEdit')" :disabled="processing" @click="enableEditMode">
+                <!-- View mode -->
+                <BButtonGroup v-if="!isEditMode" class="me-2">
+                    <button class="btn btn-normal me-1" :disabled="processing" @click="enableEditMode">
                         <font-awesome-icon icon="pen" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("editStack") }}</span>
                     </button>
 
-                    <button v-if="!isEditMode && (hasExitedServices || hasInactiveServices || !stack.started)" class="btn btn-primary me-1" data-toggle="tooltip" :title="$t('tooltipStackStart')" :disabled="processing" @click="startStack">
+                    <button v-if="hasExitedServices || hasInactiveServices || !stack.started" class="btn btn-primary me-1" :disabled="processing" @click="startStack">
                         <font-awesome-icon icon="play" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("startStack") }}</span>
                     </button>
 
-                    <button v-if="!isEditMode && hasRunningServices" class="btn btn-normal me-1" data-toggle="tooltip" :title="$t('tooltipStackRestart')" :disabled="processing" @click="restartStack">
+                    <button v-if="hasRunningServices" class="btn btn-normal me-1" :disabled="processing" @click="restartStack">
                         <font-awesome-icon icon="rotate" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("restartStack") }}</span>
                     </button>
 
-                    <button v-if="!isEditMode" class="btn btn-normal btn-hover-info me-1" data-toggle="tooltip" :title="$t('tooltipStackUpdate')" :disabled="processing" @click="showUpdateDialog = true">
+                    <button class="btn btn-normal btn-hover-info me-1" :disabled="processing" @click="showUpdateDialog = true">
                         <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("updateStack") }}</span>
                     </button>
 
                     <BModal v-model="showUpdateDialog" :title="$t('updateStack')" :close-on-esc="true" @show="resetUpdateDialog" @hidden="resetUpdateDialog">
                         <p class="mb-3" v-html="$t('updateStackMsg')"></p>
-
                         <BForm>
                             <BFormCheckbox v-model="updateDialogData.pruneAfterUpdate" switch><span v-html="$t('pruneAfterUpdate')"></span></BFormCheckbox>
                             <div style="margin-left: 2.5rem;">
                                 <BFormCheckbox v-model="updateDialogData.pruneAllAfterUpdate" :checked="updateDialogData.pruneAfterUpdate && updateDialogData.pruneAllAfterUpdate" :disabled="!updateDialogData.pruneAfterUpdate"><span v-html="$t('pruneAllAfterUpdate')"></span></BFormCheckbox>
                             </div>
                         </BForm>
-
                         <template #footer>
                             <button class="btn btn-primary" @click="updateStack">
                                 <font-awesome-icon icon="cloud-arrow-down" class="me-1" />{{ $t("updateStack") }}
@@ -58,24 +62,32 @@
                         </template>
                     </BModal>
 
-                    <button v-if="!isEditMode && hasRunningServices" class="btn btn-normal btn-hover-danger me-1" data-toggle="tooltip" :title="$t('tooltipStackStop')" :disabled="processing" @click="stopStack">
+                    <button v-if="hasRunningServices" class="btn btn-normal btn-hover-danger me-1" :disabled="processing" @click="stopStack">
                         <font-awesome-icon icon="stop" class="me-1" />
                         <span class="d-none d-xl-inline">{{ $t("stopStack") }}</span>
                     </button>
 
                     <BDropdown menu-class="compose-dropdown-menu" right text="" variant="dark" :disabled="processing">
-                        <BDropdownItem link-class="compose-dropdown-item-normal mb-1" @click="downStack">
-                            <font-awesome-icon icon="stop" class="me-1" />
-                            <span>{{ $t("downStack") }}</span>
+                        <BDropdownItem v-if="gitSource" link-class="compose-dropdown-item-normal mb-1" :disabled="gitPulling" @click="pullFromGit">
+                            <span v-if="gitPulling" class="spinner-border spinner-border-sm me-1"></span>
+                            <font-awesome-icon v-else icon="code-branch" class="me-1" />
+                            <span>{{ $t("pullFromGit") }}</span>
                         </BDropdownItem>
+                        <BDropdownItem v-if="!gitSource" link-class="compose-dropdown-item-normal mb-1" @click="showLinkGitDialog = true">
+                            <font-awesome-icon icon="code-branch" class="me-1" />
+                            <span>{{ $t("linkGitSource") }}</span>
+                        </BDropdownItem>
+                        <BDropdownItem v-if="gitSource" link-class="compose-dropdown-item-normal mb-1" @click="unlinkGitSource">
+                            <font-awesome-icon icon="link-slash" class="me-1" />
+                            <span>{{ $t("unlinkGitSource") }}</span>
+                        </BDropdownItem>
+                        <BDropdownDivider />
                         <BDropdownItem link-class="compose-dropdown-item-danger" @click="showDeleteDialog = !showDeleteDialog">
                             <font-awesome-icon icon="trash" class="me-1" />
                             <span>{{ $t("deleteStack") }}</span>
                         </BDropdownItem>
                     </BDropdown>
                 </BButtonGroup>
-
-                <button v-if="isEditMode && !isAdd" class="btn btn-normal" data-toggle="tooltip" :title="$t('tooltipStackDiscard')" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
             </div>
 
             <!-- URLs -->
@@ -83,6 +95,25 @@
                 <a v-for="(urlItem, index) in urls" :key="index" target="_blank" :href="urlItem.url">
                     <span class="badge bg-secondary text-truncate me-2" style="max-width: 100%;">{{ urlItem.display }}</span>
                 </a>
+            </div>
+
+            <!-- Git source info -->
+            <div v-if="gitSource && !isAdd" class="git-source-info mb-3">
+                <font-awesome-icon icon="code-branch" class="git-source-icon" />
+                <div class="git-source-fields">
+                    <div class="git-source-field">
+                        <span class="git-source-label">{{ $t("gitRepoUrl") }}</span>
+                        <a :href="gitSource.repoUrl" target="_blank" class="git-source-value text-truncate">{{ gitSource.repoUrl }}</a>
+                    </div>
+                    <div class="git-source-field">
+                        <span class="git-source-label">{{ $t("gitBranch") }}</span>
+                        <span class="git-source-value">{{ gitSource.branch }}</span>
+                    </div>
+                    <div v-if="gitSource.lastCommit" class="git-source-field">
+                        <span class="git-source-label">{{ $t("gitCommit") }}</span>
+                        <span class="git-source-value font-monospace">{{ gitSource.lastCommit.slice(0, 7) }}</span>
+                    </div>
+                </div>
             </div>
 
             <ProgressTerminal ref="progressTerminal" :name="terminalName" :endpoint="endpoint" />
@@ -363,6 +394,16 @@
             <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
             </BModal>
+
+            <!-- Link Git Source Dialog -->
+            <LinkGitDialog
+                v-if="!isAdd"
+                v-model="showLinkGitDialog"
+                :stack-name="stack.name"
+                :endpoint="endpoint"
+                :existing-source="gitSource"
+                @saved="onGitSourceSaved"
+            />
         </div>
     </transition>
 </template>
@@ -384,6 +425,7 @@ import { ComposeDocument } from "../../../common/compose-document";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import ProgressTerminal from "../components/ProgressTerminal.vue";
+import LinkGitDialog from "../components/LinkGitDialog.vue";
 
 const template = `
 services:
@@ -407,6 +449,7 @@ export default defineComponent({
         CodeEditor,
         ProgressTerminal,
         BModal,
+        LinkGitDialog,
     },
 
     beforeRouteUpdate(_to: unknown, _from: unknown, next: (val?: boolean | Error) => void) {
@@ -453,6 +496,10 @@ export default defineComponent({
                 { value: "none",
                     label: "None" },
             ] as { value: string; label: string }[],
+            gitSource: null as import("../../common/types").GitSourceData | null,
+            showLinkGitDialog: false,
+            gitPulling: false,
+            gitAutoDeploy: false,
         };
     },
 
@@ -746,6 +793,7 @@ export default defineComponent({
                     this.yamlCodeChange();
                     this.processing = false;
                     this.loadAutoUpdateSettings();
+                    this.loadGitSource();
                 } else {
                     this.$root.toastRes(res);
                 }
@@ -969,6 +1017,44 @@ export default defineComponent({
             });
         },
 
+        loadGitSource() {
+            this.$root.emitAgent(this.endpoint, "getStackGitSource", this.stack.name, (res: SocketRes) => {
+                if (res.ok) {
+                    this.gitSource = res.source;
+                }
+            });
+        },
+
+        pullFromGit() {
+            this.gitPulling = true;
+            this.$root.emitAgent(this.endpoint, "pullStackFromGit", {
+                stackName: this.stack.name,
+                autoDeploy: this.gitAutoDeploy,
+            }, (res: SocketRes) => {
+                this.gitPulling = false;
+                this.$root.toastRes(res);
+                if (res.ok) {
+                    this.gitSource = { ...this.gitSource,
+                        lastCommit: res.newCommit };
+                    this.loadStack();
+                }
+            });
+        },
+
+        unlinkGitSource() {
+            this.$root.emitAgent(this.endpoint, "unlinkStackGitSource", this.stack.name, (res: SocketRes) => {
+                this.$root.toastRes(res);
+                if (res.ok) {
+                    this.gitSource = null;
+                }
+            });
+        },
+
+        onGitSourceSaved() {
+            this.loadGitSource();
+            this.loadStack();
+        },
+
     }
 });
 </script>
@@ -1059,6 +1145,60 @@ export default defineComponent({
     &:hover {
         background-color: color-mix(in srgb, var(--arbour-danger) 85%, black);
         color: var(--arbour-text-on-danger);
+    }
+}
+
+.git-source-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    background: var(--arbour-bg-header);
+    border-radius: var(--arbour-radius);
+    padding: 0.5rem 0.75rem;
+    font-size: 13px;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.git-source-icon {
+    color: var(--arbour-text-muted);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.git-source-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+}
+
+.git-source-field {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+
+.git-source-label {
+    color: var(--arbour-text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+}
+
+.git-source-value {
+    color: var(--arbour-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &[href] {
+        color: var(--arbour-primary);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
     }
 }
 

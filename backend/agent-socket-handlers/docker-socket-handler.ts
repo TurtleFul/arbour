@@ -1,18 +1,23 @@
 import { AgentSocketHandler } from "../agent-socket-handler";
 import { ArbourServer } from "../arbour-server";
-import { callbackError, callbackResult, checkLogin, ArbourSocket, ValidationError } from "../util-server";
+import { callbackError, callbackResult, checkLogin, fileExists, ArbourSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
 import { EXITED, RUNNING } from "../../common/util-common";
 import { promises as fsAsync } from "fs";
 import path from "path";
 import { logServiceEvent, getServiceEvents } from "../service-event-logger";
+import { getDb } from "../db/index";
+import { gitCredential as gitCredentialTable, stackGitSource as stackGitSourceTable } from "../db/schema";
+import { eq } from "drizzle-orm";
+import { GitSourceManager } from "../git-source-manager";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : ArbourSocket, server : ArbourServer, agentSocket : AgentSocket) {
         // Do not call super.create()
 
         this.importStack(server, agentSocket, socket);
+        this.gitSourceHandlers(server, agentSocket, socket);
 
         agentSocket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
@@ -61,6 +66,11 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     server.sendStackList();
                     throw e;
                 }
+
+                // Clean up git source link and cached repo if present
+                getDb().delete(stackGitSourceTable).where(eq(stackGitSourceTable.stackName, name)).run();
+                const gitManager = new GitSourceManager(server.config.dataDir);
+                await gitManager.deleteCachedRepo(name);
 
                 server.sendStackList();
                 callbackResult({
@@ -541,6 +551,271 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 callbackResult({
                     ok: true,
                     dockerNetworkList,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+    }
+
+    gitSourceHandlers(server: ArbourServer, agentSocket: AgentSocket, socket: ArbourSocket) {
+        const gitManager = new GitSourceManager(server.config.dataDir);
+
+        agentSocket.on("getStackGitSource", async (stackName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof stackName !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+                const row = getDb()
+                    .select()
+                    .from(stackGitSourceTable)
+                    .where(eq(stackGitSourceTable.stackName, stackName))
+                    .get();
+                callbackResult({ ok: true,
+                    source: row ?? null }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("linkStackGitSource", async (data: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof data !== "object" || data === null) {
+                    throw new ValidationError("Invalid data");
+                }
+                const { stackName, repoUrl, branch, subdir, credentialId } = data as Record<string, unknown>;
+                if (typeof stackName !== "string" || !stackName.trim()) {
+                    throw new ValidationError("Stack name is required");
+                }
+                if (typeof repoUrl !== "string" || !repoUrl.trim()) {
+                    throw new ValidationError("Repository URL is required");
+                }
+                if (!repoUrl.startsWith("http://") && !repoUrl.startsWith("https://")) {
+                    throw new ValidationError("Only HTTP/HTTPS repository URLs are supported");
+                }
+
+                getDb()
+                    .insert(stackGitSourceTable)
+                    .values({
+                        stackName: stackName.trim(),
+                        repoUrl: repoUrl.trim(),
+                        branch: typeof branch === "string" && branch.trim() ? branch.trim() : "main",
+                        subdir: typeof subdir === "string" ? subdir.trim() : "",
+                        credentialId: typeof credentialId === "number" ? credentialId : null,
+                    })
+                    .onConflictDoUpdate({
+                        target: stackGitSourceTable.stackName,
+                        set: {
+                            repoUrl: repoUrl.trim(),
+                            branch: typeof branch === "string" && branch.trim() ? branch.trim() : "main",
+                            subdir: typeof subdir === "string" ? subdir.trim() : "",
+                            credentialId: typeof credentialId === "number" ? credentialId : null,
+                        },
+                    })
+                    .run();
+
+                callbackResult({ ok: true }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("unlinkStackGitSource", async (stackName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof stackName !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+                getDb()
+                    .delete(stackGitSourceTable)
+                    .where(eq(stackGitSourceTable.stackName, stackName))
+                    .run();
+                await gitManager.deleteCachedRepo(stackName);
+                callbackResult({ ok: true }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("importStackFromGit", async (data: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof data !== "object" || data === null) {
+                    throw new ValidationError("Invalid data");
+                }
+                const { stackName, repoUrl, branch, subdir, credentialId, deploy } = data as Record<string, unknown>;
+                if (typeof stackName !== "string" || !stackName.trim()) {
+                    throw new ValidationError("Stack name is required");
+                }
+                if (!/^[a-zA-Z0-9_-]+$/.test(stackName.trim())) {
+                    throw new ValidationError("Stack name may only contain letters, numbers, hyphens, and underscores");
+                }
+                if (typeof repoUrl !== "string" || !repoUrl.trim()) {
+                    throw new ValidationError("Repository URL is required");
+                }
+                if (!repoUrl.startsWith("http://") && !repoUrl.startsWith("https://")) {
+                    throw new ValidationError("Only HTTP/HTTPS repository URLs are supported");
+                }
+
+                const resolvedBranch = typeof branch === "string" && branch.trim() ? branch.trim() : "main";
+                const resolvedSubdir = typeof subdir === "string" ? subdir.trim() : "";
+                const resolvedCredId = typeof credentialId === "number" ? credentialId : null;
+
+                let credential;
+                if (resolvedCredId !== null) {
+                    credential = getDb()
+                        .select()
+                        .from(gitCredentialTable)
+                        .where(eq(gitCredentialTable.id, resolvedCredId))
+                        .get();
+                    if (!credential) {
+                        throw new ValidationError("Credential not found");
+                    }
+                }
+
+                // Reject if a non-git-managed stack already exists with this name
+                const stackDir = path.join(server.stacksDir, stackName.trim());
+                if (await fileExists(stackDir)) {
+                    const existingSource = getDb()
+                        .select()
+                        .from(stackGitSourceTable)
+                        .where(eq(stackGitSourceTable.stackName, stackName.trim()))
+                        .get();
+                    if (existingSource) {
+                        await fsAsync.rm(stackDir, { recursive: true, force: true });
+                    } else {
+                        throw new ValidationError("Stack name already exists");
+                    }
+                }
+
+                let newCommit: string | undefined;
+                try {
+                    newCommit = await gitManager.syncRepo(
+                        stackName.trim(), repoUrl.trim(), resolvedBranch, credential
+                    );
+
+                    const { yaml: composeYAML, env: composeENV } = await gitManager.readComposeFromRepo(
+                        stackName.trim(), resolvedSubdir
+                    );
+
+                    const now = Math.floor(Date.now() / 1000);
+                    getDb()
+                        .insert(stackGitSourceTable)
+                        .values({
+                            stackName: stackName.trim(),
+                            repoUrl: repoUrl.trim(),
+                            branch: resolvedBranch,
+                            subdir: resolvedSubdir,
+                            credentialId: resolvedCredId,
+                            lastPulledAt: now,
+                            lastCommit: newCommit,
+                        })
+                        .onConflictDoUpdate({
+                            target: stackGitSourceTable.stackName,
+                            set: {
+                                repoUrl: repoUrl.trim(),
+                                branch: resolvedBranch,
+                                subdir: resolvedSubdir,
+                                credentialId: resolvedCredId,
+                                lastPulledAt: now,
+                                lastCommit: newCommit,
+                            },
+                        })
+                        .run();
+
+                    const stack = new Stack(server, stackName.trim(), composeYAML, composeENV);
+                    await stack.save(true);
+                    server.sendStackList();
+
+                    if (deploy === true) {
+                        await stack.deploy(socket);
+                        logServiceEvent(stack.name, "", "deploy", "manual", true);
+                        stack.joinCombinedTerminal(socket);
+                    }
+                } catch (e) {
+                    // Clean up git cache and partial DB entry so the name is fully free to retry
+                    await gitManager.deleteCachedRepo(stackName.trim());
+                    getDb().delete(stackGitSourceTable).where(eq(stackGitSourceTable.stackName, stackName.trim())).run();
+                    if (await fileExists(stackDir)) {
+                        await fsAsync.rm(stackDir, { recursive: true, force: true });
+                    }
+                    throw e;
+                }
+
+                callbackResult({
+                    ok: true,
+                    msg: deploy === true ? "gitPullAndDeploySuccess" : "gitPullSuccess",
+                    msgi18n: true,
+                    newCommit,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("pullStackFromGit", async (data: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof data !== "object" || data === null) {
+                    throw new ValidationError("Invalid data");
+                }
+                const { stackName, autoDeploy } = data as Record<string, unknown>;
+                if (typeof stackName !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const source = getDb()
+                    .select()
+                    .from(stackGitSourceTable)
+                    .where(eq(stackGitSourceTable.stackName, stackName))
+                    .get();
+
+                if (!source) {
+                    throw new ValidationError("Stack has no Git source linked");
+                }
+
+                let credential;
+                if (source.credentialId !== null) {
+                    credential = getDb()
+                        .select()
+                        .from(gitCredentialTable)
+                        .where(eq(gitCredentialTable.id, source.credentialId))
+                        .get();
+                }
+
+                const newCommit = await gitManager.syncRepo(
+                    stackName, source.repoUrl, source.branch, credential
+                );
+
+                const { yaml: composeYAML, env: composeENV } = await gitManager.readComposeFromRepo(
+                    stackName, source.subdir
+                );
+
+                const now = Math.floor(Date.now() / 1000);
+                getDb()
+                    .update(stackGitSourceTable)
+                    .set({ lastPulledAt: now,
+                        lastCommit: newCommit })
+                    .where(eq(stackGitSourceTable.stackName, stackName))
+                    .run();
+
+                const stack = new Stack(server, stackName, composeYAML, composeENV);
+                await stack.save(false);
+                server.sendStackList();
+
+                if (autoDeploy === true) {
+                    await stack.deploy(socket);
+                    logServiceEvent(stack.name, "", "deploy", "manual", true);
+                    stack.joinCombinedTerminal(socket);
+                }
+
+                callbackResult({
+                    ok: true,
+                    msg: autoDeploy === true ? "gitPullAndDeploySuccess" : "gitPullSuccess",
+                    msgi18n: true,
+                    newCommit,
                 }, callback);
             } catch (e) {
                 callbackError(e, callback);

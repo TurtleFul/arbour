@@ -19,6 +19,7 @@ import General from "./components/settings/General.vue";
 const Security = () => import("./components/settings/Security.vue");
 import About from "./components/settings/About.vue";
 const ReleaseNotes = () => import("./components/settings/ReleaseNotes.vue");
+const GitCredentials = () => import("./components/settings/GitCredentials.vue");
 import MobileStackList from "./pages/MobileStackList.vue";
 
 const routes = [
@@ -122,6 +123,10 @@ const routes = [
                             {
                                 path: "about",
                                 component: About,
+                            },
+                            {
+                                path: "git-credentials",
+                                component: GitCredentials,
                             },
                         ]
                     },

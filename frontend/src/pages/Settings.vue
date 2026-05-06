@@ -79,6 +79,9 @@ export default {
                 security: {
                     title: this.$t("Security"),
                 },
+                "git-credentials": {
+                    title: this.$t("gitCredentials"),
+                },
                 "release-notes": {
                     title: this.$t("Release Notes"),
                 },

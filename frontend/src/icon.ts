@@ -64,7 +64,10 @@ import {
     faChevronCircleDown,
     faExpand,
     faBan,
-    faClipboardList
+    faClipboardList,
+    faCodeBranch,
+    faLinkSlash,
+    faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -130,7 +133,10 @@ library.add(
     faChevronCircleDown,
     faExpand,
     faBan,
-    faClipboardList
+    faClipboardList,
+    faCodeBranch,
+    faLinkSlash,
+    faPenToSquare,
 );
 
 export { FontAwesomeIcon };

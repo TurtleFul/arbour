@@ -4,13 +4,14 @@ import { SocketHandler } from "../socket-handler.js";
 import { ArbourServer } from "../arbour-server";
 import { log } from "../log";
 import { getDb } from "../db/index";
-import { user as userTable } from "../db/schema";
+import { user as userTable, gitCredential as gitCredentialTable } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import { loginRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
 import {
     callbackError,
+    callbackResult,
     checkLogin,
     ArbourSocket,
     doubleCheckPassword,
@@ -335,6 +336,103 @@ export class MainSocketHandler extends SocketHandler {
                     ok: true,
                     composeTemplate,
                 });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Git credential management
+
+        socket.on("getGitCredentials", async (callback) => {
+            try {
+                checkLogin(socket);
+                const rows = getDb()
+                    .select({ id: gitCredentialTable.id,
+                        name: gitCredentialTable.name,
+                        username: gitCredentialTable.username })
+                    .from(gitCredentialTable)
+                    .all();
+                callbackResult({ ok: true,
+                    credentials: rows }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        socket.on("addGitCredential", async (data: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof data !== "object" || data === null) {
+                    throw new ValidationError("Invalid data");
+                }
+                const { name, username, token } = data as Record<string, unknown>;
+                if (typeof name !== "string" || !name.trim()) {
+                    throw new ValidationError("Name is required");
+                }
+                if (typeof token !== "string" || !token.trim()) {
+                    throw new ValidationError("Token is required");
+                }
+                const result = getDb()
+                    .insert(gitCredentialTable)
+                    .values({
+                        name: name.trim(),
+                        username: typeof username === "string" ? username.trim() : "",
+                        token: token.trim(),
+                    })
+                    .returning({ id: gitCredentialTable.id })
+                    .get();
+                callbackResult({ ok: true, id: result?.id, msg: "Saved" }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        socket.on("updateGitCredential", async (data: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof data !== "object" || data === null) {
+                    throw new ValidationError("Invalid data");
+                }
+                const { id, name, username, token } = data as Record<string, unknown>;
+                if (typeof id !== "number") {
+                    throw new ValidationError("ID is required");
+                }
+                if (typeof name !== "string" || !name.trim()) {
+                    throw new ValidationError("Name is required");
+                }
+                const updateData: Partial<{ name: string; username: string; token: string }> = {
+                    name: name.trim(),
+                    username: typeof username === "string" ? username.trim() : "",
+                };
+                if (typeof token === "string" && token.trim()) {
+                    updateData.token = token.trim();
+                }
+                getDb()
+                    .update(gitCredentialTable)
+                    .set(updateData)
+                    .where(eq(gitCredentialTable.id, id))
+                    .run();
+                callbackResult({ ok: true, msg: "Saved" }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        socket.on("deleteGitCredential", async (data: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof data !== "object" || data === null) {
+                    throw new ValidationError("Invalid data");
+                }
+                const { id } = data as Record<string, unknown>;
+                if (typeof id !== "number") {
+                    throw new ValidationError("ID is required");
+                }
+                getDb()
+                    .delete(gitCredentialTable)
+                    .where(eq(gitCredentialTable.id, id))
+                    .run();
+                callbackResult({ ok: true, msg: "Deleted" }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
