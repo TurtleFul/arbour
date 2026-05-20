@@ -6,7 +6,6 @@ stacks
 tmp
 /private
 
-frontend-dist
 .git
 .gitignore
 docker

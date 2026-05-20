@@ -105,10 +105,11 @@ export class StackAutoUpdateManager {
             await this.applyUpdates(stack, trigger);
         } catch (e) {
             log.error("autoUpdate", `Scheduled update failed for stack '${stackName}': ${e}`);
+            logServiceEvent(stackName, "", "update", trigger, false);
         }
     }
 
-    private async applyUpdates(stack: Stack, trigger: EventTrigger): Promise<void> {
+    protected async applyUpdates(stack: Stack, trigger: EventTrigger): Promise<void> {
         const services = stack.getServicesWithAvailableImageUpdates();
         if (services.length === 0) {
             return;
@@ -119,8 +120,8 @@ export class StackAutoUpdateManager {
         let anyUpdated = false;
         for (const serviceData of services) {
             const updated = await stack.autoUpdateService(serviceData.name);
+            logServiceEvent(stack.name, serviceData.name, "update", trigger, updated);
             if (updated) {
-                logServiceEvent(stack.name, serviceData.name, "update", trigger, true);
                 anyUpdated = true;
             }
         }

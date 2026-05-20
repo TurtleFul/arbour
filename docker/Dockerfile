@@ -1,7 +1,7 @@
 ############################################
 # System base: Bun + Docker CLI + skopeo + dumb-init
 ############################################
-FROM oven/bun:1-debian AS system-base
+FROM oven/bun:1.3.14-debian AS system-base
 RUN apt-get update && apt-get install --yes --no-install-recommends \
         ca-certificates \
         curl \
@@ -31,31 +31,17 @@ WORKDIR /app
 COPY package.json bun.lock ./
 
 ############################################
-# All deps (dev + prod) for frontend build
-############################################
-FROM build-base AS deps-all
-RUN bun install --frozen-lockfile
-
-############################################
-# Frontend build
-############################################
-FROM deps-all AS frontend-build
-COPY . .
-RUN bun run build:frontend
-
-############################################
 # Production-only deps
 ############################################
 FROM build-base AS deps-prod
 RUN bun install --frozen-lockfile --production
 
 ############################################
-# Release image
+# Release image (frontend-dist must be pre-built in build context)
 ############################################
 FROM system-base AS release
 WORKDIR /app
 COPY --from=deps-prod /app/node_modules ./node_modules
-COPY --from=frontend-build /app/frontend-dist ./frontend-dist
 COPY . .
 RUN mkdir -p ./data
 

@@ -2,16 +2,16 @@
  * Arbour CI pipelines. Runs locally and in CI identically.
  *
  * Usage (from repo root):
- *   dagger call test             --source=.
- *   dagger call lint             --source=.
- *   dagger call typecheck        --source=.
- *   dagger call verify           --source=.
- *   dagger call build-frontend   --source=. export --path=./frontend-dist
- *   dagger call build-image      --source=. as-tarball export --path=./arbour.tar
- *   dagger call ci               --source=.
- *   dagger call github-ci        --source=.    # full pipeline: ci + build-image
+ *   dagger call test
+ *   dagger call lint
+ *   dagger call typecheck
+ *   dagger call verify
+ *   dagger call build-frontend export --path=./frontend-dist
+ *   dagger call build-image as-tarball export --path=./arbour.tar
+ *   dagger call ci
+ *   dagger call github-ci        # full pipeline: ci + build-image
  */
-import { dag, Container, Directory, object, func } from "@dagger.io/dagger";
+import { dag, Container, Directory, object, func, argument } from "@dagger.io/dagger";
 
 const SOURCE_EXCLUDES = [
     "node_modules",
@@ -31,10 +31,10 @@ export class Arbour {
      * Base container: Bun + native toolchain + installed deps.
      */
     @func()
-    base(source: Directory): Container {
+    base(@argument({ defaultPath: "." }) source: Directory): Container {
         return dag
             .container()
-            .from("oven/bun:1-debian")
+            .from("oven/bun:1.3.14-debian")
             .withExec(["apt-get", "update"])
             .withExec([
                 "apt-get", "install", "-y", "--no-install-recommends",
@@ -49,31 +49,31 @@ export class Arbour {
 
     /** Run bun test. */
     @func()
-    async test(source: Directory): Promise<string> {
+    async test(@argument({ defaultPath: "." }) source: Directory): Promise<string> {
         return this.base(source).withExec(["sh", "-c", "bun test 2>&1"]).stdout();
     }
 
     /** Run eslint. */
     @func()
-    async lint(source: Directory): Promise<string> {
+    async lint(@argument({ defaultPath: "." }) source: Directory): Promise<string> {
         return this.base(source).withExec(["sh", "-c", "bun run lint 2>&1"]).stdout();
     }
 
     /** Run vue-tsc --noEmit. */
     @func()
-    async typecheck(source: Directory): Promise<string> {
+    async typecheck(@argument({ defaultPath: "." }) source: Directory): Promise<string> {
         return this.base(source).withExec(["sh", "-c", "bun run typecheck 2>&1"]).stdout();
     }
 
     /** Run fmt + typecheck + test (bun run verify). */
     @func()
-    async verify(source: Directory): Promise<string> {
+    async verify(@argument({ defaultPath: "." }) source: Directory): Promise<string> {
         return this.base(source).withExec(["sh", "-c", "bun run verify 2>&1"]).stdout();
     }
 
     /** Build the frontend bundle, return the frontend-dist directory. */
     @func()
-    buildFrontend(source: Directory): Directory {
+    buildFrontend(@argument({ defaultPath: "." }) source: Directory): Directory {
         return this.base(source)
             .withExec(["sh", "-c", "bun run build:frontend 2>&1"])
             .directory("/app/frontend-dist");
@@ -81,8 +81,10 @@ export class Arbour {
 
     /** Build the release container image via docker/Dockerfile. */
     @func()
-    buildImage(source: Directory): Container {
-        return source.dockerBuild({
+    buildImage(@argument({ defaultPath: "." }) source: Directory): Container {
+        const frontendDist = this.buildFrontend(source);
+        const ctx = source.withDirectory("frontend-dist", frontendDist);
+        return ctx.dockerBuild({
             dockerfile: "docker/Dockerfile",
             target: "release",
         });
@@ -90,13 +92,13 @@ export class Arbour {
 
     /** Run verify (fmt + typecheck + test). */
     @func()
-    async ci(source: Directory): Promise<string> {
+    async ci(@argument({ defaultPath: "." }) source: Directory): Promise<string> {
         return this.verify(source);
     }
 
     /** Full CI pipeline for GitHub Actions: verify, then build image. */
     @func()
-    async githubCi(source: Directory): Promise<string> {
+    async githubCi(@argument({ defaultPath: "." }) source: Directory): Promise<string> {
         const output = await this.verify(source);
         await this.buildImage(source).sync();
         return `${output}\n\n=== build-image ===\nSuccess`;

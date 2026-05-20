@@ -1,5 +1,9 @@
-import { describe, expect, test } from "bun:test";
-import { callbackError, callbackResult, checkLogin, ValidationError, fileExists } from "../util-server";
+import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import { callbackError, callbackResult, checkLogin, ValidationError, fileExists, doubleCheckPassword } from "../util-server";
+import { initDb, closeDb } from "../db/index";
+import { user as userTable } from "../db/schema";
+import { generatePasswordHash } from "../password-hash";
+import { runMigrations } from "./helpers";
 import os from "os";
 import path from "path";
 import fs from "fs";
@@ -94,6 +98,60 @@ describe("callbackResult", () => {
 // ---------------------------------------------------------------------------
 // fileExists
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// doubleCheckPassword
+// ---------------------------------------------------------------------------
+
+describe("doubleCheckPassword", () => {
+    beforeEach(() => {
+        const db = initDb(":memory:");
+        runMigrations(db.$client);
+    });
+    afterEach(closeDb);
+
+    async function insertUser(active: boolean, password: string): Promise<number> {
+        const db = (await import("../db/index")).getDb();
+        const hash = generatePasswordHash(password);
+        const result = db.insert(userTable).values({
+            username: "testuser",
+            password: hash,
+            active,
+        }).returning({ id: userTable.id }).get();
+        return result.id;
+    }
+
+    test("throws when currentPassword is not a string", async () => {
+        const socket = { userID: 1 } as never;
+        await expect(doubleCheckPassword(socket, 123)).rejects.toThrow("Wrong data type?");
+        await expect(doubleCheckPassword(socket, null)).rejects.toThrow("Wrong data type?");
+        await expect(doubleCheckPassword(socket, undefined)).rejects.toThrow("Wrong data type?");
+    });
+
+    test("returns User when password is correct", async () => {
+        const id = await insertUser(true, "correct-pass");
+        const socket = { userID: id } as never;
+        const user = await doubleCheckPassword(socket, "correct-pass");
+        expect(user).toBeDefined();
+    });
+
+    test("throws when password is wrong", async () => {
+        const id = await insertUser(true, "correct-pass");
+        const socket = { userID: id } as never;
+        await expect(doubleCheckPassword(socket, "wrong-pass")).rejects.toThrow("Incorrect current password");
+    });
+
+    test("throws when user is inactive", async () => {
+        const id = await insertUser(false, "correct-pass");
+        const socket = { userID: id } as never;
+        await expect(doubleCheckPassword(socket, "correct-pass")).rejects.toThrow("Incorrect current password");
+    });
+
+    test("throws when userID does not exist", async () => {
+        const socket = { userID: 9999 } as never;
+        await expect(doubleCheckPassword(socket, "any-pass")).rejects.toThrow("Incorrect current password");
+    });
+});
 
 describe("fileExists", () => {
     test("returns true for a file that exists", async () => {
