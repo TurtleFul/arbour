@@ -1,0 +1,238 @@
+@use "vars";
+
+@import "@fontsource/jetbrains-mono/index.css";
+@import "@xterm/xterm/css/xterm.css";
+
+/* ─── Reset ───────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    background-color: var(--arbour-bg-body);
+    color: var(--arbour-text);
+}
+
+a {
+    color: var(--arbour-primary);
+    text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+h1, h2, h3, h4, h5, h6 { margin: 0 0 0.5rem; line-height: 1.2; }
+
+code, pre {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.88em;
+}
+
+/* ─── Forms ───────────────────────────────────────────────────────────────── */
+
+input, select, textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--arbour-border);
+    border-radius: var(--arbour-radius);
+    background: var(--arbour-bg);
+    color: var(--arbour-text);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--arbour-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--arbour-primary) 25%, transparent);
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--arbour-text-muted);
+}
+
+input[type="checkbox"], input[type="radio"] {
+    width: auto;
+    accent-color: var(--arbour-primary);
+}
+
+label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: var(--arbour-text-muted);
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────────────────── */
+
+button, .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    padding: 0.45rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--arbour-radius);
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn-primary {
+    background: var(--arbour-gradient);
+    color: var(--arbour-text-on-primary);
+    border-color: var(--arbour-primary);
+    &:hover { background: var(--arbour-gradient-active); }
+}
+
+.btn-danger {
+    background-color: var(--arbour-danger);
+    color: var(--arbour-text-on-danger);
+    border-color: var(--arbour-danger);
+}
+
+.btn-warning {
+    background-color: var(--arbour-warning);
+    color: var(--arbour-text-on-warning);
+    border-color: var(--arbour-warning);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    color: var(--arbour-primary);
+    border-color: var(--arbour-primary);
+    &:hover { background: color-mix(in srgb, var(--arbour-primary) 12%, transparent); }
+}
+
+.btn-sm {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.82rem;
+}
+
+.btn:disabled, button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--arbour-bg); }
+::-webkit-scrollbar-thumb {
+    background: var(--arbour-border);
+    border-radius: 4px;
+    &:hover { background: var(--arbour-text-muted); }
+}
+
+/* ─── Transitions ─────────────────────────────────────────────────────────── */
+
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+    transition: all 0.3s ease-in;
+}
+.slide-fade-enter-from {
+    opacity: 0;
+    transform: translateY(50px);
+}
+.slide-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-50px);
+}
+
+/* ─── Utility ─────────────────────────────────────────────────────────────── */
+
+.text-muted { color: var(--arbour-text-muted); }
+.text-danger { color: var(--arbour-danger); }
+.text-center { text-align: center; }
+.w-100 { width: 100%; }
+.d-none { display: none !important; }
+.d-flex { display: flex; }
+.align-items-center { align-items: center; }
+.justify-content-between { justify-content: space-between; }
+.flex-grow-1 { flex: 1; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 1rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.ms-2 { margin-left: 0.5rem; }
+.me-2 { margin-right: 0.5rem; }
+
+/* ─── Shadow box ──────────────────────────────────────────────────────────── */
+
+.shadow-box {
+    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: var(--arbour-radius);
+    background-color: var(--arbour-bg);
+    &.big-padding { padding: 20px; }
+}
+
+/* ─── Global button variants ──────────────────────────────────────────────── */
+
+.btn-ghost {
+    background: var(--arbour-bg-deep);
+    border: 1px solid var(--arbour-border);
+    color: var(--arbour-text-muted);
+    &:hover:not(:disabled) { background: var(--arbour-bg-header-active); color: var(--arbour-text); }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--arbour-border);
+    color: var(--arbour-text);
+    &:hover { background: var(--arbour-bg-deep); }
+}
+
+.btn-success {
+    background-color: var(--arbour-success);
+    color: var(--arbour-text-on-primary);
+    border-color: var(--arbour-success);
+}
+
+.btn-info {
+    background-color: var(--arbour-info);
+    color: var(--arbour-text-on-primary);
+    border-color: var(--arbour-info);
+}
+
+/* Size variant for icon-only buttons */
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--arbour-text-muted);
+    cursor: pointer;
+    padding: 0.1rem 0.25rem;
+    border-radius: var(--arbour-radius-sm);
+    display: inline-flex;
+    align-items: center;
+    &:hover { color: var(--arbour-text); background: var(--arbour-bg-deep); }
+}
+
+/* Icon styling helpers (applied to raw SVG via {@html}) */
+.empty-icon { font-size: 2rem; opacity: 0.4; }
+
+.noscript-message {
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 2rem;
+    max-width: 500px;
+    margin: 3rem auto;
+}

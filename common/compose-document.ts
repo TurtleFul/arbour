@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Document, Pair, parseDocument, Scalar } from "yaml";
-import dotenv, { DotenvParseOutput } from "dotenv";
-import { LooseObject } from "./util-common";
+import dotenv from "dotenv";
+import type { DotenvParseOutput } from "dotenv";
+import type { LooseObject } from "./util-common";
 // @ts-ignore
 import { replaceVariablesSync } from "@inventage/envsubst";
 

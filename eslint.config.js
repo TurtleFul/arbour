@@ -1,13 +1,13 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import pluginVue from "eslint-plugin-vue";
-import vueParser from "vue-eslint-parser";
+import sveltePlugin from "eslint-plugin-svelte";
+import svelteParser from "svelte-eslint-parser";
 import globals from "globals";
 
 export default [
     eslint.configs.recommended,
     ...tseslint.configs.recommended,
-    ...pluginVue.configs["flat/recommended"],
+    ...sveltePlugin.configs["flat/recommended"],
     {
         languageOptions: {
             globals: {
@@ -17,9 +17,9 @@ export default [
         },
     },
     {
-        files: ["**/*.vue"],
+        files: ["**/*.svelte"],
         languageOptions: {
-            parser: vueParser,
+            parser: svelteParser,
             parserOptions: {
                 parser: tseslint.parser,
             },
@@ -32,7 +32,6 @@ export default [
             "camelcase": ["warn", {
                 "properties": "never",
                 "ignoreImports": true,
-                "allow": ["^CONSOLE_STYLE_"]
             }],
             "no-unused-vars": ["warn", {
                 "args": "none",
@@ -48,13 +47,6 @@ export default [
             ],
             quotes: ["error", "double"],
             semi: "error",
-            "vue/html-indent": ["error", 4],
-            "vue/max-attributes-per-line": "off",
-            "vue/singleline-html-element-content-newline": "off",
-            "vue/html-self-closing": "off",
-            "vue/require-component-is": "off",
-            "vue/attribute-hyphenation": "off",
-            "vue/multi-word-component-names": "off",
             "no-multi-spaces": ["error", {
                 ignoreEOLComments: true,
             }],
@@ -107,13 +99,11 @@ export default [
                 "args": "none",
                 "caughtErrors": "none"
             }],
-            "vue/no-v-html": "off",
             "prefer-const": "off",
         },
     },
     {
-        // Base no-unused-vars doesn't understand TS enum members; TS rule handles it correctly
-        files: ["**/*.ts", "**/*.vue"],
+        files: ["**/*.ts", "**/*.svelte"],
         rules: {
             "no-unused-vars": "off",
         },
@@ -125,6 +115,7 @@ export default [
             "data/",
             "stacks/",
             ".dagger/",
+            ".svelte-kit/",
         ],
     },
 ];

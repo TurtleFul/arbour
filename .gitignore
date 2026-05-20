@@ -17,3 +17,7 @@ CLAUDE.md
 # Dagger build artifacts
 /arbour-dagger.tar
 /arbour*.tar
+
+# SvelteKit generated
+.svelte-kit/
+frontend/components.d.ts
