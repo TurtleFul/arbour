@@ -31,33 +31,35 @@ function submit() {
 <div class="login-wrap">
     <form class="login-form" onsubmit={(e) => { e.preventDefault(); submit(); }}>
         {#if !tokenRequired}
-            <div class="field">
-                <label for="login-user">{$t("Username")}</label>
+            <div class="form-floating mb-3">
                 <input
                     id="login-user"
+                    class="form-control"
                     bind:value={username}
                     type="text"
                     placeholder={$t("Username")}
                     autocomplete="username"
                     required
                 />
+                <label for="login-user">{$t("Username")}</label>
             </div>
-            <div class="field">
-                <label for="login-pass">{$t("Password")}</label>
+            <div class="form-floating mb-3">
                 <input
                     id="login-pass"
+                    class="form-control"
                     bind:value={password}
                     type="password"
                     placeholder={$t("Password")}
                     autocomplete="current-password"
                     required
                 />
+                <label for="login-pass">{$t("Password")}</label>
             </div>
         {:else}
-            <div class="field">
-                <label for="login-otp">{$t("Token")}</label>
+            <div class="form-floating mb-3">
                 <input
                     id="login-otp"
+                    class="form-control"
                     bind:value={token}
                     type="text"
                     maxlength="6"
@@ -65,14 +67,13 @@ function submit() {
                     autocomplete="one-time-code"
                     required
                 />
+                <label for="login-otp">{$t("Token")}</label>
             </div>
         {/if}
 
-        <div class="remember-row">
-            <label>
-                <input type="checkbox" bind:checked={socketStore.remember} />
-                {$t("Remember me")}
-            </label>
+        <div class="form-check d-flex justify-content-center mb-3">
+            <input id="remember-me" class="form-check-input me-2" type="checkbox" bind:checked={socketStore.remember} />
+            <label class="form-check-label" for="remember-me">{$t("Remember me")}</label>
         </div>
 
         <button class="btn btn-primary w-100" type="submit" disabled={processing}>
@@ -80,7 +81,7 @@ function submit() {
         </button>
 
         {#if res && !res.ok}
-            <div class="error-msg" role="alert">
+            <div class="alert alert-danger mt-3" role="alert">
                 {$t(res.msg as string)}
             </div>
         {/if}
@@ -99,49 +100,5 @@ function submit() {
 .login-form {
     width: 100%;
     max-width: 340px;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.field label {
-    font-size: 0.88rem;
-    color: var(--arbour-text-muted);
-}
-
-.field input {
-    padding: 0.65rem 1.1rem;
-    border-radius: var(--arbour-radius);
-}
-
-.remember-row {
-    display: flex;
-    justify-content: center;
-}
-
-.remember-row label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    color: var(--arbour-text);
-}
-
-.w-100 { width: 100%; }
-
-.error-msg {
-    padding: 0.75rem 1rem;
-    background: color-mix(in srgb, var(--arbour-danger) 20%, transparent);
-    border: 1px solid var(--arbour-danger);
-    border-radius: var(--arbour-radius);
-    color: var(--arbour-danger);
-    font-size: 0.9rem;
 }
 </style>

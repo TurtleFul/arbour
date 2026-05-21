@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount, getContext } from "svelte";
 import { t } from "svelte-i18n";
+import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import { AGENT_CONTEXT, type AgentContext } from "$lib/context";
 import Icon from "./Icon.svelte";
@@ -103,19 +104,19 @@ onMount(loadData);
 
 <div class="artefact-wrap">
     <!-- Action buttons -->
-    <div class="action-bar">
+    <div class="btn-group mb-3 action-bar">
         {#if artefact.actions.includes(DockerArtefactAction.Prune)}
-            <button class="btn btn-primary btn-sm" disabled={ctx?.processing} onclick={() => (showPruneDialog = true)}>
+            <button class="btn btn-primary me-1" disabled={ctx?.processing} onclick={() => (showPruneDialog = true)}>
                 <Icon name="wrench" /> {$t("prune")}
             </button>
         {/if}
         {#if artefact.actions.includes(DockerArtefactAction.Pull)}
-            <button class="btn btn-sm btn-secondary-action" disabled={ctx?.processing || selectedItems.length === 0} onclick={checkOpenPullDialog}>
+            <button class="btn btn-normal me-1" disabled={ctx?.processing || selectedItems.length === 0} onclick={checkOpenPullDialog}>
                 <Icon name="cloud-arrow-down" /> {$t("pull")}
             </button>
         {/if}
         {#if artefact.actions.includes(DockerArtefactAction.Remove)}
-            <button class="btn btn-danger btn-sm" disabled={ctx?.processing || selectedItems.length === 0} onclick={() => (showDeleteDialog = true)}>
+            <button class="btn btn-danger" disabled={ctx?.processing || selectedItems.length === 0} onclick={() => (showDeleteDialog = true)}>
                 <Icon name="trash" /> {$t("delete")}
             </button>
         {/if}
@@ -124,8 +125,8 @@ onMount(loadData);
     {#if fetchingData}
         <div class="loading">{$t("fetchingData")}</div>
     {:else}
-        <div class="table-wrap">
-            <table class="artefact-table">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <th></th>
@@ -144,7 +145,7 @@ onMount(loadData);
                             <td>
                                 <input
                                     type="checkbox"
-                                    class="row-check"
+                                    class="form-check-input row-check"
                                     checked={selectedItems.includes(item.id)}
                                     onchange={(e) => {
                                         if ((e.target as HTMLInputElement).checked) {
@@ -158,12 +159,12 @@ onMount(loadData);
                             {#each Object.values(item.values) as value}
                                 <td class="artefact-cell">{getValue(value)}</td>
                             {/each}
-                            <td class="action-cell">
+                            <td class="action-cell text-nowrap">
                                 {#if item.dangling}
-                                    <span class="badge badge-info">{item.danglingLabel}</span>
+                                    <span class="badge bg-info me-2">{item.danglingLabel}</span>
                                 {/if}
                                 {#if artefact.name === "network"}
-                                    <button class="btn btn-sm btn-ghost" title={$t("networkInspect")} onclick={() => openNetworkInspect(item.id)}>
+                                    <button class="btn btn-sm btn-outline-secondary py-0 px-1" title={$t("networkInspect")} onclick={() => openNetworkInspect(item.id)}>
                                         <Icon name="circle-info" />
                                     </button>
                                 {/if}
@@ -179,7 +180,7 @@ onMount(loadData);
 <!-- Prune dialog -->
 <Confirm
     bind:open={showPruneDialog}
-    title="{$t('prune')} {$t(artefact.name, { values: { n: 2 } })}"
+    title="{$t('prune')} {$tn(artefact.name, 2)}"
     yesText={$t("prune")}
     btnStyle="btn-danger"
     onyes={() => executeAction(pruneAll ? DockerArtefactAction.PruneAll : DockerArtefactAction.Prune)}
@@ -188,17 +189,17 @@ onMount(loadData);
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
     <p>{@html $t(artefact.name + "PruneMsg")}</p>
     {#if artefact.actions.includes(DockerArtefactAction.PruneAll)}
-        <label class="toggle-label">
-            <input type="checkbox" bind:checked={pruneAll} />
-            {$t(artefact.name + "PruneAll")}
-        </label>
+        <div class="form-check form-switch">
+            <input id="prune-all-{artefact.name}" class="form-check-input" type="checkbox" bind:checked={pruneAll} />
+            <label class="form-check-label" for="prune-all-{artefact.name}">{$t(artefact.name + "PruneAll")}</label>
+        </div>
     {/if}
 </Confirm>
 
 <!-- Pull dialog -->
 <Confirm
     bind:open={showPullDialog}
-    title="{$t('pull')} {$t(artefact.name, { values: { n: 2 } })}"
+    title="{$t('pull')} {$tn(artefact.name, 2)}"
     yesText={$t("pull")}
     btnStyle="btn-primary"
     onyes={() => executeAction(DockerArtefactAction.Pull)}
@@ -212,7 +213,7 @@ onMount(loadData);
 <!-- Delete dialog -->
 <Confirm
     bind:open={showDeleteDialog}
-    title="{$t('delete')} {$t(artefact.name, { values: { n: 2 } })}"
+    title="{$t('delete')} {$tn(artefact.name, 2)}"
     yesText={$t("delete")}
     btnStyle="btn-danger"
     onyes={() => executeAction(DockerArtefactAction.Remove)}
@@ -226,35 +227,11 @@ onMount(loadData);
 {/if}
 
 <style>
-.artefact-wrap { display: flex; flex-direction: column; gap: 1rem; }
+.artefact-wrap { display: flex; flex-direction: column; }
 
-.action-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.action-bar { display: flex; flex-wrap: wrap; gap: 4px; }
 
 .loading { padding: 1rem; color: var(--arbour-text-muted); }
-
-.table-wrap { overflow-x: auto; }
-
-.artefact-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
-
-.artefact-table th,
-.artefact-table td {
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid var(--arbour-border);
-    text-align: left;
-}
-
-.artefact-table thead th {
-    background: var(--arbour-bg-header);
-    font-weight: 600;
-    font-size: 0.82rem;
-    color: var(--arbour-text-muted);
-}
-
-.artefact-table tbody tr:hover { background: var(--arbour-bg-deep); }
 
 .sortable { cursor: pointer; user-select: none; }
 .sort-sym { font-family: monospace; margin-left: 4px; color: var(--arbour-primary); }
@@ -266,25 +243,8 @@ onMount(loadData);
     text-overflow: ellipsis;
 }
 
-.action-cell { white-space: nowrap; }
+.row-check { width: 1em; height: 1em; margin: 0; cursor: pointer; }
 
-.row-check { width: auto; cursor: pointer; }
-
-.badge { display: inline-block; padding: 0.2em 0.5em; border-radius: var(--arbour-radius-pill); font-size: 0.75rem; font-weight: 600; }
-.badge-info { background: var(--arbour-info); color: var(--arbour-text-on-primary); }
-
-.btn-ghost {
-    background: none; border: 1px solid var(--arbour-border);
-    color: var(--arbour-text-muted); padding: 0.15rem 0.4rem;
-}
-.btn-ghost:hover { background: var(--arbour-bg-deep); color: var(--arbour-text); }
-
-.btn-secondary-action {
-    background: var(--arbour-bg-deep); border: 1px solid var(--arbour-border);
-    color: var(--arbour-text);
-}
-.btn-secondary-action:hover { background: var(--arbour-bg-header-active); }
-
-.toggle-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-.toggle-label input { width: auto; }
+.py-0 { padding-top: 0; padding-bottom: 0; }
+.px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
 </style>

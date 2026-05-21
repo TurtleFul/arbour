@@ -1,6 +1,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { t } from "svelte-i18n";
+import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import { StackStatusInfo } from "../../../../common/util-common";
 import type { AgentData, SimpleStackData } from "../../../../common/types";
@@ -125,7 +126,7 @@ function getAgentLink(agent: AgentData): string {
 
             <!-- Agents -->
             <div class="section-header">
-                <h4>{$t("arbourAgent", { values: { n: 2 } })}</h4>
+                <h4>{$tn("arbourAgent", 2)}</h4>
                 {#if !showAgentForm}
                     <button class="btn btn-primary btn-sm" onclick={() => (showAgentForm = true)}>
                         <Icon name="plus" /> {$t("addAgent")}

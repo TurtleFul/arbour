@@ -1,5 +1,6 @@
 <script lang="ts">
 import { t } from "svelte-i18n";
+import { fly } from "svelte/transition";
 import Terminal from "./Terminal.svelte";
 import Icon from "./Icon.svelte";
 import { PROGRESS_TERMINAL_ROWS } from "../../../../common/util-common";
@@ -22,6 +23,13 @@ interface TerminalInstance {
     rebind: () => void;
     updateTerminalSize: () => void;
 }
+
+const easeInCustom = (t: number) => {
+    const cx = 0.54, cy = 0.78, cx2 = 0.55, cy2 = 0.97;
+    const u = 1 - t;
+    return 3 * u * u * t * cy + 3 * u * t * t * cy2 + t * t * t;
+    void cx; void cx2;
+};
 
 let showTerminal = $state(false);
 let terminalRef = $state<TerminalInstance | undefined>(undefined);
@@ -54,7 +62,7 @@ export function hideWithTimeout() {
     </button>
 
     {#if showTerminal}
-        <div class="terminal-body">
+        <div class="terminal-body" transition:fly={{ y: 50, duration: 200, easing: easeInCustom }}>
             <Terminal
                 bind:this={terminalRef}
                 {name}
@@ -77,6 +85,7 @@ export function hideWithTimeout() {
 .terminal-header {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.5rem;
     width: 100%;
     padding: 0.6rem 1rem;
@@ -88,6 +97,7 @@ export function hideWithTimeout() {
     font-family: inherit;
     text-align: left;
     transition: background 0.1s;
+    white-space: nowrap;
 }
 
 .terminal-header:hover {

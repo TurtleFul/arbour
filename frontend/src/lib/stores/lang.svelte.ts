@@ -1,5 +1,12 @@
-import { register, init, locale, getLocaleFromNavigator } from "svelte-i18n";
-import { get } from "svelte/store";
+import { register, init, locale, getLocaleFromNavigator, t as i18nT } from "svelte-i18n";
+import { derived, get } from "svelte/store";
+
+export const tn = derived(i18nT, ($t) => (key: string, n: number): string => {
+    const text = $t(key);
+    const parts = text.split(" | ");
+    if (parts.length <= 1) return text;
+    return n === 1 ? parts[0] : parts[parts.length - 1];
+});
 
 export const languageList: Record<string, string> = {
     "bg-BG": "Български",

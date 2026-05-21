@@ -111,16 +111,16 @@ onMount(() => {
     <h5>{$t("Internal Networks")}</h5>
 
     {#if networkList.length > 0}
-        <ul class="network-list">
+        <ul class="list-group mb-2">
             {#each networkList as row, i (i)}
-                <li class="network-item">
+                <li class="list-group-item network-item">
                     <input
                         type="text"
-                        class="network-name-input"
+                        class="form-control no-bg network-name-input"
                         bind:value={row.name}
                         placeholder={$t("Network name...")}
                     />
-                    <button class="remove-btn" onclick={() => remove(i)}>
+                    <button class="btn btn-sm btn-hover-danger remove-btn" onclick={() => remove(i)}>
                         <Icon name="xmark" />
                     </button>
                 </li>
@@ -128,20 +128,21 @@ onMount(() => {
         </ul>
     {/if}
 
-    <button class="btn btn-sm btn-ghost" onclick={addField}>
+    <button class="btn btn-sm btn-normal" onclick={addField}>
         {$t("addInternalNetwork")}
     </button>
 
-    <h5 class="mt">{$t("External Networks")}</h5>
+    <h5 class="mt-3">{$t("External Networks")}</h5>
 
     {#if externalNetworkList.length === 0}
-        <p class="empty-text">{$t("No External Networks")}</p>
+        <p class="text-muted">{$t("No External Networks")}</p>
     {:else}
         <div class="external-list">
             {#each externalNetworkList as networkName, i (networkName)}
-                <label class="external-item">
+                <div class="form-check form-switch">
                     <input
                         id="ext-net-{i}"
+                        class="form-check-input"
                         type="checkbox"
                         checked={selectedExternalList[networkName] ?? false}
                         onchange={(e) => {
@@ -151,81 +152,36 @@ onMount(() => {
                             };
                         }}
                     />
-                    <span>{networkName}</span>
-                </label>
+                    <label class="form-check-label" for="ext-net-{i}">{networkName}</label>
+                </div>
             {/each}
         </div>
     {/if}
 </div>
 
 <style>
-.network-input { display: flex; flex-direction: column; gap: 0.5rem; }
+.network-input { display: flex; flex-direction: column; }
 
-h5 { margin: 0; font-size: 0.9rem; font-weight: 600; }
-.mt { margin-top: 0.75rem; }
-
-.network-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    background: var(--arbour-bg-deep);
-    border: 1px solid var(--arbour-border);
-    border-radius: var(--arbour-radius);
-    overflow: hidden;
-}
+h5 { margin: 0 0 0.5rem; font-size: 0.9rem; font-weight: 600; }
 
 .network-item {
     display: flex;
     align-items: center;
     padding: 0.4rem 0.5rem 0.4rem 0.75rem;
-    border-bottom: 1px solid var(--arbour-border);
 }
-.network-item:last-child { border-bottom: none; }
 
 .network-name-input {
     flex: 1;
     background: none;
     border: none;
+    padding: 0;
     color: var(--arbour-text);
     outline: none;
     font-size: 0.9rem;
     min-width: 0;
 }
-.network-name-input::placeholder { color: var(--arbour-text-muted); }
 
-.remove-btn {
-    background: none;
-    border: none;
-    color: var(--arbour-danger);
-    cursor: pointer;
-    padding: 0.1rem 0.3rem;
-    border-radius: var(--arbour-radius-sm);
-    flex-shrink: 0;
-}
-.remove-btn:hover { background: color-mix(in srgb, var(--arbour-danger) 12%, transparent); }
+.remove-btn { flex-shrink: 0; }
 
-.btn-ghost {
-    background: none;
-    border: 1px solid var(--arbour-border);
-    color: var(--arbour-text-muted);
-    cursor: pointer;
-    padding: 0.25rem 0.6rem;
-    border-radius: var(--arbour-radius-sm);
-    font-size: 0.85rem;
-    align-self: flex-start;
-}
-.btn-ghost:hover { background: var(--arbour-bg-deep); color: var(--arbour-text); }
-
-.empty-text { color: var(--arbour-text-muted); font-size: 0.85rem; margin: 0; }
-
-.external-list { display: flex; flex-direction: column; gap: 0.4rem; }
-
-.external-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-.external-item input { width: auto; cursor: pointer; }
+.external-list { display: flex; flex-direction: column; }
 </style>

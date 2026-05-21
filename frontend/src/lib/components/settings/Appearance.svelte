@@ -6,11 +6,12 @@ import { themeStore, type ColorTheme } from "$lib/stores/theme.svelte";
 const langs = Object.entries(languageList);
 </script>
 
-<div class="settings-section">
-    <div class="field">
-        <label for="language">{$t("Language")}</label>
+<div class="my-4">
+    <div class="mb-3">
+        <label for="language" class="form-label">{$t("Language")}</label>
         <select
             id="language"
+            class="form-select"
             value={langStore.language}
             onchange={(e) => langStore.setLang((e.target as HTMLSelectElement).value)}
         >
@@ -21,10 +22,11 @@ const langs = Object.entries(languageList);
         </select>
     </div>
 
-    <div class="field">
-        <label for="color-theme">{$t("Theme")}</label>
+    <div class="mb-3">
+        <label for="color-theme" class="form-label">{$t("Theme")}</label>
         <select
             id="color-theme"
+            class="form-select"
             value={themeStore.colorTheme}
             onchange={(e) => themeStore.setTheme((e.target as HTMLSelectElement).value as ColorTheme)}
         >
@@ -38,30 +40,5 @@ const langs = Object.entries(languageList);
 </div>
 
 <style>
-.settings-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 1rem 0;
-}
-
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.field label {
-    font-size: 0.88rem;
-    color: var(--arbour-text-muted);
-}
-
-.field select {
-    padding: 0.55rem 0.9rem;
-    border-radius: var(--arbour-radius);
-    background: var(--arbour-bg-deep);
-    color: var(--arbour-text);
-    border: 1px solid var(--arbour-border);
-    max-width: 360px;
-}
+.form-select { max-width: 360px; }
 </style>

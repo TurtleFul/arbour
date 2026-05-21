@@ -48,17 +48,17 @@ const langs = Object.entries(languageList);
 <div class="setup-wrap">
     <div class="setup-form">
         <form onsubmit={(e) => { e.preventDefault(); submit(); }}>
-            <div class="brand">
+            <div class="brand mb-3">
                 <img src="/icon.svg" alt="Arbour" width="64" height="64" />
                 <div class="brand-name">Arbour</div>
             </div>
 
             <p class="mt-3">{$t("Create your admin account")}</p>
 
-            <div class="field">
-                <label for="setup-language">{$t("Language")}</label>
+            <div class="form-floating mb-3">
                 <select
                     id="setup-language"
+                    class="form-select"
                     value={langStore.language}
                     onchange={(e) => langStore.setLang((e.target as HTMLSelectElement).value)}
                 >
@@ -67,12 +67,13 @@ const langs = Object.entries(languageList);
                         <option value={code}>{name}</option>
                     {/each}
                 </select>
+                <label for="setup-language">{$t("Language")}</label>
             </div>
 
-            <div class="field">
-                <label for="setup-user">{$t("Username")}</label>
+            <div class="form-floating mb-3">
                 <input
                     id="setup-user"
+                    class="form-control"
                     bind:value={username}
                     type="text"
                     placeholder={$t("Username")}
@@ -80,12 +81,13 @@ const langs = Object.entries(languageList);
                     required
                     data-cy="username-input"
                 />
+                <label for="setup-user">{$t("Username")}</label>
             </div>
 
-            <div class="field">
-                <label for="setup-pass">{$t("Password")}</label>
+            <div class="form-floating mb-3">
                 <input
                     id="setup-pass"
+                    class="form-control"
                     bind:value={password}
                     type="password"
                     placeholder={$t("Password")}
@@ -93,12 +95,13 @@ const langs = Object.entries(languageList);
                     required
                     data-cy="password-input"
                 />
+                <label for="setup-pass">{$t("Password")}</label>
             </div>
 
-            <div class="field">
-                <label for="setup-repeat">{$t("Repeat Password")}</label>
+            <div class="form-floating mb-3">
                 <input
                     id="setup-repeat"
+                    class="form-control"
                     bind:value={repeatPassword}
                     type="password"
                     placeholder={$t("Repeat Password")}
@@ -106,6 +109,7 @@ const langs = Object.entries(languageList);
                     required
                     data-cy="password-repeat-input"
                 />
+                <label for="setup-repeat">{$t("Repeat Password")}</label>
             </div>
 
             <button class="btn btn-primary w-100 mt-3" type="submit" disabled={processing} data-cy="submit-setup-form">
@@ -134,44 +138,11 @@ const langs = Object.entries(languageList);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
 }
 
 .brand-name {
-    font-size: 1.75rem;
+    font-size: 28px;
     font-weight: bold;
-    margin-top: 0.25rem;
+    margin-top: 5px;
 }
-
-.mt-3 { margin-top: 1rem; }
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    text-align: left;
-}
-
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.field label {
-    font-size: 0.88rem;
-    color: var(--arbour-text-muted);
-}
-
-.field input,
-.field select {
-    padding: 0.65rem 1rem;
-    border-radius: var(--arbour-radius);
-    background: var(--arbour-bg-deep);
-    color: var(--arbour-text);
-    border: 1px solid var(--arbour-border);
-    width: 100%;
-}
-
-.w-100 { width: 100%; }
 </style>

@@ -18,8 +18,8 @@ const agentCount = $derived(socketStore.agentCount);
 const endpointDisplay = $derived(socketStore.getAgentName(stack.endpoint ?? ""));
 </script>
 
-<a href={url} class="item" class:active={isActive} class:dim={!stack.isManagedByArbour}>
-    <Uptime {stack} fixedWidth={true} />
+<a href={url} class="item" class:active={isActive} class:disabled={!stack.isManagedByArbour}>
+    <span class="uptime-wrap me-2"><Uptime {stack} fixedWidth={true} /></span>
     <div class="title">
         <span class="name">{stack.name}</span>
         {#if stack.started && stack.recreateNecessary}
@@ -35,46 +35,15 @@ const endpointDisplay = $derived(socketStore.getAgentName(stack.endpoint ?? ""))
 </a>
 
 <style>
-.item {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: 52px;
-    border-radius: 10px;
-    transition: all ease-in-out 0.15s;
-    width: 100%;
-    padding: 5px 8px;
-    color: var(--arbour-text);
-}
+.item { color: var(--arbour-text); }
 
-.item:hover,
-.item.active {
-    background-color: var(--arbour-bg-deep);
-}
+.title { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
 
-.item.dim {
-    opacity: 0.5;
-}
+.uptime-wrap { display: inline-flex; align-items: center; }
 
-.title {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin-top: -4px;
-    flex-wrap: wrap;
-}
+.name { font-weight: 500; }
 
-.name {
-    font-weight: 500;
-}
+.endpoint { font-size: 12px; color: var(--arbour-text-muted); }
 
-.endpoint {
-    font-size: 12px;
-    color: var(--arbour-text-muted);
-}
-
-:global(.notification-icon) {
-    color: var(--arbour-info);
-}
+:global(.notification-icon) { color: var(--arbour-info); }
 </style>

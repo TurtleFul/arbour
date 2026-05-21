@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount, onDestroy } from "svelte";
 import { t } from "svelte-i18n";
+import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, RUNNING_AND_EXITED, StackStatusInfo, UNHEALTHY, UNKNOWN } from "../../../../common/util-common";
 import type { SimpleStackData } from "../../../../common/types";
@@ -112,45 +113,45 @@ onDestroy(() => {
 });
 </script>
 
-<div class="stack-list-box" class:sticky-box={embedded} style={boxStyle}>
+<div class="shadow-box mb-3" class:sticky-box={embedded} style={boxStyle}>
     <div class="list-header">
         <div class="header-row">
-            <div class="search-wrap">
-                <button class="search-icon-btn" onclick={() => (searchText = "")} disabled={!searchText}>
+            <div class="input-group search-wrap">
+                <button class="input-group-text" onclick={() => (searchText = "")} disabled={!searchText} aria-label="clear search">
                     <Icon name={searchText ? "xmark" : "magnifying-glass"} />
                 </button>
-                <input class="search-input" bind:value={searchText} placeholder={$t("search")} autocomplete="off" />
+                <input class="form-control" bind:value={searchText} placeholder={$t("search")} autocomplete="off" />
             </div>
 
-            <button class="icon-btn" title={$t("checkForUpdates")} disabled={checkingForUpdates} onclick={checkForUpdates}>
+            <button class="btn btn-normal btn-sm" title={$t("checkForUpdates")} disabled={checkingForUpdates} onclick={checkForUpdates}>
                 <Icon name={checkingForUpdates ? "spinner" : "arrows-rotate"} spin={checkingForUpdates} />
             </button>
 
             <div class="filter-wrap">
-                <button class="icon-btn" class:filter-active={filtersActive} onclick={() => (filterOpen = !filterOpen)}
+                <button class="btn btn-normal btn-sm" class:filter-active={filtersActive} onclick={() => (filterOpen = !filterOpen)}
                     title={$t("filter")}>
                     <Icon name="filter" />
                 </button>
 
                 {#if filterOpen}
-                    <div class="filter-dropdown" role="menu" tabindex="-1"
+                    <div class="dropdown-menu show filter-dropdown" role="menu" tabindex="-1"
                         onmouseleave={() => (filterOpen = false)}>
-                        <button class="filter-clear" disabled={!socketStore.stackFilter.isFilterSelected()}
+                        <button class="dropdown-item" disabled={!socketStore.stackFilter.isFilterSelected()}
                             onclick={() => socketStore.stackFilter.clear()}>
                             <Icon name="xmark" /> {$t("clearFilter")}
                         </button>
-                        <div class="filter-divider"></div>
+                        <hr class="dropdown-divider" />
                         {#each socketStore.stackFilter.categories as category}
                             {#if category.hasOptions()}
                                 <div class="filter-group">
-                                    <div class="filter-group-label">{$t(category.label, { values: { n: 2 } })}</div>
+                                    <div class="filter-group-label">{$tn(category.label, 2)}</div>
                                     {#each Object.entries(category.options) as [key, value] (value)}
-                                        <label class="filter-option">
-                                            <input type="checkbox"
+                                        <div class="form-check form-switch filter-option">
+                                            <input id="filter-{category.label}-{value}" class="form-check-input" type="checkbox"
                                                 checked={category.selected.has(value as any)}
                                                 onchange={() => category.toggleSelected(value as any)} />
-                                            {$t(key)}
-                                        </label>
+                                            <label class="form-check-label" for="filter-{category.label}-{value}">{$t(key)}</label>
+                                        </div>
                                     {/each}
                                 </div>
                             {/if}
@@ -185,13 +186,11 @@ onDestroy(() => {
 </div>
 
 <style>
-.stack-list-box {
-    background: var(--arbour-bg);
-    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
-    border-radius: var(--arbour-radius);
+.shadow-box {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding: 10px;
 }
 
 .sticky-box {
@@ -200,9 +199,12 @@ onDestroy(() => {
 }
 
 .list-header {
-    background: var(--arbour-bg-header);
+    margin: -10px -10px 10px;
     padding: 0.4rem 0.5rem;
+    background: var(--arbour-bg-header);
     border-bottom: 1px solid var(--arbour-border);
+    border-top-left-radius: var(--arbour-radius);
+    border-top-right-radius: var(--arbour-radius);
     flex-shrink: 0;
 }
 
@@ -212,83 +214,31 @@ onDestroy(() => {
     gap: 0.25rem;
 }
 
-.search-wrap {
-    display: flex;
-    align-items: center;
-    flex: 1;
+.search-wrap { flex: 1; }
+.search-wrap :global(.input-group-text) {
     background: var(--arbour-bg-deep);
-    border: 1px solid var(--arbour-border);
-    border-radius: var(--arbour-radius-sm);
-    overflow: hidden;
-}
-
-.search-icon-btn {
-    background: none;
-    border: none;
+    border-color: var(--arbour-border);
     color: var(--arbour-text-muted);
-    padding: 0.4rem 0.6rem;
     cursor: pointer;
-    flex-shrink: 0;
 }
-.search-icon-btn:disabled { cursor: default; }
-.search-icon-btn:hover:not(:disabled) { color: var(--arbour-text); }
-
-.search-input {
-    flex: 1;
-    background: none;
-    border: none;
-    color: var(--arbour-text);
-    padding: 0.4rem 0.4rem 0.4rem 0;
+.search-wrap :global(.input-group-text:hover:not(:disabled)) { color: var(--arbour-text); }
+.search-wrap :global(.form-control) {
+    background: var(--arbour-bg-deep);
+    border-color: var(--arbour-border);
+    padding: 0.35rem 0.5rem;
     font-size: 0.9rem;
-    outline: none;
-    width: 0;
 }
 
-.icon-btn {
-    background: none;
-    border: none;
-    color: var(--arbour-text-muted);
-    cursor: pointer;
-    padding: 0.4rem 0.5rem;
-    border-radius: var(--arbour-radius-sm);
-    flex-shrink: 0;
-}
-.icon-btn:hover:not(:disabled) { color: var(--arbour-text); background: var(--arbour-bg-deep); }
-.icon-btn:disabled { opacity: 0.4; cursor: default; }
-.filter-active { color: var(--arbour-info) !important; border: 1px solid var(--arbour-info); }
+.filter-active { color: var(--arbour-info) !important; border-color: var(--arbour-info) !important; }
 
 .filter-wrap { position: relative; }
 
 .filter-dropdown {
-    position: absolute;
     right: 0;
-    top: calc(100% + 4px);
-    z-index: 100;
-    background: var(--arbour-bg);
-    border: 1px solid var(--arbour-border);
-    border-radius: var(--arbour-radius);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    left: auto;
     min-width: 200px;
     padding: 0.25rem 0;
 }
-
-.filter-clear {
-    width: 100%;
-    background: none;
-    border: none;
-    color: var(--arbour-text);
-    padding: 0.4rem 0.75rem;
-    text-align: left;
-    cursor: pointer;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.filter-clear:disabled { color: var(--arbour-text-muted); cursor: default; }
-.filter-clear:hover:not(:disabled) { background: var(--arbour-bg-header-active); }
-
-.filter-divider { border-top: 1px solid var(--arbour-border); margin: 0.25rem 0; }
 
 .filter-group { padding: 0.25rem 0; }
 
@@ -302,16 +252,11 @@ onDestroy(() => {
 }
 
 .filter-option {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.75rem 0.25rem 2.25rem;
+    margin-bottom: 0;
     font-size: 0.85rem;
-    color: var(--arbour-text);
-    cursor: pointer;
 }
 .filter-option:hover { background: var(--arbour-bg-header-active); }
-.filter-option input { width: auto; cursor: pointer; }
 
 .stack-list { flex: 1; overflow-y: auto; }
 

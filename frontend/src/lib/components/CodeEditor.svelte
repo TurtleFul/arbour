@@ -1,8 +1,11 @@
 <script lang="ts">
 import { onMount, onDestroy } from "svelte";
-import { EditorView } from "@codemirror/view";
+import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightActiveLineGutter, drawSelection } from "@codemirror/view";
 import { EditorState, Compartment } from "@codemirror/state";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { HighlightStyle, syntaxHighlighting, indentOnInput, bracketMatching, foldGutter, foldKeymap } from "@codemirror/language";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
+import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { tags } from "@lezer/highlight";
 import { yaml } from "@codemirror/lang-yaml";
 import { json } from "@codemirror/lang-json";
@@ -10,13 +13,13 @@ import { json } from "@codemirror/lang-json";
 let {
     value = $bindable(""),
     lang = "yaml" as "yaml" | "json" | "env",
-    readonly = false,
+    isReadonly = false,
     onfocus = undefined,
     onblur = undefined,
 } = $props<{
     value?: string;
     lang?: "yaml" | "json" | "env";
-    readonly?: boolean;
+    isReadonly?: boolean;
     onfocus?: () => void;
     onblur?: () => void;
 }>();
@@ -27,6 +30,7 @@ let lastEditorValue = "";
 
 const langComp = new Compartment();
 const editableComp = new Compartment();
+const readOnlyComp = new Compartment();
 
 const arbourHighlight = HighlightStyle.define([
     { tag: tags.keyword, color: "var(--arbour-primary)" },
@@ -103,8 +107,11 @@ $effect(() => {
 
 $effect(() => {
     if (!view) return;
-    const ro = readonly;
-    view.dispatch({ effects: editableComp.reconfigure(EditorView.editable.of(!ro)) });
+    const ro = isReadonly;
+    view.dispatch({ effects: [
+        editableComp.reconfigure(EditorView.editable.of(!ro)),
+        readOnlyComp.reconfigure(EditorState.readOnly.of(ro)),
+    ] });
 });
 
 $effect(() => {
@@ -125,10 +132,31 @@ onMount(() => {
                 baseTheme,
                 selectionTheme,
                 editorTheme,
+                lineNumbers(),
+                highlightActiveLine(),
+                highlightActiveLineGutter(),
+                foldGutter(),
+                drawSelection(),
+                history(),
+                indentOnInput(),
+                bracketMatching(),
+                closeBrackets(),
+                autocompletion(),
+                highlightSelectionMatches(),
                 EditorView.lineWrapping,
                 syntaxHighlighting(arbourHighlight),
                 langComp.of(getLangExtension(lang)),
-                editableComp.of(EditorView.editable.of(!readonly)),
+                editableComp.of(EditorView.editable.of(!isReadonly)),
+                readOnlyComp.of(EditorState.readOnly.of(isReadonly)),
+                keymap.of([
+                    ...closeBracketsKeymap,
+                    ...defaultKeymap,
+                    ...searchKeymap,
+                    ...historyKeymap,
+                    ...foldKeymap,
+                    ...completionKeymap,
+                    indentWithTab,
+                ]),
                 EditorView.updateListener.of((update) => {
                     if (update.docChanged) {
                         lastEditorValue = update.state.doc.toString();
@@ -151,7 +179,7 @@ onDestroy(() => view?.destroy());
 
 <div
     class="code-editor"
-    class:code-editor-readonly={readonly}
+    class:code-editor-readonly={isReadonly}
     bind:this={editorEl}
 ></div>
 

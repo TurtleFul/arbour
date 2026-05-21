@@ -115,58 +115,62 @@ function disable2FA() {
     onclose={() => (open = false)}
     onclick={(e) => { if (e.target === dialogEl) close(); }}
 >
-    <div class="dialog-box">
-        <header class="dialog-header">
-            <h5>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">
                 {$t("Setup 2FA")}
                 {#if twoFAStatus === true}
-                    <span class="badge">{$t("Active")}</span>
+                    <span class="badge bg-primary ms-2">{$t("Active")}</span>
                 {:else if twoFAStatus === false}
-                    <span class="badge badge-inactive">{$t("Inactive")}</span>
+                    <span class="badge bg-secondary ms-2">{$t("Inactive")}</span>
                 {/if}
             </h5>
-            <button class="close-btn" onclick={close} disabled={processing} aria-label="Close">×</button>
-        </header>
+            <button class="btn-close" onclick={close} disabled={processing} aria-label="Close"></button>
+        </div>
 
-        <div class="dialog-body">
+        <div class="modal-body">
             {#if uri && twoFAStatus === false}
-                <div class="qr-wrap">
+                <div class="qr-wrap text-center">
                     {#if qrDataUrl}
                         <img src={qrDataUrl} alt="QR Code" width="210" height="210" />
                     {/if}
                     {#if !showURI}
-                        <button type="button" class="btn btn-sm btn-outline mt-2" onclick={() => (showURI = true)}>
-                            {$t("Show URI")}
-                        </button>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick={() => (showURI = true)}>
+                                {$t("Show URI")}
+                            </button>
+                        </div>
                     {/if}
                 </div>
                 {#if showURI}
-                    <p class="uri-text">{uri}</p>
+                    <p class="text-break mt-2">{uri}</p>
                 {/if}
 
-                <div class="field mt-3">
-                    <label for="twofa-token">{$t("twoFAVerifyLabel")}</label>
-                    <div class="token-row">
+                <div class="mt-3">
+                    <label for="twofa-token" class="form-label">{$t("twoFAVerifyLabel")}</label>
+                    <div class="input-group">
                         <input
                             id="twofa-token"
+                            class="form-control"
                             bind:value={token}
                             type="text"
                             maxlength="6"
                             autocomplete="one-time-code"
                         />
-                        <button type="button" class="btn btn-outline" onclick={verifyToken}>
+                        <button type="button" class="btn btn-outline-primary" onclick={verifyToken}>
                             {$t("Verify Token")}
                         </button>
                     </div>
                     {#if tokenValid}
-                        <p class="token-valid-msg">{$t("tokenValidSettingsMsg")}</p>
+                        <p class="text-primary mt-2 mb-0">{$t("tokenValidSettingsMsg")}</p>
                     {/if}
                 </div>
             {:else}
-                <div class="field">
-                    <label for="twofa-pass">{$t("Current Password")}</label>
+                <div>
+                    <label for="twofa-pass" class="form-label">{$t("Current Password")}</label>
                     <input
                         id="twofa-pass"
+                        class="form-control"
                         bind:value={currentPassword}
                         type="password"
                         autocomplete="current-password"
@@ -193,7 +197,7 @@ function disable2FA() {
         </div>
 
         {#if uri && twoFAStatus === false}
-            <footer class="dialog-footer">
+            <div class="modal-footer">
                 <button
                     type="button"
                     class="btn btn-primary"
@@ -202,7 +206,7 @@ function disable2FA() {
                 >
                     {$t("Save")}
                 </button>
-            </footer>
+            </div>
         {/if}
     </div>
 </dialog>
@@ -228,126 +232,6 @@ function disable2FA() {
 </Confirm>
 
 <style>
-dialog {
-    border: none;
-    border-radius: var(--arbour-radius-lg);
-    background: var(--arbour-bg);
-    color: var(--arbour-text);
-    padding: 0;
-    max-width: 480px;
-    width: calc(100% - 2rem);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.5);
-}
-
-.dialog-box {
-    display: flex;
-    flex-direction: column;
-}
-
-.dialog-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--arbour-border);
-}
-
-.dialog-header h5 {
-    margin: 0;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    color: var(--arbour-text-muted);
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-}
-.close-btn:hover { color: var(--arbour-text); }
-
-.dialog-body {
-    padding: 1.25rem;
-}
-
-.dialog-footer {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid var(--arbour-border);
-}
-
-.badge {
-    font-size: 0.75rem;
-    padding: 0.2em 0.5em;
-    border-radius: var(--arbour-radius);
-    background: var(--arbour-primary);
-    color: #fff;
-}
-.badge-inactive { background: var(--arbour-text-muted); }
-
-.qr-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.uri-text {
-    word-break: break-all;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-}
-
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.field label {
-    font-size: 0.88rem;
-    color: var(--arbour-text-muted);
-}
-
-.field input {
-    padding: 0.55rem 0.9rem;
-    border-radius: var(--arbour-radius);
-}
-
-.token-row {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.token-row input {
-    flex: 1;
-    padding: 0.55rem 0.9rem;
-    border-radius: var(--arbour-radius);
-}
-
-.token-valid-msg {
-    color: var(--arbour-primary);
-    margin: 0.5rem 0 0;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--arbour-primary);
-    color: var(--arbour-primary);
-}
-.btn-outline:hover { background: color-mix(in srgb, var(--arbour-primary) 10%, transparent); }
-
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 1rem; }
+dialog { max-width: 480px; width: calc(100% - 2rem); }
+.modal-title { display: flex; align-items: center; }
 </style>

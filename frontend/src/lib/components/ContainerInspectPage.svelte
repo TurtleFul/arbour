@@ -27,7 +27,7 @@ onMount(() => {
 <h1>{$t("inspect")} - {containerName}</h1>
 
 <div class="editor-box">
-    <CodeEditor bind:value={inspectData} lang="json" readonly={true} />
+    <CodeEditor bind:value={inspectData} lang="json" isReadonly={true} />
 </div>
 
 <style>

@@ -2,8 +2,10 @@
 import { setContext, onMount, onDestroy } from "svelte";
 import { goto } from "$app/navigation";
 import { t } from "svelte-i18n";
+import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import { COMPOSE_CONTEXT } from "$lib/context";
+import { clickOutside } from "$lib/actions/clickOutside";
 import {
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
@@ -67,6 +69,18 @@ let serviceStats = $state<Record<string, unknown> | undefined>(undefined);
 let yamlCopied = $state(false);
 let logTimestampMode = $state<"full" | "short" | "none">((localStorage.getItem(LS_KEY) as "full" | "short" | "none") ?? "full");
 let logExpanded = $state(false);
+let logModalEl = $state<HTMLDialogElement | undefined>(undefined);
+let composeEditorOpen = $state(false);
+let composeEditorDialogEl = $state<HTMLDialogElement | undefined>(undefined);
+
+$effect(() => {
+    if (!logModalEl) return;
+    if (logExpanded) logModalEl.showModal(); else logModalEl.close();
+});
+$effect(() => {
+    if (!composeEditorDialogEl) return;
+    if (composeEditorOpen) composeEditorDialogEl.showModal(); else composeEditorDialogEl.close();
+});
 let containerListRef = $state<HTMLElement | undefined>(undefined);
 let progressTerminalRef = $state<ProgressTerminalInstance | undefined>(undefined);
 let combinedTerminalRef = $state<TerminalInstance | undefined>(undefined);
@@ -348,15 +362,6 @@ function saveAutoUpdateSettings() {
     });
 }
 
-function exitIfNeeded() {
-    if (isEditMode) {
-        if (!confirm($t("confirmLeaveStack"))) return false;
-    }
-    stopUpdateTimeouts = true;
-    clearTimeout(updateStackDataTimeout);
-    return true;
-}
-
 function getServiceStats(serviceName: string) {
     const svc = stack.services?.[serviceName];
     return svc ? (serviceStats as any)?.[svc.containerName] : undefined;
@@ -393,68 +398,65 @@ onDestroy(() => {
 </script>
 
 <!-- Title -->
-<div class="compose-title">
-    {#if isAdd}
-        <h1>{$t("compose")}</h1>
-    {:else}
-        <h1>
-            <Uptime stack={stack} pill={true} />
-            {stack.name}
-            {#if socketStore.agentCount > 1 && endpoint !== ""}
-                <span class="agent-name">({agentName})</span>
-            {/if}
-        </h1>
-    {/if}
-</div>
+{#if isAdd}
+    <h1 class="mb-3">{$t("compose")}</h1>
+{:else}
+    <h1 class="mb-3">
+        <Uptime stack={stack} pill={true} />
+        {stack.name}
+        {#if socketStore.agentCount > 1 && endpoint !== ""}
+            <span class="agent-name">({agentName})</span>
+        {/if}
+    </h1>
+{/if}
 
 <!-- Action bar -->
 {#if stack.isManagedByArbour}
-    <div class="action-bar">
+    <div class="mb-3 action-bar">
         {#if isEditMode}
-            <button class="btn btn-primary" disabled={processing} onclick={deployStack}>
-                <Icon name="rocket" /> {$t("deployStack")}
+            <button class="btn btn-primary me-1" title={$t("tooltipStackDeploy")} disabled={processing} onclick={deployStack}>
+                <Icon name="rocket" /> <span class="d-none d-xl-inline">{$t("deployStack")}</span>
             </button>
-            <button class="btn btn-ghost" disabled={processing} onclick={saveStack}>
-                <Icon name="floppy-disk" /> {$t("saveStackDraft")}
+            <button class="btn btn-normal me-1" title={$t("tooltipStackSave")} disabled={processing} onclick={saveStack}>
+                <Icon name="floppy-disk" /> <span class="d-none d-xl-inline">{$t("saveStackDraft")}</span>
             </button>
             {#if !isAdd}
-                <button class="btn btn-ghost" disabled={processing} onclick={discardStack}>
+                <button class="btn btn-normal" disabled={processing} onclick={discardStack}>
                     {$t("discardStack")}
                 </button>
             {/if}
         {:else}
-            <button class="btn btn-ghost" disabled={processing} onclick={() => (isEditMode = true)}>
-                <Icon name="pen" /> {$t("editStack")}
+            <button class="btn btn-normal me-1" title={$t("tooltipStackEdit")} disabled={processing} onclick={() => (isEditMode = true)}>
+                <Icon name="pen" /> <span class="d-none d-xl-inline">{$t("editStack")}</span>
             </button>
             {#if hasExitedServices || hasInactiveServices() || !stack.started}
-                <button class="btn btn-primary" disabled={processing} onclick={startStack}>
-                    <Icon name="play" /> {$t("startStack")}
+                <button class="btn btn-primary me-1" title={$t("tooltipStackStart")} disabled={processing} onclick={startStack}>
+                    <Icon name="play" /> <span class="d-none d-xl-inline">{$t("startStack")}</span>
                 </button>
             {/if}
             {#if hasRunningServices}
-                <button class="btn btn-ghost" disabled={processing} onclick={restartStack}>
-                    <Icon name="rotate" /> {$t("restartStack")}
+                <button class="btn btn-normal me-1" title={$t("tooltipStackRestart")} disabled={processing} onclick={restartStack}>
+                    <Icon name="rotate" /> <span class="d-none d-xl-inline">{$t("restartStack")}</span>
                 </button>
             {/if}
-            <button class="btn btn-ghost" disabled={processing} onclick={() => (showUpdateDialog = true)}>
-                <Icon name="cloud-arrow-down" /> {$t("updateStack")}
+            <button class="btn btn-normal btn-hover-info me-1" title={$t("tooltipStackUpdate")} disabled={processing} onclick={() => (showUpdateDialog = true)}>
+                <Icon name="cloud-arrow-down" /> <span class="d-none d-xl-inline">{$t("updateStack")}</span>
             </button>
             {#if hasRunningServices}
-                <button class="btn btn-ghost btn-stop" disabled={processing} onclick={stopStack}>
-                    <Icon name="stop" /> {$t("stopStack")}
+                <button class="btn btn-normal btn-hover-danger me-1" title={$t("tooltipStackStop")} disabled={processing} onclick={stopStack}>
+                    <Icon name="stop" /> <span class="d-none d-xl-inline">{$t("stopStack")}</span>
                 </button>
             {/if}
-            <div class="more-menu-wrap">
-                <button class="btn btn-ghost" onclick={() => (showMoreMenu = !showMoreMenu)}>
+            <div class="more-menu-wrap" use:clickOutside={() => (showMoreMenu = false)}>
+                <button class="btn btn-dark" disabled={processing} onclick={() => (showMoreMenu = !showMoreMenu)}>
                     <Icon name="ellipsis-v" />
                 </button>
                 {#if showMoreMenu}
-                    <div class="more-menu" role="menu" tabindex="-1"
-                        onmouseleave={() => (showMoreMenu = false)}>
-                        <button class="more-item" onclick={downStack}>
+                    <div class="dropdown-menu show more-menu">
+                        <button class="dropdown-item" onclick={downStack}>
                             <Icon name="stop" /> {$t("downStack")}
                         </button>
-                        <button class="more-item more-item-danger" onclick={() => { showMoreMenu = false; showDeleteDialog = true; }}>
+                        <button class="dropdown-item text-danger" onclick={() => { showMoreMenu = false; showDeleteDialog = true; }}>
                             <Icon name="trash" /> {$t("deleteStack")}
                         </button>
                     </div>
@@ -466,33 +468,35 @@ onDestroy(() => {
 
 <!-- URLs -->
 {#if urls.length > 0}
-    <div class="urls">
+    <div class="mb-3 urls">
         {#each urls as item (item.url)}
-            <a href={item.url} target="_blank" class="url-badge">{item.display}</a>
+            <a href={item.url} target="_blank" class="url-badge">
+                <span class="badge bg-secondary text-truncate me-2">{item.display}</span>
+            </a>
         {/each}
     </div>
 {/if}
 
 <!-- Progress terminal -->
-<div class="progress-terminal-wrap">
+<div class="mb-3">
     <ProgressTerminal bind:this={progressTerminalRef} name={terminalName} {endpoint} />
 </div>
 
 {#if stack.isManagedByArbour}
-    <div class="compose-grid">
+    <div class="row mt-3">
         <!-- Left column -->
-        <div class="col-left">
+        <div class="col-xl-6 col-left">
             {#if isAdd}
-                <h4>{$t("general")}</h4>
-                <div class="section-box">
-                    <div class="form-group">
-                        <label for="stack-name">{$t("stackName")}</label>
+                <h4 class="mb-3">{$t("general")}</h4>
+                <div class="shadow-box big-padding mb-3">
+                    <div>
+                        <label for="stack-name" class="form-label">{$t("stackName")}</label>
                         <input id="stack-name" type="text" class="form-control" bind:value={stack.name}
                             required onblur={stackNameToLowercase} />
-                        <div class="form-hint">{$t("Lowercase only")}</div>
+                        <div class="form-text">{$t("Lowercase only")}</div>
                     </div>
-                    <div class="form-group mt">
-                        <label for="stack-endpoint">{$t("arbourAgent")}</label>
+                    <div class="mt-3">
+                        <label for="stack-endpoint" class="form-label">{$t("arbourAgent")}</label>
                         <select id="stack-endpoint" class="form-select" bind:value={stack.endpoint}>
                             {#each Object.entries(socketStore.agentList) as [ep, agent] (ep)}
                                 <option value={ep} disabled={socketStore.agentStatusList[ep] !== "online"}>
@@ -504,14 +508,14 @@ onDestroy(() => {
                 </div>
             {/if}
 
-            <h4>{$t("container", { values: { n: 2 } })}</h4>
+            <h4 class="mb-3">{$tn("container", 2)}</h4>
 
             {#if isEditMode}
-                <div class="add-container">
+                <div class="input-group mb-3">
                     <input class="form-control" bind:value={newContainerName}
                         placeholder={$t("New Container Name...")}
                         onkeyup={(e) => { if (e.key === "Enter") addContainer(); }} />
-                    <button class="btn btn-primary btn-sm" onclick={addContainer}>
+                    <button class="btn btn-primary" onclick={addContainer}>
                         {$t("addContainer")}
                     </button>
                 </div>
@@ -529,10 +533,11 @@ onDestroy(() => {
             </div>
 
             {#if isEditMode}
-                <h4>{$t("extra")}</h4>
-                <div class="section-box">
-                    <div class="form-group">
-                        <label>{$t("url", { values: { n: 2 } })}</label>
+                <h4 class="mb-3">{$t("extra")}</h4>
+                <div class="shadow-box big-padding mb-3">
+                    <div>
+                        <!-- svelte-ignore a11y_label_has_associated_control -->
+                        <label class="form-label">{$tn("url", 2)}</label>
                         <ArrayInput composeArray={composeDocument.xArbour.urls} displayName={$t("url")} placeholder="https://" />
                     </div>
                 </div>
@@ -540,18 +545,18 @@ onDestroy(() => {
 
             {#if !isEditMode}
                 <!-- Combined log terminal -->
-                <div class="log-section">
-                    <div class="log-header">
-                        <h4>{$t("log")}</h4>
+                <div class="log-section mb-3">
+                    <div class="log-header mb-2">
+                        <h4 class="mb-0">{$t("log")}</h4>
                         <div class="ts-controls">
                             {#each timestampOptions as opt (opt.value)}
                                 <button class="btn btn-sm" class:btn-primary={logTimestampMode === opt.value}
-                                    class:btn-ghost={logTimestampMode !== opt.value}
+                                    class:btn-outline-normal={logTimestampMode !== opt.value}
                                     onclick={() => { logTimestampMode = opt.value as "full" | "short" | "none"; localStorage.setItem(LS_KEY, opt.value); }}>
                                     {opt.label}
                                 </button>
                             {/each}
-                            <button class="btn btn-sm btn-ghost" onclick={() => (logExpanded = true)}>
+                            <button class="btn btn-sm btn-outline-normal" onclick={() => (logExpanded = true)}>
                                 <Icon name="expand" />
                             </button>
                         </div>
@@ -565,36 +570,38 @@ onDestroy(() => {
 
                 <!-- Auto update settings -->
                 {#if !isAdd && stack.isManagedByArbour}
-                    <h4>{$t("autoUpdate")}</h4>
-                    <div class="section-box">
-                        <div class="form-group">
-                            <label>{$t("autoUpdateMode")}</label>
+                    <h4 class="mb-3">{$t("autoUpdate")}</h4>
+                    <div class="shadow-box big-padding mb-3">
+                        <div>
+                            <!-- svelte-ignore a11y_label_has_associated_control -->
+                            <label class="form-label">{$t("autoUpdateMode")}</label>
                             <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" bind:group={autoUpdateMode} value="disabled" />
-                                    {$t("disabled")}
+                                <label class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" bind:group={autoUpdateMode} value="disabled" />
+                                    <span class="form-check-label">{$t("disabled")}</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" bind:group={autoUpdateMode} value="immediate" />
-                                    {$t("autoUpdateImmediate")}
+                                <label class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" bind:group={autoUpdateMode} value="immediate" />
+                                    <span class="form-check-label">{$t("autoUpdateImmediate")}</span>
                                 </label>
-                                <label class="radio-label">
-                                    <input type="radio" bind:group={autoUpdateMode} value="scheduled" />
-                                    {$t("autoUpdateScheduled")}
+                                <label class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" bind:group={autoUpdateMode} value="scheduled" />
+                                    <span class="form-check-label">{$t("autoUpdateScheduled")}</span>
                                 </label>
                             </div>
                         </div>
                         {#if autoUpdateMode === "scheduled"}
-                            <div class="form-group">
-                                <label>{$t("autoUpdateSchedule")}</label>
+                            <div class="mt-3">
+                                <!-- svelte-ignore a11y_label_has_associated_control -->
+                                <label class="form-label">{$t("autoUpdateSchedule")}</label>
                                 <input class="form-control monospace" bind:value={autoUpdateCustomSchedule} placeholder="0 3 * * *" />
-                                <div class="form-hint">{$t("autoUpdateCronHint")}</div>
+                                <div class="form-text">{$t("autoUpdateCronHint")}</div>
                             </div>
                         {/if}
                         {#if autoUpdateMode === "immediate"}
-                            <div class="form-hint">{$t("autoUpdateImmediateHint")}</div>
+                            <div class="form-text mt-2">{$t("autoUpdateImmediateHint")}</div>
                         {/if}
-                        <button class="btn btn-primary btn-sm" disabled={autoUpdateSaving} onclick={saveAutoUpdateSettings}>
+                        <button class="btn btn-primary btn-sm mt-3" disabled={autoUpdateSaving} onclick={saveAutoUpdateSettings}>
                             <Icon name="floppy-disk" /> {$t("saveSettings")}
                         </button>
                     </div>
@@ -603,11 +610,11 @@ onDestroy(() => {
         </div>
 
         <!-- Right column (YAML/ENV editors + Networks) -->
-        <div class="col-right">
-            <h4>{stack.composeFileName || "compose.yaml"}</h4>
-            <div class="editor-box" class:edit-mode={isEditMode}>
+        <div class="col-xl-6 col-right">
+            <h4 class="mb-3">{stack.composeFileName || "compose.yaml"}</h4>
+            <div class="editor-box mb-3" class:edit-mode={isEditMode}>
                 {#if isEditMode}
-                    <button class="editor-overlay-btn" onclick={() => (logExpanded = true)} title={$t("expand")}>
+                    <button class="editor-overlay-btn" onclick={() => (composeEditorOpen = true)} title={$t("expand")}>
                         <Icon name="expand" />
                     </button>
                 {:else}
@@ -615,29 +622,31 @@ onDestroy(() => {
                         <Icon name={yamlCopied ? "check" : "copy"} />
                     </button>
                 {/if}
-                <CodeEditor bind:value={stack.composeYAML} lang="yaml" readonly={!isEditMode}
-                    onfocus={() => (editorFocus = true)} onblur={() => (editorFocus = false)} />
+                {#key isEditMode}
+                    <CodeEditor bind:value={stack.composeYAML} lang="yaml" isReadonly={!isEditMode}
+                        onfocus={() => (editorFocus = true)} onblur={() => (editorFocus = false)} />
+                {/key}
             </div>
             {#if isEditMode && yamlError}
-                <div class="yaml-error">{yamlError}</div>
+                <div class="alert alert-danger">{yamlError}</div>
             {/if}
 
             {#if isEditMode}
-                <h4>.env</h4>
-                <div class="editor-box edit-mode">
-                    <CodeEditor bind:value={stack.composeENV} lang="env" readonly={false}
+                <h4 class="mb-3">.env</h4>
+                <div class="editor-box edit-mode mb-3">
+                    <CodeEditor bind:value={stack.composeENV} lang="env" isReadonly={false}
                         onfocus={() => (editorFocus = true)} onblur={() => (editorFocus = false)} />
                 </div>
 
-                <h4>{$t("network", { values: { n: 2 } })}</h4>
-                <div class="section-box">
+                <h4 class="mb-3">{$tn("network", 2)}</h4>
+                <div class="shadow-box big-padding mb-3">
                     <NetworkInput />
                 </div>
             {/if}
         </div>
     </div>
 {:else if !processing}
-    <div class="not-managed">
+    <div class="shadow-box big-padding mb-3">
         <p>{$t("stackNotManagedByArbourMsg")}</p>
         <button class="btn btn-primary" onclick={() => (showImportDialog = true)}>
             <Icon name="file-import" /> {$t("importStack")}
@@ -646,22 +655,46 @@ onDestroy(() => {
 {/if}
 
 <!-- Log expanded modal -->
-{#if logExpanded}
-    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-    <dialog open class="log-modal" onclick={(e) => { if (e.target === e.currentTarget) logExpanded = false; }}
-        onclose={() => (logExpanded = false)}>
-        <div class="dialog-box">
-            <header class="dialog-header">
-                <h5>{$t("log")}</h5>
-                <button class="close-btn" onclick={() => (logExpanded = false)}>×</button>
-            </header>
-            <div class="dialog-body log-modal-body">
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<dialog bind:this={logModalEl} class="log-modal" onclick={(e) => { if (e.target === e.currentTarget) logExpanded = false; }}
+    onclose={() => (logExpanded = false)}>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">{$t("log")}</h5>
+            <button class="btn-close" aria-label="Close" onclick={() => (logExpanded = false)}></button>
+        </div>
+        <div class="modal-body log-modal-body">
+            {#if logExpanded}
                 <Terminal bind:this={modalTerminalRef} name={combinedTerminalName} {endpoint}
                     timestampMode={logTimestampMode} />
-            </div>
+            {/if}
         </div>
-    </dialog>
-{/if}
+    </div>
+</dialog>
+
+<!-- Compose editor fullscreen modal -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<dialog bind:this={composeEditorDialogEl} class="compose-editor-modal"
+    onclick={(e) => { if (e.target === e.currentTarget) composeEditorOpen = false; }}
+    onclose={() => (composeEditorOpen = false)}>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">{stack.composeFileName || "compose.yaml"}</h5>
+            <button class="btn-close" aria-label="Close" onclick={() => (composeEditorOpen = false)}></button>
+        </div>
+        <div class="modal-body compose-editor-modal-body">
+            {#if composeEditorOpen}
+                <div class="editor-box edit-mode">
+                    <CodeEditor bind:value={stack.composeYAML} lang="yaml" isReadonly={!isEditMode}
+                        onfocus={() => (editorFocus = true)} onblur={() => (editorFocus = false)} />
+                </div>
+                {#if isEditMode && yamlError}
+                    <div class="alert alert-danger mt-3">{yamlError}</div>
+                {/if}
+            {/if}
+        </div>
+    </div>
+</dialog>
 
 <!-- Update stack dialog -->
 <Confirm
@@ -673,20 +706,20 @@ onDestroy(() => {
     onno={() => { updateDialogData = { pruneAfterUpdate: false, pruneAllAfterUpdate: false }; }}
 >
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    <p>{@html $t("updateStackMsg")}</p>
-    <label class="toggle-label">
-        <input type="checkbox" bind:checked={updateDialogData.pruneAfterUpdate} />
+    <p class="mb-3">{@html $t("updateStackMsg")}</p>
+    <label class="form-check">
+        <input class="form-check-input" type="checkbox" bind:checked={updateDialogData.pruneAfterUpdate} />
         <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {@html $t("pruneAfterUpdate")}
+        <span class="form-check-label">{@html $t("pruneAfterUpdate")}</span>
     </label>
-    <div class="indent">
-        <label class="toggle-label">
-            <input type="checkbox"
+    <div class="ms-3">
+        <label class="form-check">
+            <input class="form-check-input" type="checkbox"
                 checked={updateDialogData.pruneAfterUpdate && updateDialogData.pruneAllAfterUpdate}
                 disabled={!updateDialogData.pruneAfterUpdate}
                 onchange={(e) => (updateDialogData.pruneAllAfterUpdate = (e.target as HTMLInputElement).checked)} />
             <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-            {@html $t("pruneAllAfterUpdate")}
+            <span class="form-check-label">{@html $t("pruneAllAfterUpdate")}</span>
         </label>
     </div>
 </Confirm>
@@ -730,89 +763,24 @@ onDestroy(() => {
 </Confirm>
 
 <style>
-h1 { font-size: 1.4rem; margin: 0 0 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-h4 { font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem; }
-h5 { font-size: 1rem; margin: 0; }
-
+h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .agent-name { font-size: 13px; color: var(--arbour-text-muted); }
 
-.compose-title { margin-bottom: 0.5rem; }
+.action-bar { display: flex; flex-wrap: wrap; align-items: center; }
 
-.action-bar { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; align-items: center; }
+.more-menu-wrap { position: relative; display: inline-block; }
+.more-menu { display: block; right: 0; left: auto; min-width: 160px; padding: 0.25rem 0; }
 
-.btn {
-    padding: 0.3rem 0.7rem; border-radius: var(--arbour-radius-sm);
-    cursor: pointer; border: none; font-size: 0.9rem;
-    display: inline-flex; align-items: center; gap: 0.35rem;
-}
-.btn-sm { padding: 0.2rem 0.5rem; font-size: 0.82rem; }
-.btn-primary { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
-.btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--arbour-primary) 85%, black); }
-.btn-primary:disabled { opacity: 0.6; cursor: default; }
-.btn-ghost { background: var(--arbour-bg-deep); border: 1px solid var(--arbour-border); color: var(--arbour-text-muted); }
-.btn-ghost:hover:not(:disabled) { background: var(--arbour-bg-header-active); color: var(--arbour-text); }
-.btn-ghost:disabled { opacity: 0.6; cursor: default; }
-.btn-stop:hover:not(:disabled) { color: var(--arbour-danger); border-color: var(--arbour-danger); }
+.urls { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.url-badge { display: inline-block; max-width: 100%; text-decoration: none; }
+.url-badge :global(.badge) { font-size: 0.78rem; }
 
-.more-menu-wrap { position: relative; }
-.more-menu {
-    position: absolute; top: calc(100% + 4px); right: 0; z-index: 50;
-    background: var(--arbour-bg); border: 1px solid var(--arbour-border);
-    border-radius: var(--arbour-radius); box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-    min-width: 140px; padding: 0.25rem 0;
-}
-.more-item {
-    display: flex; align-items: center; gap: 0.5rem;
-    width: 100%; background: none; border: none; cursor: pointer;
-    padding: 0.5rem 0.75rem; font-size: 0.85rem; color: var(--arbour-text); text-align: left;
-}
-.more-item:hover { background: var(--arbour-bg-header-active); }
-.more-item-danger { color: var(--arbour-danger); }
+.log-section { display: flex; flex-direction: column; }
+.log-header { display: flex; align-items: center; justify-content: space-between; }
+.ts-controls { display: flex; gap: 4px; }
+.log-terminal { overflow: hidden; }
 
-.urls { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
-.url-badge {
-    background: var(--arbour-bg-header-active); color: var(--arbour-text-muted);
-    border-radius: var(--arbour-radius-pill); padding: 0.2em 0.6em;
-    font-size: 0.78rem; text-decoration: none; max-width: 100%;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;
-}
-.url-badge:hover { color: var(--arbour-text); }
-
-.progress-terminal-wrap { margin-bottom: 0.75rem; }
-
-.compose-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-}
-@media (min-width: 1200px) {
-    .compose-grid { grid-template-columns: 1fr 1fr; }
-}
-
-.col-left, .col-right { display: flex; flex-direction: column; gap: 0.75rem; }
-
-.section-box {
-    background: var(--arbour-bg);
-    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
-    border-radius: var(--arbour-radius);
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.form-group { display: flex; flex-direction: column; gap: 0.25rem; }
-.form-group label { font-size: 0.85rem; font-weight: 500; color: var(--arbour-text-muted); }
-.form-hint { font-size: 0.78rem; color: var(--arbour-text-muted); }
-.mt { margin-top: 0.75rem; }
-
-.form-control, .form-select {
-    background: var(--arbour-bg-deep); border: 1px solid var(--arbour-border);
-    border-radius: var(--arbour-radius-sm); color: var(--arbour-text);
-    padding: 0.4rem 0.6rem; font-size: 0.9rem; width: 100%; box-sizing: border-box;
-}
 .monospace { font-family: 'JetBrains Mono', monospace; }
-
-.add-container { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
-.add-container .form-control { flex: 1; }
 
 .editor-box {
     font-family: 'JetBrains Mono', monospace;
@@ -820,13 +788,10 @@ h5 { font-size: 1rem; margin: 0; }
     position: relative;
     min-height: 200px;
     background: var(--arbour-bg);
-    border: 1px solid transparent;
     box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
     border-radius: var(--arbour-radius);
     overflow: hidden;
-    margin-bottom: 0.5rem;
 }
-.editor-box.edit-mode { border-color: var(--arbour-primary); }
 
 .editor-overlay-btn {
     all: unset; cursor: pointer;
@@ -834,46 +799,14 @@ h5 { font-size: 1rem; margin: 0; }
     color: var(--arbour-text-muted); width: 20px; height: 20px;
 }
 .editor-overlay-btn:hover { color: var(--arbour-text); }
-
 .copy-btn { right: 10px; top: 10px; }
 
-.yaml-error {
-    background: color-mix(in srgb, var(--arbour-danger) 10%, transparent);
-    border: 1px solid var(--arbour-danger);
-    border-radius: var(--arbour-radius-sm);
-    padding: 0.4rem 0.6rem; font-size: 0.82rem;
-    color: var(--arbour-danger); margin-bottom: 0.5rem;
-}
-
-.log-section { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
-.log-header { display: flex; align-items: center; justify-content: space-between; }
-.ts-controls { display: flex; gap: 2px; }
-.log-terminal { overflow: hidden; }
-
 .radio-group { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.25rem; }
-.radio-label { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; font-size: 0.9rem; }
-.radio-label input { width: auto; }
 
-.toggle-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; margin-bottom: 0.25rem; }
-.toggle-label input { width: auto; }
-.indent { margin-left: 1.5rem; }
-
-.not-managed { padding: 1rem 0; }
-
-/* Dialogs */
-dialog {
-    border: none; border-radius: var(--arbour-radius-lg);
-    background: var(--arbour-bg); color: var(--arbour-text);
-    padding: 0; max-width: 600px; width: calc(100% - 2rem);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    position: fixed; top: 50%; left: 50%;
-    transform: translate(-50%, -50%); margin: 0;
-}
 .log-modal { max-width: 900px; }
-.dialog-box { display: flex; flex-direction: column; max-height: 80vh; }
-.dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--arbour-border); flex-shrink: 0; }
-.close-btn { background: none; border: none; color: var(--arbour-text-muted); font-size: 1.4rem; cursor: pointer; padding: 0; line-height: 1; }
-.close-btn:hover { color: var(--arbour-text); }
-.dialog-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
 .log-modal-body { padding: 0; height: 70vh; }
+
+.compose-editor-modal { max-width: 1200px; width: calc(100% - 2rem); }
+.compose-editor-modal-body { padding: 1rem; max-height: 75vh; overflow-y: auto; }
+.compose-editor-modal-body .editor-box { min-height: 65vh; height: 65vh; }
 </style>

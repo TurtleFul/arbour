@@ -57,13 +57,13 @@ function fetchData() {
     onclose={() => (open = false)}
     onclick={(e) => { if (e.target === dialogEl) close(); }}
 >
-    <div class="dialog-box">
-        <header class="dialog-header">
-            <h5>{$t("networkInspect")}</h5>
-            <button class="close-btn" onclick={close} aria-label="Close">×</button>
-        </header>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">{$t("networkInspect")}</h5>
+            <button class="btn-close" onclick={close} aria-label="Close"></button>
+        </div>
 
-        <div class="dialog-body">
+        <div class="modal-body">
             {#if loading}
                 <div class="loading-state">
                     <Icon name="spinner" spin={true} />
@@ -78,18 +78,18 @@ function fetchData() {
                 <div class="network-panel">
                     <div class="net-header">
                         <div class="net-header-icon"><Icon name="link" /></div>
-                        <div class="flex-grow">
+                        <div class="flex-grow-1">
                             <div class="net-name">{data.name}</div>
                             <div class="badge-row">
-                                <span class="net-badge net-badge-info">{data.driver}</span>
-                                <span class="net-badge net-badge-muted">{data.scope}</span>
+                                <span class="badge bg-info">{data.driver}</span>
+                                <span class="badge bg-secondary">{data.scope}</span>
                                 {#if data.internal}
-                                    <span class="net-badge net-badge-warning">
+                                    <span class="badge bg-warning">
                                         <Icon name="ban" /> {$t("networkInternal")}
                                     </span>
                                 {/if}
                                 {#if data.ipv6}
-                                    <span class="net-badge net-badge-primary">IPv6</span>
+                                    <span class="badge bg-primary">IPv6</span>
                                 {/if}
                             </div>
                         </div>
@@ -147,59 +147,16 @@ function fetchData() {
             {/if}
         </div>
 
-        <footer class="dialog-footer">
+        <div class="modal-footer">
             <button class="btn btn-secondary" onclick={close}>{$t("close")}</button>
-        </footer>
+        </div>
     </div>
 </dialog>
 
 <style>
-dialog {
-    border: none;
-    border-radius: var(--arbour-radius-lg);
-    background: var(--arbour-bg);
-    color: var(--arbour-text);
-    padding: 0;
-    max-width: 660px;
-    width: calc(100% - 2rem);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-dialog::backdrop { background: rgba(0,0,0,0.5); }
+dialog { max-width: 660px; width: calc(100% - 2rem); }
 
-.dialog-box { display: flex; flex-direction: column; max-height: 80vh; }
-
-.dialog-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--arbour-border);
-    flex-shrink: 0;
-}
-.dialog-header h5 { margin: 0; font-size: 1.1rem; }
-
-.close-btn {
-    background: none; border: none;
-    color: var(--arbour-text-muted); font-size: 1.4rem;
-    cursor: pointer; padding: 0; line-height: 1;
-}
-.close-btn:hover { color: var(--arbour-text); }
-
-.dialog-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
-
-.dialog-footer {
-    display: flex; justify-content: flex-end;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid var(--arbour-border);
-    flex-shrink: 0;
-}
-
-.btn-secondary {
-    background: transparent;
-    border: 1px solid var(--arbour-border);
-    color: var(--arbour-text);
-}
-.btn-secondary:hover { background: var(--arbour-bg-deep); }
+.modal-body { max-height: 70vh; overflow-y: auto; }
 
 .loading-state, .error-state {
     padding: 1.5rem; text-align: center;
@@ -224,18 +181,7 @@ dialog::backdrop { background: rgba(0,0,0,0.5); }
     border-radius: var(--arbour-radius-sm); font-size: 15px;
 }
 .net-name { font-size: 1rem; font-weight: 600; word-break: break-all; }
-.flex-grow { flex: 1; min-width: 0; }
 .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-
-.net-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 10px; border-radius: var(--arbour-radius-pill);
-    font-size: 11px; font-weight: 600;
-}
-.net-badge-info { color: var(--arbour-text-on-primary); background: var(--arbour-info); }
-.net-badge-muted { color: var(--arbour-text-subtle); background: var(--arbour-bg-header-active); }
-.net-badge-warning { color: var(--arbour-text-on-warning); background: var(--arbour-warning); }
-.net-badge-primary { color: var(--arbour-text-on-primary); background: var(--arbour-primary); }
 
 .section { margin-bottom: 1.25rem; }
 

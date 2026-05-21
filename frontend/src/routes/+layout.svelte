@@ -3,6 +3,7 @@ import type { Snippet } from "svelte";
 import { onMount } from "svelte";
 import { page } from "$app/stores";
 import { t } from "svelte-i18n";
+import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import { themeStore } from "$lib/stores/theme.svelte";
 import { langStore } from "$lib/stores/lang.svelte";
@@ -11,6 +12,7 @@ import Icon from "$lib/components/Icon.svelte";
 import ToastContainer from "$lib/components/ToastContainer.svelte";
 import Login from "$lib/components/Login.svelte";
 import { compareVersions, ALL_ENDPOINTS } from "../../../common/util-common";
+import { clickOutside } from "$lib/actions/clickOutside";
 import "$lib/../styles/global.scss";
 import "$lib/../styles/localization.scss";
 
@@ -30,14 +32,17 @@ const layoutClass = $derived(
     [socketStore.isMobile ? "mobile" : "", themeStore.isDark ? "dark" : "light"].filter(Boolean).join(" ")
 );
 
+let dropdownOpen = $state(false);
+
 onMount(() => {
     document.title = "Arbour - " + location.host;
     themeStore.init();
     langStore.initI18n();
     socketStore.initSocketIO();
     socketStore.checkScreenSize();
-    window.addEventListener("resize", () => socketStore.checkScreenSize());
-    return () => window.removeEventListener("resize", () => socketStore.checkScreenSize());
+    const handler = () => socketStore.checkScreenSize();
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
 });
 </script>
 
@@ -47,86 +52,99 @@ onMount(() => {
     <div class={layoutClass}>
         {#if !socketStore.socketIO.connected && !socketStore.socketIO.firstConnect}
             <div class="lost-connection">
-                {socketStore.socketIO.connectionErrorMsg}
-                {#if socketStore.socketIO.showReverseProxyGuide}
-                    {$t("reverseProxyMsg1")}
-                    <a href="https://github.com/louislam/uptime-kuma/wiki/Reverse-Proxy" target="_blank">
-                        {$t("reverseProxyMsg2")}
-                    </a>
-                {/if}
+                <div class="container-fluid">
+                    {socketStore.socketIO.connectionErrorMsg}
+                    {#if socketStore.socketIO.showReverseProxyGuide}
+                        {$t("reverseProxyMsg1")}
+                        <a href="https://github.com/louislam/uptime-kuma/wiki/Reverse-Proxy" target="_blank">
+                            {$t("reverseProxyMsg2")}
+                        </a>
+                    {/if}
+                </div>
             </div>
         {/if}
 
-        <header>
-            <div class="header-logo">
-                <a href="/" class="logo-link">
+        <header class="d-flex flex-nowrap align-items-center py-3 mb-3 border-bottom">
+            <div class="d-flex align-items-center ms-4 me-3">
+                <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
                     <AppLogo size={40} />
-                    <span class="app-title">Arbour</span>
+                    <span class="d-none d-md-inline fs-4 title ms-2">Arbour</span>
                 </a>
                 {#if hasNewVersion()}
-                    <a target="_blank" href="https://github.com/turtleful/arbour/releases" class="update-icon">
+                    <a target="_blank" href="https://github.com/turtleful/arbour/releases" class="ms-2 me-3 notification-icon">
                         <Icon name="arrow-up" />
                     </a>
                 {/if}
             </div>
 
-            <nav class="header-nav">
+            <ul class="nav nav-pills d-flex flex-nowrap ms-auto">
                 {#if socketStore.loggedIn}
-                    <a href="/" class="nav-link" class:active={$page.url.pathname === "/"}>
-                        <Icon name="home" />
-                        <span>{$t("home")}</span>
-                    </a>
+                    <li class="nav-item me-2">
+                        <a href="/" class="nav-link d-flex flex-column flex-sm-row align-items-center" class:active={$page.url.pathname === "/"} title={$t("home")}>
+                            <Icon name="home" />
+                            <div class="mt-2 mt-sm-0 ms-sm-2">{$t("home")}</div>
+                        </a>
+                    </li>
 
                     {#if socketStore.isMobile}
-                        <a href="/stacks" class="nav-link" class:active={(($page.url.pathname as string) === "/stacks")}>
-                            <Icon name="list" />
-                            <span>{$t("stack", { values: { n: 2 } })}</span>
-                        </a>
+                        <li class="nav-item me-2">
+                            <a href="/stacks" class="nav-link d-flex flex-column flex-sm-row align-items-center" class:active={($page.url.pathname as string) === "/stacks"} title={$tn("stack", 2)}>
+                                <Icon name="list" />
+                                <div class="mt-2 mt-sm-0 ms-sm-2">{$tn("stack", 2)}</div>
+                            </a>
+                        </li>
                     {/if}
 
-                    <a href="/console" class="nav-link" class:active={$page.url.pathname.startsWith("/console")}>
-                        <Icon name="terminal" />
-                        <span>{$t("console")}</span>
-                    </a>
+                    <li class="nav-item me-2">
+                        <a href="/console" class="nav-link d-flex flex-column flex-sm-row align-items-center" class:active={$page.url.pathname.startsWith("/console")} title={$t("console")}>
+                            <Icon name="terminal" />
+                            <div class="mt-2 mt-sm-0 ms-sm-2">{$t("console")}</div>
+                        </a>
+                    </li>
 
-                    <div class="profile-menu">
-                        <button class="nav-link profile-btn">
-                            <span class="profile-pic">{socketStore.usernameFirstChar}</span>
-                            <Icon name="ellipsis-v" />
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li class="dropdown-username">
-                                {#if socketStore.username}
-                                    {$t("signedInDisp", { values: { 0: socketStore.username } })}
-                                {:else}
-                                    {$t("signedInDispDisabled")}
-                                {/if}
-                            </li>
-                            <li class="dropdown-divider"></li>
-                            <li>
-                                <button class="dropdown-item" onclick={() => socketStore.scanFolder()}>
-                                    <Icon name="arrows-rotate" /> {$t("scanFolder")}
-                                </button>
-                            </li>
-                            <li>
-                                <a href="/settings" class="dropdown-item" class:active={$page.url.pathname.startsWith("/settings")}>
-                                    <Icon name="cog" /> {$t("Settings")}
-                                </a>
-                            </li>
-                            <li>
-                                <button class="dropdown-item" onclick={() => socketStore.logout()}>
-                                    <Icon name="sign-out-alt" /> {$t("Logout")}
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
+                    <li class="nav-item">
+                        <div class="dropdown dropdown-profile-pic" use:clickOutside={() => (dropdownOpen = false)}>
+                            <button type="button" class="nav-link profile-toggle" onclick={() => (dropdownOpen = !dropdownOpen)}>
+                                <span class="profile-pic d-none d-sm-flex">{socketStore.usernameFirstChar}</span>
+                                <Icon name="ellipsis-v" />
+                            </button>
+
+                            <ul class="dropdown-menu" class:show={dropdownOpen}>
+                                <li>
+                                    {#if socketStore.username}
+                                        <span class="dropdown-item-text">
+                                            {$t("signedInDisp", { values: { 0: socketStore.username } })}
+                                        </span>
+                                    {:else}
+                                        <span class="dropdown-item-text">{$t("signedInDispDisabled")}</span>
+                                    {/if}
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <button class="dropdown-item" onclick={() => { dropdownOpen = false; socketStore.emitAgent(ALL_ENDPOINTS, "requestStackList", (res: { ok: boolean; msg?: string }) => socketStore.toastRes(res as any)); }}>
+                                        <Icon name="arrows-rotate" /> {$t("scanFolder")}
+                                    </button>
+                                </li>
+                                <li>
+                                    <a href="/settings" class="dropdown-item" class:active={$page.url.pathname.startsWith("/settings")} onclick={() => (dropdownOpen = false)}>
+                                        <Icon name="cog" /> {$t("Settings")}
+                                    </a>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" onclick={() => { dropdownOpen = false; socketStore.logout(); }}>
+                                        <Icon name="sign-out-alt" /> {$t("Logout")}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
                 {/if}
-            </nav>
+            </ul>
         </header>
 
         <main>
             {#if socketStore.socketIO.connecting}
-                <div class="connecting-msg">
+                <div class="container mt-5">
                     <h4>{$t("connecting...")}</h4>
                 </div>
             {:else if socketStore.loggedIn}
@@ -142,190 +160,58 @@ onMount(() => {
 
 <style>
 header {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
     background-color: var(--arbour-bg-header);
-    border-bottom: 1px solid var(--arbour-bg-header);
-    flex-wrap: nowrap;
+    border-bottom-color: var(--arbour-bg-header) !important;
 }
 
-.header-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-right: auto;
-}
-
-.logo-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-}
-
-.app-title {
+header :global(span) {
     color: var(--arbour-text);
-    font-size: 1.25rem;
-    font-weight: bold;
-    display: none;
 }
 
-@media (min-width: 768px) {
-    .app-title { display: inline; }
-}
+.title { font-weight: bold; }
 
-.update-icon {
-    color: var(--arbour-info);
-    font-weight: bold;
-}
+main { min-height: calc(100vh - 160px); }
 
-.header-nav {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    margin-right: 1.5rem;
-}
+.nav { margin-right: 25px; }
 
-.nav-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--arbour-radius);
-    color: var(--arbour-text-on-header);
-    text-decoration: none;
-    font-size: 0.85rem;
-    gap: 0.25rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    transition: color 0.15s, background 0.15s;
-}
-
-@media (min-width: 576px) {
-    .nav-link {
-        flex-direction: row;
-        gap: 0.4rem;
-    }
-}
-
-.nav-link:hover, .nav-link.active {
-    color: var(--arbour-primary);
-    background-color: var(--arbour-bg-header-active);
-}
-
-.profile-menu {
+.dropdown-profile-pic {
+    user-select: none;
     position: relative;
 }
 
-.profile-btn {
+.dropdown-profile-pic .profile-toggle {
+    cursor: pointer;
     display: flex;
-    gap: 0.4rem;
+    gap: 6px;
     align-items: center;
     padding: 0.5rem 0.8rem;
+    background: none;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.dropdown-profile-pic :global(.dropdown-menu) {
+    right: 0;
+    left: auto;
 }
 
 .profile-pic {
-    display: none;
     align-items: center;
     justify-content: center;
+    color: var(--arbour-text-on-primary);
+    background-color: var(--arbour-primary);
     width: 24px;
     height: 24px;
+    margin-right: 5px;
     border-radius: var(--arbour-radius-pill);
-    background-color: var(--arbour-primary);
-    color: var(--arbour-text-on-primary);
     font-weight: bold;
-    font-size: 0.65rem;
+    font-size: 10px;
 }
 
-@media (min-width: 576px) {
-    .profile-pic { display: flex; }
-}
-
-.profile-menu:hover .dropdown-menu,
-.profile-menu:focus-within .dropdown-menu {
-    display: block;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    min-width: 180px;
-    background-color: var(--arbour-bg);
-    border: 1px solid var(--arbour-border);
-    border-radius: var(--arbour-radius-lg);
-    overflow: hidden;
-    z-index: 100;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-}
-
-.dropdown-username {
-    padding: 0.7rem 1rem 0.5rem;
-    font-size: 0.85rem;
-    color: var(--arbour-text-muted);
-}
-
-.dropdown-divider {
-    height: 1px;
-    background-color: var(--arbour-border);
-    margin: 0;
-}
-
-.dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-    padding: 0.7rem 1rem;
-    background: none;
-    border: none;
-    text-align: left;
-    color: var(--arbour-text);
-    font-size: 0.9rem;
-    font-family: inherit;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.1s;
-}
-
-.dropdown-item:hover {
-    background-color: var(--arbour-bg-deep);
-}
-
-.dropdown-item.active {
-    background-color: var(--arbour-dropdown-selected);
-}
-
-.lost-connection {
-    padding: 0.4rem 1rem;
-    background-color: var(--arbour-danger);
-    color: var(--arbour-text-on-danger);
-    position: fixed;
-    width: 100%;
-    z-index: 9999;
-    font-size: 0.9rem;
-}
-
-.lost-connection a {
-    color: inherit;
-    text-decoration: underline;
-}
-
-main {
-    min-height: calc(100vh - 64px);
-    padding: 0;
-}
-
-.connecting-msg {
-    padding: 3rem 1.5rem;
-    text-align: center;
-    color: var(--arbour-text-muted);
+.notification-icon {
+    color: var(--arbour-info);
+    font-weight: bold;
 }
 </style>

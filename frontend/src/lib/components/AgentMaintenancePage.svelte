@@ -1,6 +1,7 @@
 <script lang="ts">
 import { setContext } from "svelte";
 import { t } from "svelte-i18n";
+import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import { AGENT_CONTEXT } from "$lib/context";
 import { getAgentMaintenanceTerminalName } from "../../../../common/util-common";
@@ -23,7 +24,6 @@ let systemPruneData = $state({ all: false, volumes: false });
 let activeTab = $state(Object.keys(DockerArtefactInfos)[0]);
 let progressTerminalRef = $state<ProgressTerminalInstance | undefined>(undefined);
 
-// Expose loadData on each DockerArtefact
 let artefactRefs = $state<Record<string, { loadData(): void } | undefined>>({});
 
 const name = $derived(socketStore.getAgentName(endpoint));
@@ -65,10 +65,10 @@ setContext(AGENT_CONTEXT, {
 });
 </script>
 
-<h1>{name}</h1>
+<h1 class="mb-3">{name}</h1>
 
-<button class="btn btn-primary" disabled={processing} onclick={() => (showSystemPruneDialog = true)}>
-    <Icon name="wrench" /> {$t("systemPrune")}
+<button class="btn btn-primary mb-3" title={$t("tooltipOpenPruneDialog")} disabled={processing} onclick={() => (showSystemPruneDialog = true)}>
+    <Icon name="wrench" /> <span>{$t("systemPrune")}</span>
 </button>
 
 <Confirm
@@ -80,32 +80,34 @@ setContext(AGENT_CONTEXT, {
     onno={resetSystemPrune}
 >
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    <p>{@html $t("systemPruneMsg")}</p>
-    <label class="toggle-label">
-        <input type="checkbox" bind:checked={systemPruneData.all} />
-        {$t("systemPruneAll")}
-    </label>
-    <label class="toggle-label mt">
-        <input type="checkbox" bind:checked={systemPruneData.volumes} />
-        {$t("systemPruneVolumes")}
-    </label>
+    <p class="mb-3">{@html $t("systemPruneMsg")}</p>
+
+    <div class="form-check form-switch">
+        <input id="systemPruneAll" class="form-check-input" type="checkbox" bind:checked={systemPruneData.all} />
+        <label class="form-check-label" for="systemPruneAll">{$t("systemPruneAll")}</label>
+    </div>
+
+    <div class="form-check form-switch mt-3">
+        <input id="systemPruneVolumes" class="form-check-input" type="checkbox" bind:checked={systemPruneData.volumes} />
+        <label class="form-check-label" for="systemPruneVolumes">{$t("systemPruneVolumes")}</label>
+    </div>
 </Confirm>
 
-<div class="terminal-wrap">
+<div class="mt-3">
     <ProgressTerminal bind:this={progressTerminalRef} name={terminalName} {endpoint} />
 </div>
 
-<div class="artefact-panel">
+<div class="shadow-box big-padding mt-3">
     <div class="tabs">
         {#each Object.values(DockerArtefactInfos) as info (info.name)}
-            <button class="tab" class:active={activeTab === info.name}
+            <button class="tab artefact-tab me-2" class:active-artefact-tab={activeTab === info.name}
                 onclick={() => (activeTab = info.name)}>
-                {$t(info.name, { values: { n: 2 } })}
+                {$tn(info.name, 2)}
             </button>
         {/each}
     </div>
 
-    <div class="tab-content">
+    <div class="tab-content mt-4">
         {#each Object.values(DockerArtefactInfos) as info (info.name)}
             {#if activeTab === info.name}
                 <DockerArtefact
@@ -119,52 +121,34 @@ setContext(AGENT_CONTEXT, {
 </div>
 
 <style>
-h1 { font-size: 2rem; margin: 0 0 1rem; }
-
-.btn { padding: 0.35rem 0.8rem; border-radius: var(--arbour-radius-sm); cursor: pointer; border: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; }
-.btn-primary { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
-.btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--arbour-primary) 85%, black); }
-.btn-primary:disabled { opacity: 0.6; cursor: default; }
-
-.toggle-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; margin-top: 0.5rem; }
-.toggle-label input { width: auto; }
-.mt { margin-top: 0.5rem; }
-
-.terminal-wrap { margin-top: 1rem; }
-
-.artefact-panel {
-    margin-top: 1rem;
-    background: var(--arbour-bg);
-    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
-    border-radius: var(--arbour-radius);
-    overflow: hidden;
-}
-
 .tabs {
     display: flex;
-    background: var(--arbour-bg-header);
+    flex-wrap: wrap;
     border-bottom: 1px solid var(--arbour-border);
-    overflow-x: auto;
+    margin-bottom: 0;
 }
 
-.tab {
+.tab.artefact-tab {
     background: none;
     border: none;
-    border-bottom: 3px solid transparent;
-    padding: 0.6rem 1rem;
+    border-bottom: 4px solid transparent;
+    padding: 0.5rem 1rem;
+    border-radius: var(--arbour-radius) var(--arbour-radius) 0 0;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: 0.9rem;
     color: var(--arbour-text-muted);
     white-space: nowrap;
-    transition: color 0.15s, background 0.15s;
-}
-.tab:hover { background: var(--arbour-bg-header-active); color: var(--arbour-text); }
-.tab.active {
-    color: var(--arbour-text);
-    border-bottom-color: var(--arbour-primary);
-    background: var(--arbour-bg-header-active);
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
-.tab-content { padding: 1rem; }
+.tab.artefact-tab:hover {
+    background: var(--arbour-bg-header-active);
+    color: var(--arbour-text);
+}
+
+.tab.active-artefact-tab {
+    background: var(--arbour-bg-header-active);
+    color: var(--arbour-text);
+    border-bottom-color: var(--arbour-primary);
+}
 </style>
