@@ -1,10 +1,12 @@
-import { register, init, locale, getLocaleFromNavigator, t as i18nT } from "svelte-i18n";
+import { register, init, locale, t as i18nT } from "svelte-i18n";
 import { derived, get } from "svelte/store";
 
 export const tn = derived(i18nT, ($t) => (key: string, n: number): string => {
     const text = $t(key);
     const parts = text.split(" | ");
-    if (parts.length <= 1) return text;
+    if (parts.length <= 1) {
+        return text;
+    }
     return n === 1 ? parts[0] : parts[parts.length - 1];
 });
 
@@ -41,7 +43,7 @@ export const languageList: Record<string, string> = {
     "de-CH": "Schwiizerdütsch",
 };
 
-const RTL_LANGS = new Set(["fa", "ar-SY", "ur", "ar"]);
+const RTL_LANGS = new Set([ "fa", "ar-SY", "ur", "ar" ]);
 
 const langModules = import.meta.glob("../../lang/*.json");
 
@@ -60,7 +62,9 @@ export function isRTL(lang: string): boolean {
 }
 
 export function setPageLocale(lang: string) {
-    if (typeof document === "undefined") return;
+    if (typeof document === "undefined") {
+        return;
+    }
     document.documentElement.setAttribute("lang", lang);
     document.documentElement.setAttribute("dir", isRTL(lang) ? "rtl" : "ltr");
 }

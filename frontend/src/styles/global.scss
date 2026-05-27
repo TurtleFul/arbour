@@ -1,4 +1,6 @@
 @use "vars";
+@use "localization";
+@use "sass:math";
 
 @import "@fontsource/jetbrains-mono/index.css";
 @import "@xterm/xterm/css/xterm.css";
@@ -1111,28 +1113,28 @@ $spacers: (
 @for $i from 1 through 12 {
     .col-#{$i} {
         flex: 0 0 auto;
-        width: percentage(calc($i / 12));
+        width: math.percentage(math.div($i, 12));
     }
 }
 
 @media (min-width: 576px) {
     @for $i from 1 through 12 {
-        .col-sm-#{$i} { flex: 0 0 auto; width: percentage(calc($i / 12)); }
+        .col-sm-#{$i} { flex: 0 0 auto; width: math.percentage(math.div($i, 12)); }
     }
 }
 @media (min-width: 768px) {
     @for $i from 1 through 12 {
-        .col-md-#{$i} { flex: 0 0 auto; width: percentage(calc($i / 12)); }
+        .col-md-#{$i} { flex: 0 0 auto; width: math.percentage(math.div($i, 12)); }
     }
 }
 @media (min-width: 992px) {
     @for $i from 1 through 12 {
-        .col-lg-#{$i} { flex: 0 0 auto; width: percentage(calc($i / 12)); }
+        .col-lg-#{$i} { flex: 0 0 auto; width: math.percentage(math.div($i, 12)); }
     }
 }
 @media (min-width: 1200px) {
     @for $i from 1 through 12 {
-        .col-xl-#{$i} { flex: 0 0 auto; width: percentage(calc($i / 12)); }
+        .col-xl-#{$i} { flex: 0 0 auto; width: math.percentage(math.div($i, 12)); }
     }
 }
 
@@ -1314,5 +1316,3 @@ h5.settings-subheading::after {
 
     a { color: inherit; }
 }
-
-@import "localization.scss";

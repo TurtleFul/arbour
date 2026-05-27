@@ -103,7 +103,7 @@ describe("getServiceEvents", () => {
     });
 
     test("all EventType values are stored and retrieved correctly", () => {
-        const types = ["deploy", "start", "stop", "restart", "update", "recreate", "down"] as const;
+        const types = [ "deploy", "start", "stop", "restart", "update", "recreate", "down" ] as const;
         for (const t of types) {
             logServiceEvent("mystack", "web", t, "manual");
         }

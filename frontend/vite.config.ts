@@ -11,7 +11,7 @@ export default defineConfig({
             // SvelteKit hardcodes path.resolve('src') in its allow list, but this
             // project keeps source under frontend/src/ — so lang/ and other dirs
             // outside lib/ and routes/ are blocked without this explicit entry.
-            allow: ['frontend/src'],
+            allow: [ "frontend/src" ],
         },
     },
     define: {

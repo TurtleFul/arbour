@@ -1,5 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
+import { SvelteMap, SvelteSet } from "svelte/reactivity";
 import { Terminal } from "@xterm/xterm";
 import { AgentSocket } from "../../../../common/agent-socket";
 import type { AgentData, SimpleStackData } from "../../../../common/types";
@@ -12,8 +13,8 @@ import { toastStore } from "./toast.svelte";
 
 let socket: Socket;
 let agentSocket: AgentSocket;
-const terminalMap = new Map<string, Terminal>();
-const terminalTransformMap = new Map<string, (data: string) => string>();
+const terminalMap = new SvelteMap<string, Terminal>();
+const terminalTransformMap = new SvelteMap<string, (data: string) => string>();
 let filterRebuildTimer: ReturnType<typeof setTimeout> | null = null;
 
 function tr(key: string): string {
@@ -88,7 +89,9 @@ class SocketStore {
     getAgentName(endpoint: string): string {
         const agent = this.agentList[endpoint] as AgentData;
         if (agent) {
-            if (endpoint === "" && agent.name === "") return "Master";
+            if (endpoint === "" && agent.name === "") {
+                return "Master";
+            }
             return agent.name ? agent.name : agent.endpoint;
         }
         return endpoint;
@@ -107,7 +110,9 @@ class SocketStore {
     }
 
     login(username: string, password: string, token: string, callback: (res: SocketRes) => void) {
-        socket.emit("login", { username, password, token }, (res: SocketRes) => {
+        socket.emit("login", { username,
+            password,
+            token }, (res: SocketRes) => {
             if (res.tokenRequired) {
                 callback(res);
             }
@@ -188,7 +193,9 @@ class SocketStore {
 
     unbindTerminal(endpoint: string, terminalName: string) {
         this.emitAgent(endpoint, "terminalLeave", terminalName, (res: SocketRes) => {
-            if (!res.ok) this.toastRes(res);
+            if (!res.ok) {
+                this.toastRes(res);
+            }
         });
         terminalMap.delete(terminalName);
     }
@@ -202,7 +209,9 @@ class SocketStore {
     }
 
     initSocketIO() {
-        if (this.socketIO.initedSocketIO) return;
+        if (this.socketIO.initedSocketIO) {
+            return;
+        }
         this.socketIO.initedSocketIO = true;
 
         const env = import.meta.env.MODE;
@@ -288,17 +297,23 @@ class SocketStore {
             const terminalName = args[0] as string;
             let data = args[1] as string | Uint8Array;
             const terminal = terminalMap.get(terminalName);
-            if (!terminal) return;
+            if (!terminal) {
+                return;
+            }
             if (typeof data === "string") {
                 const transform = terminalTransformMap.get(terminalName);
-                if (transform) data = transform(data);
+                if (transform) {
+                    data = transform(data);
+                }
             }
             terminal.write(data);
         });
 
         agentSocket.on("stackList", (...args) => {
             const res = args[0] as SocketRes;
-            if (!res.ok) return;
+            if (!res.ok) {
+                return;
+            }
             if (!res.endpoint) {
                 this.stackList = res.stackList as Record<string, SimpleStackData>;
             } else {
@@ -313,7 +328,9 @@ class SocketStore {
 
         agentSocket.on("stackUpdate", (...args) => {
             const res = args[0] as SocketRes;
-            if (!res.ok) return;
+            if (!res.ok) {
+                return;
+            }
             if (!res.endpoint) {
                 this.stackList[res.stackName as string] = res.stackData as SimpleStackData;
             } else {
@@ -328,7 +345,9 @@ class SocketStore {
 
         socket.on("agentStatus", (res: SocketRes) => {
             this.agentStatusList[res.endpoint as string] = res.status as string;
-            if (res.msg) this.toastError(res.msg as string);
+            if (res.msg) {
+                this.toastError(res.msg as string);
+            }
         });
 
         socket.on("agentList", (res: SocketRes) => {
@@ -355,11 +374,13 @@ class SocketStore {
     }
 
     #scheduleFilterRebuild() {
-        if (filterRebuildTimer !== null) clearTimeout(filterRebuildTimer);
+        if (filterRebuildTimer !== null) {
+            clearTimeout(filterRebuildTimer);
+        }
         filterRebuildTimer = setTimeout(() => {
             filterRebuildTimer = null;
-            const agents = new Set<string>();
-            const status = new Set<string>();
+            const agents = new SvelteSet<string>();
+            const status = new SvelteSet<string>();
 
             for (const stackData of Object.values(this.completeStackList)) {
                 agents.add(stackData.endpoint);
@@ -367,13 +388,13 @@ class SocketStore {
             }
 
             this.stackFilter.agents.options = Object.fromEntries(
-                [...agents]
-                    .map((a) => [this.getAgentName(a), a])
+                [ ...agents ]
+                    .map((a) => [ this.getAgentName(a), a ])
                     .sort((a1, a2) => a1[0].localeCompare(a2[0]))
             );
 
             this.stackFilter.status.options = Object.fromEntries(
-                StackStatusInfo.ALL.filter((i) => status.has(i.label)).map((i) => [i.label, i.label])
+                StackStatusInfo.ALL.filter((i) => status.has(i.label)).map((i) => [ i.label, i.label ])
             );
 
             this.stackFilter.attributes.options = { imageUpdatesAvailable: "imageUpdatesAvailable" };

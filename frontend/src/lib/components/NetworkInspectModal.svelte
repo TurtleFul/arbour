@@ -20,7 +20,9 @@ let error = $state<string | null>(null);
 let data = $state<NetworkInspectData | null>(null);
 
 $effect(() => {
-    if (!dialogEl) return;
+    if (!dialogEl) {
+        return;
+    }
     if (open) {
         dialogEl.showModal();
         fetchData();
@@ -51,11 +53,14 @@ function fetchData() {
 }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog
     bind:this={dialogEl}
     onclose={() => (open = false)}
-    onclick={(e) => { if (e.target === dialogEl) close(); }}
+    onclick={(e) => {
+        if (e.target === dialogEl) {
+            close();
+        }
+    }}
 >
     <div class="modal-content">
         <div class="modal-header">

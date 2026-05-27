@@ -2,6 +2,7 @@
 import { getContext, onMount } from "svelte";
 import { t } from "svelte-i18n";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { COMPOSE_CONTEXT, type ComposeContext } from "$lib/context";
 import type { ComposeNetwork } from "../../../../common/compose-document";
 import Icon from "./Icon.svelte";
@@ -26,7 +27,7 @@ $effect(() => {
 });
 
 $effect(() => {
-    const _ = networkList.map(n => n.name); // track mutations
+    void networkList.map(n => n.name); // track mutations
     applyToComposeDocument();
 });
 
@@ -35,7 +36,9 @@ $effect(() => {
     for (const networkName in selected) {
         const enable = selected[networkName];
         if (enable) {
-            if (!externalList[networkName]) externalList[networkName] = {};
+            if (!externalList[networkName]) {
+                externalList[networkName] = {};
+            }
             externalList[networkName].external = true;
         } else {
             const next = { ...externalList };
@@ -50,11 +53,12 @@ function loadNetworkList() {
     const rows: NetworkRow[] = [];
     const ext: Record<string, Record<string, unknown>> = {};
 
-    for (const [name, network] of Object.entries(ctx.composeDocument.networks.getNetworks()) as [string, ComposeNetwork][]) {
+    for (const [ name, network ] of Object.entries(ctx.composeDocument.networks.getNetworks()) as [string, ComposeNetwork][]) {
         if (network.external) {
             ext[name] = Object.assign({}, network.composeData.data as Record<string, unknown>);
         } else {
-            rows.push({ name, data: network.composeData.data });
+            rows.push({ name,
+                data: network.composeData.data });
         }
     }
 
@@ -62,26 +66,33 @@ function loadNetworkList() {
     externalList = ext;
 
     const sel: Record<string, boolean> = {};
-    for (const name in ext) sel[name] = true;
+    for (const name in ext) {
+        sel[name] = true;
+    }
     selectedExternalList = sel;
 }
 
 function loadExternalNetworkList() {
-    socketStore.emitAgent(ctx.endpoint, "getDockerNetworkList", (res: { ok: boolean; dockerNetworkList?: string[]; msg?: string }) => {
+    socketStore.emitAgent(ctx.endpoint, "getDockerNetworkList", (res: SocketRes & { dockerNetworkList?: string[] }) => {
         if (res.ok) {
             externalNetworkList = (res.dockerNetworkList ?? []).filter(n => {
-                if (n.startsWith(ctx.stack.name + "_")) return false;
-                if (n === "none" || n === "host" || n === "bridge") return false;
+                if (n.startsWith(ctx.stack.name + "_")) {
+                    return false;
+                }
+                if (n === "none" || n === "host" || n === "bridge") {
+                    return false;
+                }
                 return true;
             });
         } else {
-            socketStore.toastRes(res as any);
+            socketStore.toastRes(res);
         }
     });
 }
 
 function addField() {
-    networkList = [...networkList, { name: "", data: {} }];
+    networkList = [ ...networkList, { name: "",
+        data: {} }];
 }
 
 function remove(index: number) {
@@ -89,7 +100,9 @@ function remove(index: number) {
 }
 
 function applyToComposeDocument() {
-    if (ctx.editorFocus) return;
+    if (ctx.editorFocus) {
+        return;
+    }
 
     const networks: Record<string, unknown> = {};
     for (const row of networkList) {

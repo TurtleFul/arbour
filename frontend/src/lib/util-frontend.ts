@@ -33,7 +33,9 @@ export function isDevContainer(): boolean {
 }
 
 export function getDevContainerServerHostname(): string {
-    if (!isDevContainer()) return "";
+    if (!isDevContainer()) {
+        return "";
+    }
     return CODESPACE_NAME + "-5001." + GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN;
 }
 

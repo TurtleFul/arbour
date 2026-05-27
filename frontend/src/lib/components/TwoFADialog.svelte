@@ -22,7 +22,9 @@ let confirmEnableOpen = $state(false);
 let confirmDisableOpen = $state(false);
 
 $effect(() => {
-    if (!dialogEl) return;
+    if (!dialogEl) {
+        return;
+    }
     if (open) {
         dialogEl.showModal();
     } else {
@@ -32,7 +34,8 @@ $effect(() => {
 
 $effect(() => {
     if (uri) {
-        QRCode.toDataURL(uri, { color: { light: "#ffffffff" }, width: 210 }).then((url) => {
+        QRCode.toDataURL(uri, { color: { light: "#ffffffff" },
+            width: 210 }).then((url) => {
             qrDataUrl = url;
         });
     }
@@ -109,11 +112,14 @@ function disable2FA() {
 }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog
     bind:this={dialogEl}
     onclose={() => (open = false)}
-    onclick={(e) => { if (e.target === dialogEl) close(); }}
+    onclick={(e) => {
+        if (e.target === dialogEl) {
+            close();
+        }
+    }}
 >
     <div class="modal-content">
         <div class="modal-header">

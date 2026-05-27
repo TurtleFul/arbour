@@ -33,28 +33,48 @@ const editableComp = new Compartment();
 const readOnlyComp = new Compartment();
 
 const arbourHighlight = HighlightStyle.define([
-    { tag: tags.keyword, color: "var(--arbour-primary)" },
-    { tag: tags.bool, color: "var(--arbour-primary)" },
-    { tag: tags.tagName, color: "var(--arbour-primary)" },
-    { tag: tags.string, color: "var(--arbour-warning)" },
-    { tag: tags.number, color: "var(--arbour-danger)" },
-    { tag: tags.propertyName, color: "var(--arbour-info)" },
-    { tag: tags.attributeName, color: "var(--arbour-info)" },
-    { tag: tags.labelName, color: "var(--arbour-info)" },
-    { tag: tags.typeName, color: "var(--arbour-maintenance)" },
-    { tag: tags.variableName, color: "var(--arbour-text)" },
-    { tag: tags.null, color: "var(--arbour-text-muted)" },
-    { tag: tags.comment, color: "var(--arbour-text-muted)", fontStyle: "italic" },
-    { tag: tags.meta, color: "var(--arbour-text-muted)" },
-    { tag: tags.operator, color: "var(--arbour-text-subtle)" },
-    { tag: tags.punctuation, color: "var(--arbour-text-subtle)" },
-    { tag: tags.link, color: "var(--arbour-info)", textDecoration: "underline" },
+    { tag: tags.keyword,
+        color: "var(--arbour-primary)" },
+    { tag: tags.bool,
+        color: "var(--arbour-primary)" },
+    { tag: tags.tagName,
+        color: "var(--arbour-primary)" },
+    { tag: tags.string,
+        color: "var(--arbour-warning)" },
+    { tag: tags.number,
+        color: "var(--arbour-danger)" },
+    { tag: tags.propertyName,
+        color: "var(--arbour-info)" },
+    { tag: tags.attributeName,
+        color: "var(--arbour-info)" },
+    { tag: tags.labelName,
+        color: "var(--arbour-info)" },
+    { tag: tags.typeName,
+        color: "var(--arbour-maintenance)" },
+    { tag: tags.variableName,
+        color: "var(--arbour-text)" },
+    { tag: tags.null,
+        color: "var(--arbour-text-muted)" },
+    { tag: tags.comment,
+        color: "var(--arbour-text-muted)",
+        fontStyle: "italic" },
+    { tag: tags.meta,
+        color: "var(--arbour-text-muted)" },
+    { tag: tags.operator,
+        color: "var(--arbour-text-subtle)" },
+    { tag: tags.punctuation,
+        color: "var(--arbour-text-subtle)" },
+    { tag: tags.link,
+        color: "var(--arbour-info)",
+        textDecoration: "underline" },
 ]);
 
 const baseTheme = EditorView.theme({
     "&": { height: "100%" },
-    ".cm-content": { fontFamily: "'JetBrains Mono', monospace", fontSize: "14px" },
-    ".cm-gutterElement": { fontFamily: "'JetBrains Mono', monospace", fontSize: "14px" },
+    ".cm-content": { fontFamily: "'JetBrains Mono', monospace",
+        fontSize: "14px" },
+    ".cm-gutterElement": { fontFamily: "'JetBrains Mono', monospace",
+        fontSize: "14px" },
 });
 
 const selectionTheme = EditorView.theme({
@@ -68,7 +88,8 @@ const selectionTheme = EditorView.theme({
 });
 
 const editorTheme = EditorView.theme({
-    "&": { backgroundColor: "var(--arbour-bg-deep)", color: "var(--arbour-text)" },
+    "&": { backgroundColor: "var(--arbour-bg-deep)",
+        color: "var(--arbour-text)" },
     ".cm-content": { caretColor: "var(--arbour-primary)" },
     ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--arbour-primary)" },
     ".cm-gutters": {
@@ -94,19 +115,27 @@ const editorTheme = EditorView.theme({
 });
 
 function getLangExtension(l: string) {
-    if (l === "yaml" || l === "env") return yaml();
-    if (l === "json") return json();
+    if (l === "yaml" || l === "env") {
+        return yaml();
+    }
+    if (l === "json") {
+        return json();
+    }
     return [];
 }
 
 $effect(() => {
-    if (!view) return;
+    if (!view) {
+        return;
+    }
     const l = lang;
     view.dispatch({ effects: langComp.reconfigure(getLangExtension(l)) });
 });
 
 $effect(() => {
-    if (!view) return;
+    if (!view) {
+        return;
+    }
     const ro = isReadonly;
     view.dispatch({ effects: [
         editableComp.reconfigure(EditorView.editable.of(!ro)),
@@ -115,11 +144,17 @@ $effect(() => {
 });
 
 $effect(() => {
-    if (!view) return;
-    if (value === lastEditorValue) return;
+    if (!view) {
+        return;
+    }
+    if (value === lastEditorValue) {
+        return;
+    }
     const current = view.state.doc.toString();
     if (current !== value) {
-        view.dispatch({ changes: { from: 0, to: current.length, insert: value } });
+        view.dispatch({ changes: { from: 0,
+            to: current.length,
+            insert: value } });
     }
     lastEditorValue = value;
 });
@@ -163,8 +198,11 @@ onMount(() => {
                         value = lastEditorValue;
                     }
                     if (update.focusChanged) {
-                        if (update.view.hasFocus) onfocus?.();
-                        else onblur?.();
+                        if (update.view.hasFocus) {
+                            onfocus?.();
+                        } else {
+                            onblur?.();
+                        }
                     }
                 }),
             ],

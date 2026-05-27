@@ -16,7 +16,7 @@ const langs = Object.entries(languageList);
             onchange={(e) => langStore.setLang((e.target as HTMLSelectElement).value)}
         >
             <option value="en">English</option>
-            {#each langs as [code, name]}
+            {#each langs as [ code, name ] (code)}
                 <option value={code}>{name}</option>
             {/each}
         </select>

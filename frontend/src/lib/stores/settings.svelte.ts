@@ -1,4 +1,5 @@
 import { socketStore } from "./socket.svelte";
+import type { SocketRes } from "$lib/types";
 
 type Settings = {
     disableAuth?: boolean;
@@ -25,9 +26,11 @@ class SettingsStore {
     }
 
     save(callback?: () => void, currentPassword?: string) {
-        if (!this.#validate()) return;
-        socketStore.getSocket().emit("setSettings", this.settings, currentPassword, (res: { ok: boolean; msg?: string }) => {
-            socketStore.toastRes(res as any);
+        if (!this.#validate()) {
+            return;
+        }
+        socketStore.getSocket().emit("setSettings", this.settings, currentPassword, (res: SocketRes) => {
+            socketStore.toastRes(res);
             this.load();
             callback?.();
         });

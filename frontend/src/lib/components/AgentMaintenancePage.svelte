@@ -3,6 +3,7 @@ import { setContext } from "svelte";
 import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { AGENT_CONTEXT } from "$lib/context";
 import { getAgentMaintenanceTerminalName } from "../../../../common/util-common";
 import { DockerArtefactInfos } from "../../../../common/types";
@@ -20,8 +21,9 @@ interface ProgressTerminalInstance {
 
 let processing = $state(false);
 let showSystemPruneDialog = $state(false);
-let systemPruneData = $state({ all: false, volumes: false });
-let activeTab = $state(Object.keys(DockerArtefactInfos)[0]);
+let systemPruneData = $state({ all: false,
+    volumes: false });
+let activeTab = $state(Object.values(DockerArtefactInfos)[0].name);
 let progressTerminalRef = $state<ProgressTerminalInstance | undefined>(undefined);
 
 let artefactRefs = $state<Record<string, { loadData(): void } | undefined>>({});
@@ -40,14 +42,15 @@ function stopAction() {
 }
 
 function resetSystemPrune() {
-    systemPruneData = { all: false, volumes: false };
+    systemPruneData = { all: false,
+        volumes: false };
 }
 
 function systemPrune() {
     startAction();
-    socketStore.emitAgent(endpoint, "dockerSystemPrune", systemPruneData.all, systemPruneData.volumes, (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(endpoint, "dockerSystemPrune", systemPruneData.all, systemPruneData.volumes, (res: SocketRes) => {
         stopAction();
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
         reloadArtefacts();
     });
 }
@@ -59,7 +62,9 @@ function reloadArtefacts() {
 }
 
 setContext(AGENT_CONTEXT, {
-    get processing() { return processing; },
+    get processing() {
+        return processing;
+    },
     startAction,
     stopAction,
 });
@@ -132,10 +137,10 @@ setContext(AGENT_CONTEXT, {
     background: none;
     border: none;
     border-bottom: 4px solid transparent;
+    margin-bottom: -1px;
     padding: 0.5rem 1rem;
     border-radius: var(--arbour-radius) var(--arbour-radius) 0 0;
     cursor: pointer;
-    font-size: 0.9rem;
     color: var(--arbour-text-muted);
     white-space: nowrap;
     transition: color 0.15s, background 0.15s, border-color 0.15s;

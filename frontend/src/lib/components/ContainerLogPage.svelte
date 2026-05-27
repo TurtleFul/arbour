@@ -14,15 +14,17 @@ const { stackName, serviceName, endpoint = "" } = $props<{
 
 const LS_KEY = "logTimestampMode";
 const timestampOptions: { value: "full" | "short" | "none"; label: string }[] = [
-    { value: "full", label: "Full" },
-    { value: "short", label: "Short" },
-    { value: "none", label: "None" },
+    { value: "full",
+        label: "Full" },
+    { value: "short",
+        label: "Short" },
+    { value: "none",
+        label: "None" },
 ];
 
 let expanded = $state(false);
 let timestampMode = $state<"full" | "short" | "none">((localStorage.getItem(LS_KEY) as "full" | "short" | "none") ?? "full");
 let terminalRef = $state<{ updateTerminalSize(): void; rebind(): void } | undefined>(undefined);
-let modalTerminalRef = $state<{ updateTerminalSize(): void } | undefined>(undefined);
 
 const terminalName = $derived(getContainerLogName(endpoint, stackName, serviceName, 0));
 

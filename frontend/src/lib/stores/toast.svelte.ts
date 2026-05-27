@@ -24,7 +24,10 @@ class ToastStore {
 
     #show(type: ToastType, message: string, persistent: boolean) {
         const id = crypto.randomUUID();
-        this.items.push({ id, type, message, persistent });
+        this.items.push({ id,
+            type,
+            message,
+            persistent });
         if (!persistent) {
             setTimeout(() => this.dismiss(id), 4000);
         }
@@ -32,7 +35,9 @@ class ToastStore {
 
     dismiss(id: string) {
         const idx = this.items.findIndex((t) => t.id === id);
-        if (idx !== -1) this.items.splice(idx, 1);
+        if (idx !== -1) {
+            this.items.splice(idx, 1);
+        }
     }
 }
 

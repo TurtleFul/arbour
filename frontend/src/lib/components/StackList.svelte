@@ -1,8 +1,10 @@
 <script lang="ts">
 import { onMount, onDestroy } from "svelte";
+import { SvelteMap } from "svelte/reactivity";
 import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, RUNNING_AND_EXITED, StackStatusInfo, UNHEALTHY, UNKNOWN } from "../../../../common/util-common";
 import type { SimpleStackData } from "../../../../common/types";
 import Icon from "./Icon.svelte";
@@ -11,7 +13,7 @@ import StackListItem from "./StackListItem.svelte";
 const { embedded = false } = $props<{ embedded?: boolean }>();
 
 let searchText = $state("");
-let closedAgents = $state(new Map<string, boolean>());
+let closedAgents = new SvelteMap<string, boolean>();
 let checkingForUpdates = $state(false);
 let filterOpen = $state(false);
 let windowTop = $state(0);
@@ -30,47 +32,82 @@ const agentStackList = $derived.by(() => {
             socketStore.stackFilter.status.selected.has(StackStatusInfo.get(stack.status).label);
 
         const attributeMatch = !socketStore.stackFilter.attributes.isFilterSelected() ||
-            [...socketStore.stackFilter.attributes.selected].some(attr => (stack as any)[attr] === true);
+            [ ...socketStore.stackFilter.attributes.selected ].some(attr => (stack as unknown as Record<string, unknown>)[attr] === true);
 
         return searchMatch && agentMatch && statusMatch && attributeMatch;
     });
 
     result.sort((m1, m2) => {
-        if (m1.isManagedByArbour && !m2.isManagedByArbour) return -1;
-        if (!m1.isManagedByArbour && m2.isManagedByArbour) return 1;
+        if (m1.isManagedByArbour && !m2.isManagedByArbour) {
+            return -1;
+        }
+        if (!m1.isManagedByArbour && m2.isManagedByArbour) {
+            return 1;
+        }
 
         const s1 = m1.status !== RUNNING_AND_EXITED ? m1.status : RUNNING;
         const s2 = m2.status !== RUNNING_AND_EXITED ? m2.status : RUNNING;
 
         if (s1 !== s2) {
-            if (s2 === UNHEALTHY) return 1;
-            if (s1 === UNHEALTHY) return -1;
-            if (s2 === RUNNING) return 1;
-            if (s1 === RUNNING) return -1;
-            if (s2 === EXITED) return 1;
-            if (s1 === EXITED) return -1;
-            if (s2 === CREATED_STACK) return 1;
-            if (s1 === CREATED_STACK) return -1;
-            if (s2 === CREATED_FILE) return 1;
-            if (s1 === CREATED_FILE) return -1;
-            if (s2 === UNKNOWN) return 1;
-            if (s1 === UNKNOWN) return -1;
+            if (s2 === UNHEALTHY) {
+                return 1;
+            }
+            if (s1 === UNHEALTHY) {
+                return -1;
+            }
+            if (s2 === RUNNING) {
+                return 1;
+            }
+            if (s1 === RUNNING) {
+                return -1;
+            }
+            if (s2 === EXITED) {
+                return 1;
+            }
+            if (s1 === EXITED) {
+                return -1;
+            }
+            if (s2 === CREATED_STACK) {
+                return 1;
+            }
+            if (s1 === CREATED_STACK) {
+                return -1;
+            }
+            if (s2 === CREATED_FILE) {
+                return 1;
+            }
+            if (s1 === CREATED_FILE) {
+                return -1;
+            }
+            if (s2 === UNKNOWN) {
+                return 1;
+            }
+            if (s1 === UNKNOWN) {
+                return -1;
+            }
         }
         return m1.name.localeCompare(m2.name);
     });
 
     const byEndpoint = result.reduce((acc, stack) => {
         const ep = stack.endpoint;
-        if (!acc.has(ep)) acc.set(ep, []);
+        if (!acc.has(ep)) {
+            acc.set(ep, []);
+        }
         acc.get(ep)!.push(stack);
         return acc;
     }, new Map<string, SimpleStackData[]>());
 
-    return [...byEndpoint.entries()]
-        .map(([endpoint, stacks]) => ({ endpoint, stacks }))
+    return [ ...byEndpoint.entries() ]
+        .map(([ endpoint, stacks ]) => ({ endpoint,
+            stacks }))
         .sort((a, b) => {
-            if (a.endpoint === "" && b.endpoint !== "") return -1;
-            if (a.endpoint !== "" && b.endpoint === "") return 1;
+            if (a.endpoint === "" && b.endpoint !== "") {
+                return -1;
+            }
+            if (a.endpoint !== "" && b.endpoint === "") {
+                return 1;
+            }
             return a.endpoint.localeCompare(b.endpoint);
         });
 });
@@ -95,21 +132,25 @@ function onScroll() {
 
 function checkForUpdates() {
     checkingForUpdates = true;
-    socketStore.emitAgent("", "checkForUpdates", (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent("", "checkForUpdates", (res: SocketRes) => {
         checkingForUpdates = false;
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
     });
 }
 
 function toggleAgent(endpoint: string) {
-    closedAgents = new Map(closedAgents).set(endpoint, !closedAgents.get(endpoint));
+    closedAgents.set(endpoint, !closedAgents.get(endpoint));
 }
 
 onMount(() => {
-    if (embedded) window.addEventListener("scroll", onScroll);
+    if (embedded) {
+        window.addEventListener("scroll", onScroll);
+    }
 });
 onDestroy(() => {
-    if (embedded) window.removeEventListener("scroll", onScroll);
+    if (embedded) {
+        window.removeEventListener("scroll", onScroll);
+    }
 });
 </script>
 
@@ -141,15 +182,15 @@ onDestroy(() => {
                             <Icon name="xmark" /> {$t("clearFilter")}
                         </button>
                         <hr class="dropdown-divider" />
-                        {#each socketStore.stackFilter.categories as category}
+                        {#each socketStore.stackFilter.categories as category (category.label)}
                             {#if category.hasOptions()}
                                 <div class="filter-group">
                                     <div class="filter-group-label">{$tn(category.label, 2)}</div>
-                                    {#each Object.entries(category.options) as [key, value] (value)}
+                                    {#each Object.entries(category.options) as [ key, value ] (value)}
                                         <div class="form-check form-switch filter-option">
                                             <input id="filter-{category.label}-{value}" class="form-check-input" type="checkbox"
-                                                checked={category.selected.has(value as any)}
-                                                onchange={() => category.toggleSelected(value as any)} />
+                                                checked={category.selected.has(value as never)}
+                                                onchange={() => category.toggleSelected(value as never)} />
                                             <label class="form-check-label" for="filter-{category.label}-{value}">{$t(key)}</label>
                                         </div>
                                     {/each}

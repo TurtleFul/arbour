@@ -11,7 +11,9 @@ function autoGetPrimaryHostname() {
 }
 </script>
 
-<form class="my-4" autocomplete="off" onsubmit={(e) => { e.preventDefault(); saveGeneral(); }}>
+<form class="my-4" autocomplete="off" onsubmit={(e) => {
+    e.preventDefault(); saveGeneral();
+}}>
     <div class="mb-3">
         <label for="primaryHostname" class="form-label">{$t("primaryHostname")}</label>
         <div class="input-group">

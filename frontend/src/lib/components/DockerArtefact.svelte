@@ -1,8 +1,10 @@
 <script lang="ts">
 import { onMount, getContext } from "svelte";
+import { SvelteMap } from "svelte/reactivity";
 import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { AGENT_CONTEXT, type AgentContext } from "$lib/context";
 import Icon from "./Icon.svelte";
 import Confirm from "./Confirm.svelte";
@@ -19,8 +21,8 @@ const ctx = getContext<AgentContext>(AGENT_CONTEXT);
 type SortDir = "UP" | "DOWN";
 
 let fetchingData = $state(true);
-let data = $state<DockerArtefactData>({ info: artefact, data: [] });
-let dataMap = new Map<string, DockerArtefactItem>();
+let items = $state<DockerArtefactItem[]>([]);
+let dataMap = new SvelteMap<string, DockerArtefactItem>();
 let tableData = $state<DockerArtefactItem[]>([]);
 let sortCol = $state("");
 let sortDir = $state<SortDir>("UP");
@@ -35,14 +37,16 @@ let showDeleteDialog = $state(false);
 let inspectNetworkId = $state("");
 let showNetworkInspect = $state(false);
 
-const dataHeader = $derived(data.data.length > 0 ? Object.keys(data.data[0].values) : []);
+const dataHeader = $derived(items.length > 0 ? Object.keys(items[0].values) : []);
 
 function getValue(value: string | [string, string] | [string, number], sortValue = false): string | number {
     return Array.isArray(value) ? (sortValue ? value[1] : value[0]) : value;
 }
 
 function sortData() {
-    if (!sortCol) return;
+    if (!sortCol) {
+        return;
+    }
     tableData = Array.from(dataMap.values()).sort((i1, i2) => {
         const v1 = getValue(i1.values[sortCol], true);
         const v2 = getValue(i2.values[sortCol], true);
@@ -56,20 +60,27 @@ function sortData() {
 
 export function loadData() {
     fetchingData = true;
-    socketStore.emitAgent(endpoint, "getDockerArtefactData", artefact.name, (res: { ok: boolean; data: DockerArtefactData }) => {
+    socketStore.emitAgent(endpoint, "getDockerArtefactData", artefact.name, (res: SocketRes & { data: DockerArtefactData }) => {
         fetchingData = false;
-        data = res.data;
+        items = res.data.data;
         dataMap.clear();
-        for (const item of data.data) dataMap.set(item.id, item);
-        if (!sortCol) sortCol = dataHeader[0] ?? "";
+        for (const item of items) {
+            dataMap.set(item.id, item);
+        }
+        if (!sortCol) {
+            sortCol = dataHeader[0] ?? "";
+        }
         sortData();
         selectedItems = [];
     });
 }
 
 function toggleSort(col: string) {
-    if (sortCol !== col) { sortCol = col; sortDir = "UP"; }
-    else { sortDir = sortDir === "UP" ? "DOWN" : "UP"; }
+    if (sortCol !== col) {
+        sortCol = col; sortDir = "UP";
+    } else {
+        sortDir = sortDir === "UP" ? "DOWN" : "UP";
+    }
     sortData();
 }
 
@@ -92,9 +103,9 @@ function checkOpenPullDialog() {
 
 function executeAction(action: DockerArtefactAction) {
     ctx?.startAction();
-    socketStore.emitAgent(endpoint, "executeDockerArtefactAction", artefact.name, action, selectedItems.map(id => dataMap.get(id)?.actionIds[action] ?? id), (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(endpoint, "executeDockerArtefactAction", artefact.name, action, selectedItems.map(id => dataMap.get(id)?.actionIds[action] ?? id), (res: SocketRes) => {
         ctx?.stopAction();
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
         loadData();
     });
 }
@@ -104,19 +115,19 @@ onMount(loadData);
 
 <div class="artefact-wrap">
     <!-- Action buttons -->
-    <div class="btn-group mb-3 action-bar">
+    <div class="btn-group mb-3 action-bar" role="group">
         {#if artefact.actions.includes(DockerArtefactAction.Prune)}
-            <button class="btn btn-primary me-1" disabled={ctx?.processing} onclick={() => (showPruneDialog = true)}>
+            <button class="btn btn-primary btn-sm me-1" disabled={ctx?.processing} onclick={() => (showPruneDialog = true)}>
                 <Icon name="wrench" /> {$t("prune")}
             </button>
         {/if}
         {#if artefact.actions.includes(DockerArtefactAction.Pull)}
-            <button class="btn btn-normal me-1" disabled={ctx?.processing || selectedItems.length === 0} onclick={checkOpenPullDialog}>
+            <button class="btn btn-secondary btn-sm me-1" disabled={ctx?.processing || selectedItems.length === 0} onclick={checkOpenPullDialog}>
                 <Icon name="cloud-arrow-down" /> {$t("pull")}
             </button>
         {/if}
         {#if artefact.actions.includes(DockerArtefactAction.Remove)}
-            <button class="btn btn-danger" disabled={ctx?.processing || selectedItems.length === 0} onclick={() => (showDeleteDialog = true)}>
+            <button class="btn btn-danger btn-sm" disabled={ctx?.processing || selectedItems.length === 0} onclick={() => (showDeleteDialog = true)}>
                 <Icon name="trash" /> {$t("delete")}
             </button>
         {/if}
@@ -130,7 +141,7 @@ onMount(loadData);
                 <thead>
                     <tr>
                         <th></th>
-                        {#each dataHeader as title}
+                        {#each dataHeader as title (title)}
                             <th class="sortable" onclick={() => toggleSort(title)}>
                                 {title}
                                 <span class="sort-sym">{sortCol === title ? (sortDir === "UP" ? "▲" : "▼") : ""}</span>
@@ -149,14 +160,14 @@ onMount(loadData);
                                     checked={selectedItems.includes(item.id)}
                                     onchange={(e) => {
                                         if ((e.target as HTMLInputElement).checked) {
-                                            selectedItems = [...selectedItems, item.id];
+                                            selectedItems = [ ...selectedItems, item.id ];
                                         } else {
                                             selectedItems = selectedItems.filter(i => i !== item.id);
                                         }
                                     }}
                                 />
                             </td>
-                            {#each Object.values(item.values) as value}
+                            {#each Object.entries(item.values) as [ key, value ] (key)}
                                 <td class="artefact-cell">{getValue(value)}</td>
                             {/each}
                             <td class="action-cell text-nowrap">
@@ -180,7 +191,7 @@ onMount(loadData);
 <!-- Prune dialog -->
 <Confirm
     bind:open={showPruneDialog}
-    title="{$t('prune')} {$tn(artefact.name, 2)}"
+    title="{$t("prune")} {$tn(artefact.name, 2)}"
     yesText={$t("prune")}
     btnStyle="btn-danger"
     onyes={() => executeAction(pruneAll ? DockerArtefactAction.PruneAll : DockerArtefactAction.Prune)}
@@ -199,7 +210,7 @@ onMount(loadData);
 <!-- Pull dialog -->
 <Confirm
     bind:open={showPullDialog}
-    title="{$t('pull')} {$tn(artefact.name, 2)}"
+    title="{$t("pull")} {$tn(artefact.name, 2)}"
     yesText={$t("pull")}
     btnStyle="btn-primary"
     onyes={() => executeAction(DockerArtefactAction.Pull)}
@@ -213,7 +224,7 @@ onMount(loadData);
 <!-- Delete dialog -->
 <Confirm
     bind:open={showDeleteDialog}
-    title="{$t('delete')} {$tn(artefact.name, 2)}"
+    title="{$t("delete")} {$tn(artefact.name, 2)}"
     yesText={$t("delete")}
     btnStyle="btn-danger"
     onyes={() => executeAction(DockerArtefactAction.Remove)}
@@ -229,7 +240,8 @@ onMount(loadData);
 <style>
 .artefact-wrap { display: flex; flex-direction: column; }
 
-.action-bar { display: flex; flex-wrap: wrap; gap: 4px; }
+.action-bar { width: fit-content; }
+.action-bar :global(.btn) { flex: 0 0 auto; }
 
 .loading { padding: 1rem; color: var(--arbour-text-muted); }
 

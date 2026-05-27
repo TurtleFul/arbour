@@ -60,7 +60,9 @@ function enableAuth() {
             </div>
 
             <h5 class="settings-subheading mb-3">{$t("Change Password")}</h5>
-            <form class="mb-4" onsubmit={(e) => { e.preventDefault(); savePassword(); }}>
+            <form class="mb-4" onsubmit={(e) => {
+                e.preventDefault(); savePassword();
+            }}>
                 <div class="mb-3">
                     <label for="current-password" class="form-label">{$t("Current Password")}</label>
                     <input

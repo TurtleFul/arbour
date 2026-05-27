@@ -25,7 +25,9 @@ let {
 let dialogEl: HTMLDialogElement;
 
 $effect(() => {
-    if (!dialogEl) return;
+    if (!dialogEl) {
+        return;
+    }
     if (open) {
         dialogEl.showModal();
     } else {
@@ -44,11 +46,14 @@ function no() {
 }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog
     bind:this={dialogEl}
     onclose={() => (open = false)}
-    onclick={(e) => { if (e.target === dialogEl) no(); }}
+    onclick={(e) => {
+        if (e.target === dialogEl) {
+            no();
+        }
+    }}
 >
     <div class="modal-content">
         <div class="modal-header">

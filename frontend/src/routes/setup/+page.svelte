@@ -47,7 +47,9 @@ const langs = Object.entries(languageList);
 
 <div class="setup-wrap">
     <div class="setup-form">
-        <form onsubmit={(e) => { e.preventDefault(); submit(); }}>
+        <form onsubmit={(e) => {
+            e.preventDefault(); submit();
+        }}>
             <div class="brand mb-3">
                 <img src="/icon.svg" alt="Arbour" width="64" height="64" />
                 <div class="brand-name">Arbour</div>
@@ -63,7 +65,7 @@ const langs = Object.entries(languageList);
                     onchange={(e) => langStore.setLang((e.target as HTMLSelectElement).value)}
                 >
                     <option value="en">English</option>
-                    {#each langs as [code, name]}
+                    {#each langs as [ code, name ] (code)}
                         <option value={code}>{name}</option>
                     {/each}
                 </select>

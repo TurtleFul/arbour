@@ -1,8 +1,10 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { SvelteMap } from "svelte/reactivity";
 import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { StackStatusInfo } from "../../../../common/util-common";
 import type { AgentData, SimpleStackData } from "../../../../common/types";
 import Icon from "$lib/components/Icon.svelte";
@@ -10,7 +12,11 @@ import Confirm from "$lib/components/Confirm.svelte";
 
 let showAgentForm = $state(false);
 let connectingAgent = $state(false);
-let newAgent = $state<AgentData>({ url: "http://", username: "", password: "", name: "", endpoint: "" });
+let newAgent = $state<AgentData>({ url: "http://",
+    username: "",
+    password: "",
+    name: "",
+    endpoint: "" });
 let dockerRunCommand = $state("");
 let agentToRemove = $state<AgentData | null>(null);
 let showRemoveConfirm = $state(false);
@@ -20,15 +26,19 @@ let editAgentNewName = $state<Record<string, string>>({});
 const stackList = $derived(Object.values(socketStore.completeStackList) as SimpleStackData[]);
 
 const stackStatusCounts = $derived.by(() => {
-    const byEndpoint = new Map<string, Map<number, number>>();
-    const overall = new Map<number, number>();
+    const byEndpoint = new SvelteMap<string, SvelteMap<number, number>>();
+    const overall = new SvelteMap<number, number>();
     for (const stack of stackList) {
         let epMap = byEndpoint.get(stack.endpoint);
-        if (!epMap) { epMap = new Map(); byEndpoint.set(stack.endpoint, epMap); }
+        if (!epMap) {
+            epMap = new SvelteMap();
+            byEndpoint.set(stack.endpoint, epMap);
+        }
         epMap.set(stack.status, (epMap.get(stack.status) ?? 0) + 1);
         overall.set(stack.status, (overall.get(stack.status) ?? 0) + 1);
     }
-    return { byEndpoint, overall };
+    return { byEndpoint,
+        overall };
 });
 
 function getStatusCount(statusIds: number[]): number {
@@ -41,53 +51,67 @@ function getEndpointStatusCount(endpoint: string, statusIds: number[]): number {
 
 function filterStackList(endpoint: string | undefined, info: StackStatusInfo) {
     socketStore.stackFilter.clear();
-    if (endpoint !== undefined) socketStore.stackFilter.agents.selected.add(endpoint);
+    if (endpoint !== undefined) {
+        socketStore.stackFilter.agents.selected.add(endpoint);
+    }
     socketStore.stackFilter.status.selected.add(info.label);
-    if (socketStore.isMobile) goto("/stacks");
+    if (socketStore.isMobile) {
+        goto("/stacks");
+    }
 }
 
 function resetNewAgent() {
-    newAgent = { url: "http://", username: "", password: "", name: "", endpoint: "" };
+    newAgent = { url: "http://",
+        username: "",
+        password: "",
+        name: "",
+        endpoint: "" };
 }
 
 function addAgent() {
     connectingAgent = true;
-    socketStore.getSocket().emit("addAgent", newAgent, (res: { ok: boolean; msg?: string }) => {
-        socketStore.toastRes(res as any);
-        if (res.ok) showAgentForm = false;
+    socketStore.getSocket().emit("addAgent", newAgent, (res: SocketRes) => {
+        socketStore.toastRes(res);
+        if (res.ok) {
+            showAgentForm = false;
+        }
         connectingAgent = false;
     });
 }
 
 function removeAgent(agent: AgentData) {
-    socketStore.getSocket().emit("removeAgent", agent.url, (res: { ok: boolean; msg?: string }) => {
+    socketStore.getSocket().emit("removeAgent", agent.url, (res: SocketRes) => {
         if (res.ok) {
-            socketStore.toastRes(res as any);
-            delete (socketStore.allAgentStackList as any)[agent.endpoint];
+            socketStore.toastRes(res);
+            delete (socketStore.allAgentStackList as Record<string, unknown>)[agent.endpoint];
         }
     });
 }
 
 function editAgentName(agent: AgentData) {
     editAgentNewName[agent.endpoint] = agent.name;
-    showEditAgentNameDialog = { ...showEditAgentNameDialog, [agent.endpoint]: true };
+    showEditAgentNameDialog = { ...showEditAgentNameDialog,
+        [agent.endpoint]: true };
 }
 
 function updateAgentName(agent: AgentData, updatedName: string) {
-    socketStore.getSocket().emit("updateAgent", agent.url, updatedName, (res: { ok: boolean; msg?: string }) => {
-        socketStore.toastRes(res as any);
-        showEditAgentNameDialog = { ...showEditAgentNameDialog, [agent.endpoint]: false };
+    socketStore.getSocket().emit("updateAgent", agent.url, updatedName, (res: SocketRes) => {
+        socketStore.toastRes(res);
+        showEditAgentNameDialog = { ...showEditAgentNameDialog,
+            [agent.endpoint]: false };
     });
 }
 
 function convertDockerRun() {
-    if (!dockerRunCommand.trim() || dockerRunCommand.trim() === "docker run") return;
-    socketStore.getSocket().emit("composerize", dockerRunCommand, (res: { ok: boolean; composeTemplate?: string; msg?: string }) => {
+    if (!dockerRunCommand.trim() || dockerRunCommand.trim() === "docker run") {
+        return;
+    }
+    socketStore.getSocket().emit("composerize", dockerRunCommand, (res: SocketRes & { composeTemplate?: string }) => {
         if (res.ok) {
             socketStore.composeTemplate = res.composeTemplate ?? "";
             goto("/compose");
         } else {
-            socketStore.toastRes(res as any);
+            socketStore.toastRes(res);
         }
     });
 }
@@ -128,13 +152,13 @@ function getAgentLink(agent: AgentData): string {
             <div class="section-header">
                 <h4>{$tn("arbourAgent", 2)}</h4>
                 {#if !showAgentForm}
-                    <button class="btn btn-primary btn-sm" onclick={() => (showAgentForm = true)}>
+                    <button class="btn btn-primary" onclick={() => (showAgentForm = true)}>
                         <Icon name="plus" /> {$t("addAgent")}
                     </button>
                 {/if}
             </div>
 
-            {#each Object.entries(socketStore.agentList) as [endpoint, agent] (endpoint)}
+            {#each Object.entries(socketStore.agentList) as [ endpoint, agent ] (endpoint)}
                 <div class="agent-card">
                     <div class="agent-header">
                         <div class="agent-title">
@@ -144,14 +168,16 @@ function getAgentLink(agent: AgentData): string {
                             </button>
                             {#if endpoint !== ""}
                                 <button class="icon-btn icon-btn-danger"
-                                    onclick={() => { agentToRemove = agent; showRemoveConfirm = true; }}
+                                    onclick={() => {
+                                        agentToRemove = agent; showRemoveConfirm = true;
+                                    }}
                                     title={$t("removeAgent")}>
                                     <Icon name="trash" />
                                 </button>
                             {/if}
                         </div>
                         {#if socketStore.agentStatusList[endpoint] === "online"}
-                            <a class="btn btn-sm btn-ghost" href={getAgentLink(agent)} title={$t("tooltipAgentMaintenance")}>
+                            <a class="btn btn-sm btn-normal" href={getAgentLink(agent)} title={$t("tooltipAgentMaintenance")}>
                                 <Icon name="wrench" /> {$t("maintenance")}
                             </a>
                         {/if}
@@ -168,34 +194,39 @@ function getAgentLink(agent: AgentData): string {
                             <span class="badge badge-secondary">{$t(socketStore.agentStatusList[endpoint])}</span>
                         {/if}
 
-                        {#if Object.keys(socketStore.agentList).length > 1}
-                            {#each StackStatusInfo.ALL as info (info.label)}
-                                {#if getEndpointStatusCount(endpoint, info.statusIds) > 0}
-                                    <span class="status-inline">
-                                        {$t(info.label)}:
-                                        <button class="status-num-sm" style="color: var(--arbour-{info.textColor}-color);"
-                                            onclick={() => filterStackList(endpoint, info)}>
-                                            {getEndpointStatusCount(endpoint, info.statusIds)}
-                                        </button>
-                                    </span>
-                                {/if}
-                            {/each}
-                        {/if}
+                        {#each StackStatusInfo.ALL as info (info.label)}
+                            {#if getEndpointStatusCount(endpoint, info.statusIds) > 0}
+                                <span class="status-inline">
+                                    {$t(info.label)}:
+                                    <button class="status-num-sm" style="color: var(--arbour-{info.textColor}-color);"
+                                        onclick={() => filterStackList(endpoint, info)}>
+                                        {getEndpointStatusCount(endpoint, info.statusIds)}
+                                    </button>
+                                </span>
+                            {/if}
+                        {/each}
                     </div>
                 </div>
             {/each}
 
             <!-- Add agent form dialog -->
             {#if showAgentForm}
-                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-                <dialog open onclick={(e) => { if (e.target === e.currentTarget) { showAgentForm = false; resetNewAgent(); } }}>
+                <dialog open onclick={(e) => {
+                    if (e.target === e.currentTarget) {
+                        showAgentForm = false; resetNewAgent();
+                    }
+                }}>
                     <div class="dialog-box">
                         <header class="dialog-header">
                             <h5>{$t("addAgent")}</h5>
-                            <button class="close-btn" onclick={() => { showAgentForm = false; resetNewAgent(); }}>×</button>
+                            <button class="close-btn" onclick={() => {
+                                showAgentForm = false; resetNewAgent();
+                            }}>×</button>
                         </header>
                         <div class="dialog-body">
-                            <form onsubmit={(e) => { e.preventDefault(); addAgent(); }}>
+                            <form onsubmit={(e) => {
+                                e.preventDefault(); addAgent();
+                            }}>
                                 <div class="form-group">
                                     <label for="agent-url">{$t("arbourURL")}</label>
                                     <input id="agent-url" type="url" class="form-control" bind:value={newAgent.url} required placeholder="http://" />
@@ -215,7 +246,9 @@ function getAgentLink(agent: AgentData): string {
                             </form>
                         </div>
                         <footer class="dialog-footer">
-                            <button class="btn btn-ghost" onclick={() => { showAgentForm = false; resetNewAgent(); }}>{$t("cancel")}</button>
+                            <button class="btn btn-ghost" onclick={() => {
+                                showAgentForm = false; resetNewAgent();
+                            }}>{$t("cancel")}</button>
                             <button class="btn btn-primary" disabled={connectingAgent} onclick={addAgent}>
                                 {connectingAgent ? $t("connecting") : $t("connect")}
                             </button>
@@ -225,20 +258,30 @@ function getAgentLink(agent: AgentData): string {
             {/if}
 
             <!-- Edit agent name dialogs -->
-            {#each Object.entries(socketStore.agentList) as [endpoint, agent] (endpoint)}
+            {#each Object.entries(socketStore.agentList) as [ endpoint, agent ] (endpoint)}
                 {#if showEditAgentNameDialog[endpoint]}
-                    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-                    <dialog open onclick={(e) => { if (e.target === e.currentTarget) showEditAgentNameDialog = { ...showEditAgentNameDialog, [endpoint]: false }; }}>
+                    <dialog open onclick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            showEditAgentNameDialog = { ...showEditAgentNameDialog,
+                                [endpoint]: false };
+                        }
+                    }}>
                         <div class="dialog-box">
                             <header class="dialog-header">
                                 <h5>{endpoint || "Master"}</h5>
-                                <button class="close-btn" onclick={() => { showEditAgentNameDialog = { ...showEditAgentNameDialog, [endpoint]: false }; }}>×</button>
+                                <button class="close-btn" onclick={() => {
+                                    showEditAgentNameDialog = { ...showEditAgentNameDialog,
+                                        [endpoint]: false };
+                                }}>×</button>
                             </header>
                             <div class="dialog-body">
                                 <input type="text" class="form-control" bind:value={editAgentNewName[endpoint]} />
                             </div>
                             <footer class="dialog-footer">
-                                <button class="btn btn-ghost" onclick={() => { showEditAgentNameDialog = { ...showEditAgentNameDialog, [endpoint]: false }; }}>{$t("cancel")}</button>
+                                <button class="btn btn-ghost" onclick={() => {
+                                    showEditAgentNameDialog = { ...showEditAgentNameDialog,
+                                        [endpoint]: false };
+                                }}>{$t("cancel")}</button>
                                 <button class="btn btn-primary" onclick={() => updateAgentName(agent, editAgentNewName[endpoint])}>{$t("Update Name")}</button>
                             </footer>
                         </div>
@@ -253,7 +296,11 @@ function getAgentLink(agent: AgentData): string {
                 title={agentToRemove ? getAgentName(agentToRemove) : ""}
                 yesText={$t("removeAgent")}
                 btnStyle="btn-danger"
-                onyes={() => { if (agentToRemove) { removeAgent(agentToRemove); agentToRemove = null; } }}
+                onyes={() => {
+                    if (agentToRemove) {
+                        removeAgent(agentToRemove); agentToRemove = null;
+                    }
+                }}
             >
                 <p>{$t("removeAgentMsg")}</p>
             </Confirm>
@@ -262,8 +309,8 @@ function getAgentLink(agent: AgentData): string {
         <!-- Right column -->
         <div class="col-right">
             <h2>{$t("Docker Run")}</h2>
-            <textarea class="docker-run-input" bind:value={dockerRunCommand} placeholder="docker run ..."></textarea>
-            <button class="btn btn-ghost" onclick={convertDockerRun}>{$t("Convert to Compose")}</button>
+            <textarea class="form-control docker-run-input" rows="3" bind:value={dockerRunCommand} placeholder="docker run ..."></textarea>
+            <button class="btn btn-normal" onclick={convertDockerRun}>{$t("Convert to Compose")}</button>
         </div>
     </div>
 </div>
@@ -271,9 +318,9 @@ function getAgentLink(agent: AgentData): string {
 <style>
 .dashboard-home { padding-bottom: 2rem; }
 
-h1 { font-size: 2rem; margin: 0 0 1rem; }
-h2 { font-size: 1.2rem; margin: 0 0 0.75rem; }
-h4 { font-size: 1rem; margin: 0; }
+h1 { font-size: 32px; margin: 0 0 1rem; }
+h2 { font-size: 26px; margin: 0 0 0.75rem; }
+h4 { font-size: 1.5rem; margin: 0; font-weight: 500; }
 h5 { font-size: 1rem; margin: 0; }
 
 .home-grid {
@@ -289,15 +336,24 @@ h5 { font-size: 1rem; margin: 0; }
     background: var(--arbour-bg);
     box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
     border-radius: var(--arbour-radius);
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 20px;
+    margin-bottom: 3rem;
+    text-align: center;
 }
-.status-row { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; }
-.status-item { text-align: center; }
-.status-label { font-size: 0.85rem; color: var(--arbour-text-muted); margin-bottom: 0.25rem; }
+.status-row { display: flex; flex-wrap: wrap; }
+.status-item { flex: 1; text-align: center; }
+.status-label {
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--arbour-text);
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
 .status-num {
     background: none; border: none; cursor: pointer;
-    font-size: 2rem; font-weight: 700; padding: 0; line-height: 1;
+    font-size: 30px; font-weight: 700; padding: 0; line-height: 1;
+    display: block;
+    margin: 0 auto;
 }
 .status-num:hover { opacity: 0.8; }
 
@@ -308,12 +364,12 @@ h5 { font-size: 1rem; margin: 0; }
     box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
     border-radius: var(--arbour-radius);
     padding: 20px;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
 }
-.agent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
-.agent-title { display: flex; align-items: center; gap: 0.5rem; }
-.agent-url { font-size: 0.8rem; color: var(--arbour-text-muted); margin-bottom: 0.5rem; }
-.agent-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.agent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.agent-title { display: flex; align-items: baseline; gap: 0.75rem; }
+.agent-url { font-size: 0.85rem; color: var(--arbour-text-muted); margin-bottom: 1rem; }
+.agent-badges { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
 
 .icon-btn {
     background: none; border: none; color: var(--arbour-text-muted);
@@ -330,29 +386,23 @@ h5 { font-size: 1rem; margin: 0; }
 .badge-danger { background: var(--arbour-danger); color: var(--arbour-text-on-primary); }
 .badge-secondary { background: var(--arbour-bg-header-active); color: var(--arbour-text-muted); }
 
-.status-inline { font-size: 0.85rem; color: var(--arbour-text-muted); }
-.status-num-sm { background: none; border: none; cursor: pointer; font-weight: 700; padding: 0; }
+.status-inline { font-size: 0.95rem; color: var(--arbour-text); }
+.status-num-sm { background: none; border: none; cursor: pointer; font-weight: 700; padding: 0; font-size: 0.95rem; }
 .status-num-sm:hover { opacity: 0.8; }
 
 .docker-run-input {
-    width: 100%;
-    background: var(--arbour-bg-deep);
+    background-color: var(--arbour-bg-deep) !important;
     border: none;
-    border-radius: var(--arbour-radius-lg);
-    color: var(--arbour-text);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    padding: 0.75rem;
+    font-size: 15px;
+    margin-bottom: 1rem;
     resize: vertical;
-    min-height: 100px;
-    margin-bottom: 0.75rem;
-    box-sizing: border-box;
+}
+.docker-run-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--arbour-primary) 18%, transparent);
 }
 
-.btn { padding: 0.35rem 0.8rem; border-radius: var(--arbour-radius-sm); cursor: pointer; border: none; font-size: 0.9rem; }
-.btn-sm { padding: 0.2rem 0.5rem; font-size: 0.82rem; }
-.btn-primary { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
-.btn-primary:hover { background: color-mix(in srgb, var(--arbour-primary) 85%, black); }
 .btn-ghost { background: none; border: 1px solid var(--arbour-border); color: var(--arbour-text-muted); }
 .btn-ghost:hover { background: var(--arbour-bg-deep); color: var(--arbour-text); }
 

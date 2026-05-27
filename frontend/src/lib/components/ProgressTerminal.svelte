@@ -25,10 +25,10 @@ interface TerminalInstance {
 }
 
 const easeInCustom = (t: number) => {
-    const cx = 0.54, cy = 0.78, cx2 = 0.55, cy2 = 0.97;
+    const cy = 0.78;
+    const cy2 = 0.97;
     const u = 1 - t;
     return 3 * u * u * t * cy + 3 * u * t * t * cy2 + t * t * t;
-    void cx; void cx2;
 };
 
 let showTerminal = $state(false);
@@ -62,7 +62,9 @@ export function hideWithTimeout() {
     </button>
 
     {#if showTerminal}
-        <div class="terminal-body" transition:fly={{ y: 50, duration: 200, easing: easeInCustom }}>
+        <div class="terminal-body" transition:fly={{ y: 50,
+            duration: 200,
+            easing: easeInCustom }}>
             <Terminal
                 bind:this={terminalRef}
                 {name}

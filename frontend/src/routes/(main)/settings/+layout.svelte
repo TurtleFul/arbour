@@ -36,7 +36,7 @@ onMount(() => {
         <div class="row">
             <div class="settings-menu col-lg-4 col-sm-12">
                 <div class="d-flex flex-row flex-wrap flex-lg-column align-items-start">
-                    {#each Object.entries(subMenus) as [key, label] (key)}
+                    {#each Object.entries(subMenus) as [ key, label ] (key)}
                         <a href="/settings/{key}" class="d-none d-lg-block w-100" class:active={$page.url.pathname === `/settings/${key}`}>
                             <div class="menu-item menu-item-v">{label}</div>
                         </a>

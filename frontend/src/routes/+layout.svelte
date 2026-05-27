@@ -5,6 +5,7 @@ import { page } from "$app/stores";
 import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { themeStore } from "$lib/stores/theme.svelte";
 import { langStore } from "$lib/stores/lang.svelte";
 import AppLogo from "$lib/components/AppLogo.svelte";
@@ -29,7 +30,7 @@ const hasNewVersion = $derived(() => {
 });
 
 const layoutClass = $derived(
-    [socketStore.isMobile ? "mobile" : "", themeStore.isDark ? "dark" : "light"].filter(Boolean).join(" ")
+    [ socketStore.isMobile ? "mobile" : "", themeStore.isDark ? "dark" : "light" ].filter(Boolean).join(" ")
 );
 
 let dropdownOpen = $state(false);
@@ -121,7 +122,10 @@ onMount(() => {
                                 </li>
                                 <li><hr class="dropdown-divider" /></li>
                                 <li>
-                                    <button class="dropdown-item" onclick={() => { dropdownOpen = false; socketStore.emitAgent(ALL_ENDPOINTS, "requestStackList", (res: { ok: boolean; msg?: string }) => socketStore.toastRes(res as any)); }}>
+                                    <button class="dropdown-item" onclick={() => {
+                                        dropdownOpen = false;
+                                        socketStore.emitAgent(ALL_ENDPOINTS, "requestStackList", (res: SocketRes) => socketStore.toastRes(res));
+                                    }}>
                                         <Icon name="arrows-rotate" /> {$t("scanFolder")}
                                     </button>
                                 </li>
@@ -131,7 +135,9 @@ onMount(() => {
                                     </a>
                                 </li>
                                 <li>
-                                    <button class="dropdown-item" onclick={() => { dropdownOpen = false; socketStore.logout(); }}>
+                                    <button class="dropdown-item" onclick={() => {
+                                        dropdownOpen = false; socketStore.logout();
+                                    }}>
                                         <Icon name="sign-out-alt" /> {$t("Logout")}
                                     </button>
                                 </li>

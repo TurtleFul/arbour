@@ -33,9 +33,14 @@ library.add(
 );
 
 export function getIconHtml(name: string, extraClass = ""): string {
-    const result = faIcon({ prefix: "fas", iconName: name as IconName });
-    if (!result) return "";
+    const result = faIcon({ prefix: "fas",
+        iconName: name as IconName });
+    if (!result) {
+        return "";
+    }
     const svg = result.html[0];
-    if (!extraClass) return svg;
+    if (!extraClass) {
+        return svg;
+    }
     return svg.replace("<svg ", `<svg class="${extraClass}" `);
 }

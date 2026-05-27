@@ -1,5 +1,4 @@
 <script lang="ts">
-import { onMount } from "svelte";
 import { t } from "svelte-i18n";
 import { page } from "$app/stores";
 import { socketStore } from "$lib/stores/socket.svelte";

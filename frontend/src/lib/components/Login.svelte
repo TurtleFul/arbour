@@ -12,8 +12,12 @@ let tokenRequired = $state(false);
 let res = $state<SocketRes | null>(null);
 
 const origTitle = document.title;
-onMount(() => { document.title += " — Login"; });
-onDestroy(() => { document.title = origTitle; });
+onMount(() => {
+    document.title += " — Login";
+});
+onDestroy(() => {
+    document.title = origTitle;
+});
 
 function submit() {
     processing = true;
@@ -29,7 +33,9 @@ function submit() {
 </script>
 
 <div class="login-wrap">
-    <form class="login-form" onsubmit={(e) => { e.preventDefault(); submit(); }}>
+    <form class="login-form" onsubmit={(e) => {
+        e.preventDefault(); submit();
+    }}>
         {#if !tokenRequired}
             <div class="form-floating mb-3">
                 <input

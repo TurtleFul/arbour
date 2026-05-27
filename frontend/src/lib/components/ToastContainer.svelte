@@ -7,7 +7,8 @@ import { fly } from "svelte/transition";
     {#each toastStore.items as toast (toast.id)}
         <div
             class="toast toast--{toast.type}"
-            transition:fly={{ y: 20, duration: 200 }}
+            transition:fly={{ y: 20,
+                duration: 200 }}
         >
             <span class="toast__msg">{toast.message}</span>
             <button class="toast__close" onclick={() => toastStore.dismiss(toast.id)}>×</button>

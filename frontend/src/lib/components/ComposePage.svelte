@@ -4,6 +4,7 @@ import { goto } from "$app/navigation";
 import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { COMPOSE_CONTEXT } from "$lib/context";
 import { clickOutside } from "$lib/actions/clickOutside";
 import {
@@ -14,7 +15,7 @@ import {
     UNKNOWN,
 } from "../../../../common/util-common";
 import { ComposeDocument } from "../../../../common/compose-document";
-import type { StackData, StackAutoUpdateSettings, AutoUpdateMode } from "../../../../common/types";
+import type { StackData, StackAutoUpdateSettings, AutoUpdateMode, StatsData } from "../../../../common/types";
 import Uptime from "./Uptime.svelte";
 import Container from "./Container.svelte";
 import NetworkInput from "./NetworkInput.svelte";
@@ -61,7 +62,8 @@ let showImportRelativePathWarning = $state(false);
 let showMoreMenu = $state(false);
 let importSourceDir = $state("");
 let newContainerName = $state("");
-let updateDialogData = $state({ pruneAfterUpdate: false, pruneAllAfterUpdate: false });
+let updateDialogData = $state({ pruneAfterUpdate: false,
+    pruneAllAfterUpdate: false });
 let autoUpdateMode = $state<AutoUpdateMode>("disabled");
 let autoUpdateCustomSchedule = $state("");
 let autoUpdateSaving = $state(false);
@@ -74,12 +76,24 @@ let composeEditorOpen = $state(false);
 let composeEditorDialogEl = $state<HTMLDialogElement | undefined>(undefined);
 
 $effect(() => {
-    if (!logModalEl) return;
-    if (logExpanded) logModalEl.showModal(); else logModalEl.close();
+    if (!logModalEl) {
+        return;
+    }
+    if (logExpanded) {
+        logModalEl.showModal();
+    } else {
+        logModalEl.close();
+    }
 });
 $effect(() => {
-    if (!composeEditorDialogEl) return;
-    if (composeEditorOpen) composeEditorDialogEl.showModal(); else composeEditorDialogEl.close();
+    if (!composeEditorDialogEl) {
+        return;
+    }
+    if (composeEditorOpen) {
+        composeEditorDialogEl.showModal();
+    } else {
+        composeEditorDialogEl.close();
+    }
 });
 let containerListRef = $state<HTMLElement | undefined>(undefined);
 let progressTerminalRef = $state<ProgressTerminalInstance | undefined>(undefined);
@@ -91,9 +105,12 @@ let updateStackDataTimeout: ReturnType<typeof setTimeout> | undefined;
 let updateServiceStatsTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const timestampOptions = [
-    { value: "full", label: "Full" },
-    { value: "short", label: "Short" },
-    { value: "none", label: "None" },
+    { value: "full",
+        label: "Full" },
+    { value: "short",
+        label: "Short" },
+    { value: "none",
+        label: "None" },
 ];
 
 const endpoint = $derived(stack.endpoint || routeEndpoint);
@@ -105,7 +122,9 @@ const hasExitedServices = $derived(Object.values(stack.services ?? {}).some(s =>
 const hasRunningServices = $derived(Object.values(stack.services ?? {}).some(s => s.state === "running"));
 const hasInactiveServices = $derived(() => {
     for (const name of composeDocument.services.names) {
-        if (!stack.services?.[name]) return true;
+        if (!stack.services?.[name]) {
+            return true;
+        }
     }
     return false;
 });
@@ -121,7 +140,8 @@ const urls = $derived.by(() => {
         } catch {
             display = url;
         }
-        result.push({ display, url });
+        result.push({ display,
+            url });
     }
     return result;
 });
@@ -141,11 +161,21 @@ function stopComposeAction() {
 }
 
 setContext(COMPOSE_CONTEXT, {
-    get endpoint() { return endpoint; },
-    get stack() { return stack; },
-    get composeDocument() { return composeDocument; },
-    get processing() { return processing; },
-    get editorFocus() { return editorFocus; },
+    get endpoint() {
+        return endpoint;
+    },
+    get stack() {
+        return stack;
+    },
+    get composeDocument() {
+        return composeDocument;
+    },
+    get processing() {
+        return processing;
+    },
+    get editorFocus() {
+        return editorFocus;
+    },
     startComposeAction,
     stopComposeAction,
     saveStack,
@@ -162,7 +192,9 @@ function yamlCodeChange() {
         if (yamlError) {
             yamlError = msg;
         } else {
-            yamlErrorTimeout = setTimeout(() => { yamlError = msg; }, 3000);
+            yamlErrorTimeout = setTimeout(() => {
+                yamlError = msg;
+            }, 3000);
         }
     }
 }
@@ -177,7 +209,8 @@ $effect(() => {
     if (!editorFocus) {
         const yaml = composeDocument.toYAML();
         if (yaml !== stack.composeYAML) {
-            stack = { ...stack, composeYAML: yaml };
+            stack = { ...stack,
+                composeYAML: yaml };
         }
     }
 });
@@ -192,47 +225,59 @@ $effect(() => {
 
 function startUpdateStackDataTimeout() {
     clearTimeout(updateStackDataTimeout);
-    updateStackDataTimeout = setTimeout(() => { updateStackData(); }, 5000);
+    updateStackDataTimeout = setTimeout(() => {
+        updateStackData();
+    }, 5000);
 }
 
 function updateStackData() {
     if (!isAdd && !isEditMode) {
-        socketStore.emitAgent(endpoint, "updateStackData", stack.name, (res: { ok: boolean; stack?: StackData }) => {
-            if (res.ok && res.stack) stack = res.stack;
+        socketStore.emitAgent(endpoint, "updateStackData", stack.name, (res: SocketRes & { stack?: StackData }) => {
+            if (res.ok && res.stack) {
+                stack = res.stack;
+            }
         });
     }
-    if (!stopUpdateTimeouts) startUpdateStackDataTimeout();
+    if (!stopUpdateTimeouts) {
+        startUpdateStackDataTimeout();
+    }
 }
 
 function startUpdateServiceStatsTimeout() {
     clearTimeout(updateServiceStatsTimeout);
-    updateServiceStatsTimeout = setTimeout(() => { updateServiceStats(); }, 2000);
+    updateServiceStatsTimeout = setTimeout(() => {
+        updateServiceStats();
+    }, 2000);
 }
 
 function updateServiceStats() {
     if (!isAdd && !isEditMode) {
-        socketStore.emitAgent(endpoint, "updateServiceStats", stack.name, (res: { ok: boolean; serviceStats?: Record<string, unknown> }) => {
-            if (res.ok) serviceStats = res.serviceStats;
+        socketStore.emitAgent(endpoint, "updateServiceStats", stack.name, (res: SocketRes & { serviceStats?: Record<string, unknown> }) => {
+            if (res.ok) {
+                serviceStats = res.serviceStats;
+            }
         });
     }
-    if (!stopUpdateTimeouts) startUpdateServiceStatsTimeout();
+    if (!stopUpdateTimeouts) {
+        startUpdateServiceStatsTimeout();
+    }
 }
 
 function loadStack() {
-    socketStore.emitAgent(endpoint, "getStack", stack.name, (res: { ok: boolean; stack?: StackData; msg?: string }) => {
+    socketStore.emitAgent(endpoint, "getStack", stack.name, (res: SocketRes & { stack?: StackData }) => {
         if (res.ok && res.stack) {
             stack = res.stack;
             yamlCodeChange();
             processing = false;
             loadAutoUpdateSettings();
         } else {
-            socketStore.toastRes(res as any);
+            socketStore.toastRes(res);
         }
     });
 }
 
 function loadAutoUpdateSettings() {
-    socketStore.emitAgent(endpoint, "getStackAutoUpdate", stack.name, (res: { ok: boolean; settings?: StackAutoUpdateSettings }) => {
+    socketStore.emitAgent(endpoint, "getStackAutoUpdate", stack.name, (res: SocketRes & { settings?: StackAutoUpdateSettings }) => {
         if (res.ok && res.settings) {
             autoUpdateMode = res.settings.mode;
             autoUpdateCustomSchedule = res.settings.schedule ?? "";
@@ -248,66 +293,84 @@ function deployStack() {
     const serviceNames = composeDocument.services.names;
     if (!stack.name && serviceNames.length > 0) {
         const svc = composeDocument.services.getService(serviceNames[0]);
-        stack = { ...stack, name: svc.get("container_name", serviceNames[0]) };
+        stack = { ...stack,
+            name: svc.get("container_name", serviceNames[0]) };
     }
     startComposeAction();
-    socketStore.emitAgent(stack.endpoint, "deployStack", stack.name, stack.composeYAML, stack.composeENV, isAdd, (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(stack.endpoint, "deployStack", stack.name, stack.composeYAML, stack.composeENV, isAdd, (res: SocketRes) => {
         stopComposeAction();
-        socketStore.toastRes(res as any);
-        if (res.ok) { isEditMode = false; goto(stackUrl); }
+        socketStore.toastRes(res);
+        if (res.ok) {
+            isEditMode = false;
+            goto(stackUrl);
+        }
     });
 }
 
 function saveStack() {
     processing = true;
-    socketStore.emitAgent(stack.endpoint, "saveStack", stack.name, stack.composeYAML, stack.composeENV, isAdd, (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(stack.endpoint, "saveStack", stack.name, stack.composeYAML, stack.composeENV, isAdd, (res: SocketRes) => {
         processing = false;
-        socketStore.toastRes(res as any);
-        if (res.ok) { isEditMode = false; goto(stackUrl); }
+        socketStore.toastRes(res);
+        if (res.ok) {
+            isEditMode = false;
+            goto(stackUrl);
+        }
     });
 }
 
 function startStack() {
     startComposeAction();
-    socketStore.emitAgent(endpoint, "startStack", stack.name, (res: { ok: boolean; msg?: string }) => {
-        stopComposeAction(); socketStore.toastRes(res as any); updateStackData();
+    socketStore.emitAgent(endpoint, "startStack", stack.name, (res: SocketRes) => {
+        stopComposeAction();
+        socketStore.toastRes(res);
+        updateStackData();
     });
 }
 
 function stopStack() {
     startComposeAction();
-    socketStore.emitAgent(endpoint, "stopStack", stack.name, (res: { ok: boolean; msg?: string }) => {
-        stopComposeAction(); socketStore.toastRes(res as any); updateStackData();
+    socketStore.emitAgent(endpoint, "stopStack", stack.name, (res: SocketRes) => {
+        stopComposeAction();
+        socketStore.toastRes(res);
+        updateStackData();
     });
 }
 
 function downStack() {
     showMoreMenu = false;
     startComposeAction();
-    socketStore.emitAgent(endpoint, "downStack", stack.name, (res: { ok: boolean; msg?: string }) => {
-        stopComposeAction(); socketStore.toastRes(res as any); updateStackData();
+    socketStore.emitAgent(endpoint, "downStack", stack.name, (res: SocketRes) => {
+        stopComposeAction();
+        socketStore.toastRes(res);
+        updateStackData();
     });
 }
 
 function restartStack() {
     startComposeAction();
-    socketStore.emitAgent(endpoint, "restartStack", stack.name, (res: { ok: boolean; msg?: string }) => {
-        stopComposeAction(); socketStore.toastRes(res as any); updateStackData();
+    socketStore.emitAgent(endpoint, "restartStack", stack.name, (res: SocketRes) => {
+        stopComposeAction();
+        socketStore.toastRes(res);
+        updateStackData();
     });
 }
 
 function updateStack() {
     showUpdateDialog = false;
     startComposeAction();
-    socketStore.emitAgent(endpoint, "updateStack", stack.name, updateDialogData.pruneAfterUpdate, updateDialogData.pruneAllAfterUpdate, (res: { ok: boolean; msg?: string }) => {
-        stopComposeAction(); socketStore.toastRes(res as any);
+    socketStore.emitAgent(endpoint, "updateStack", stack.name, updateDialogData.pruneAfterUpdate, updateDialogData.pruneAllAfterUpdate, (res: SocketRes) => {
+        stopComposeAction();
+        socketStore.toastRes(res);
     });
 }
 
 function deleteStack() {
-    socketStore.emitAgent(endpoint, "deleteStack", stack.name, (res: { ok: boolean; msg?: string }) => {
-        socketStore.toastRes(res as any);
-        if (res.ok) goto("/");
+    socketStore.emitAgent(endpoint, "deleteStack", stack.name, (res: SocketRes) => {
+        socketStore.toastRes(res);
+        if (res.ok) {
+            goto("/");
+        }
     });
 }
 
@@ -317,33 +380,45 @@ function discardStack() {
 }
 
 function addContainer() {
-    if (!newContainerName) { socketStore.toastError("Container name cannot be empty"); return; }
-    if (composeDocument.services.has(newContainerName)) { socketStore.toastError("Container name already exists"); return; }
+    if (!newContainerName) {
+        socketStore.toastError("Container name cannot be empty"); return;
+    }
+    if (composeDocument.services.has(newContainerName)) {
+        socketStore.toastError("Container name already exists"); return;
+    }
     composeDocument.services.set(newContainerName, { restart: "unless-stopped" });
     newContainerName = "";
     setTimeout(() => {
-        containerListRef?.lastElementChild?.scrollIntoView({ block: "start", behavior: "smooth" });
+        containerListRef?.lastElementChild?.scrollIntoView({ block: "start",
+            behavior: "smooth" });
     }, 0);
 }
 
 async function copyYAML() {
     await navigator.clipboard.writeText(stack.composeYAML ?? "");
     yamlCopied = true;
-    setTimeout(() => { yamlCopied = false; }, 2000);
+    setTimeout(() => {
+        yamlCopied = false;
+    }, 2000);
 }
 
 function stackNameToLowercase() {
-    if (stack.name) stack = { ...stack, name: stack.name.toLowerCase() };
+    if (stack.name) {
+        stack = { ...stack,
+            name: stack.name.toLowerCase() };
+    }
 }
 
 function importStack() {
-    socketStore.emitAgent(endpoint, "importStack", stack.name, (res: { ok: boolean; sourceDir?: string; hasRelativePaths?: boolean; msg?: string }) => {
+    socketStore.emitAgent(endpoint, "importStack", stack.name, (res: SocketRes & { sourceDir?: string; hasRelativePaths?: boolean }) => {
         if (res.ok) {
             importSourceDir = res.sourceDir ?? "";
-            if (res.hasRelativePaths) showImportRelativePathWarning = true;
+            if (res.hasRelativePaths) {
+                showImportRelativePathWarning = true;
+            }
             loadStack();
         } else {
-            socketStore.toastRes(res as any);
+            socketStore.toastRes(res);
         }
     });
 }
@@ -355,16 +430,17 @@ function saveAutoUpdateSettings() {
         return;
     }
     autoUpdateSaving = true;
-    const settings: StackAutoUpdateSettings = { mode: autoUpdateMode, schedule };
-    socketStore.emitAgent(endpoint, "setStackAutoUpdate", stack.name, settings, (res: { ok: boolean; msg?: string }) => {
+    const settings: StackAutoUpdateSettings = { mode: autoUpdateMode,
+        schedule };
+    socketStore.emitAgent(endpoint, "setStackAutoUpdate", stack.name, settings, (res: SocketRes) => {
         autoUpdateSaving = false;
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
     });
 }
 
-function getServiceStats(serviceName: string) {
+function getServiceStats(serviceName: string): StatsData | undefined {
     const svc = stack.services?.[serviceName];
-    return svc ? (serviceStats as any)?.[svc.containerName] : undefined;
+    return svc ? (serviceStats as Record<string, StatsData> | undefined)?.[svc.containerName] : undefined;
 }
 
 onMount(() => {
@@ -372,17 +448,26 @@ onMount(() => {
         isEditMode = true;
         processing = false;
         stack = {
-            name: "", status: UNKNOWN, started: false, recreateNecessary: false,
-            imageUpdatesAvailable: false, tags: [],
+            name: "",
+            status: UNKNOWN,
+            started: false,
+            recreateNecessary: false,
+            imageUpdatesAvailable: false,
+            tags: [],
             composeYAML: socketStore.composeTemplate || composeTemplate,
             composeENV: socketStore.envTemplate || envDefault,
-            isManagedByArbour: true, composeFileName: "", endpoint: routeEndpoint, primaryHostname: "", services: {}
+            isManagedByArbour: true,
+            composeFileName: "",
+            endpoint: routeEndpoint,
+            primaryHostname: "",
+            services: {}
         };
         socketStore.composeTemplate = "";
         socketStore.envTemplate = "";
         yamlCodeChange();
     } else {
-        stack = { ...stack, name: initialStackName };
+        stack = { ...stack,
+            name: initialStackName };
         loadStack();
     }
     updateStackData();
@@ -413,42 +498,46 @@ onDestroy(() => {
 <!-- Action bar -->
 {#if stack.isManagedByArbour}
     <div class="mb-3 action-bar">
-        {#if isEditMode}
-            <button class="btn btn-primary me-1" title={$t("tooltipStackDeploy")} disabled={processing} onclick={deployStack}>
-                <Icon name="rocket" /> <span class="d-none d-xl-inline">{$t("deployStack")}</span>
-            </button>
-            <button class="btn btn-normal me-1" title={$t("tooltipStackSave")} disabled={processing} onclick={saveStack}>
-                <Icon name="floppy-disk" /> <span class="d-none d-xl-inline">{$t("saveStackDraft")}</span>
-            </button>
-            {#if !isAdd}
-                <button class="btn btn-normal" disabled={processing} onclick={discardStack}>
-                    {$t("discardStack")}
+        <div class="btn-group" role="group">
+            {#if isEditMode}
+                <button class="btn btn-primary" title={$t("tooltipStackDeploy")} disabled={processing} onclick={deployStack}>
+                    <Icon name="rocket" /> <span class="d-none d-xl-inline">{$t("deployStack")}</span>
                 </button>
-            {/if}
-        {:else}
-            <button class="btn btn-normal me-1" title={$t("tooltipStackEdit")} disabled={processing} onclick={() => (isEditMode = true)}>
-                <Icon name="pen" /> <span class="d-none d-xl-inline">{$t("editStack")}</span>
-            </button>
-            {#if hasExitedServices || hasInactiveServices() || !stack.started}
-                <button class="btn btn-primary me-1" title={$t("tooltipStackStart")} disabled={processing} onclick={startStack}>
-                    <Icon name="play" /> <span class="d-none d-xl-inline">{$t("startStack")}</span>
+                <button class="btn btn-normal" title={$t("tooltipStackSave")} disabled={processing} onclick={saveStack}>
+                    <Icon name="floppy-disk" /> <span class="d-none d-xl-inline">{$t("saveStackDraft")}</span>
                 </button>
-            {/if}
-            {#if hasRunningServices}
-                <button class="btn btn-normal me-1" title={$t("tooltipStackRestart")} disabled={processing} onclick={restartStack}>
-                    <Icon name="rotate" /> <span class="d-none d-xl-inline">{$t("restartStack")}</span>
+                {#if !isAdd}
+                    <button class="btn btn-normal" disabled={processing} onclick={discardStack}>
+                        {$t("discardStack")}
+                    </button>
+                {/if}
+            {:else}
+                <button class="btn btn-normal" title={$t("tooltipStackEdit")} disabled={processing} onclick={() => (isEditMode = true)}>
+                    <Icon name="pen" /> <span class="d-none d-xl-inline">{$t("editStack")}</span>
                 </button>
-            {/if}
-            <button class="btn btn-normal btn-hover-info me-1" title={$t("tooltipStackUpdate")} disabled={processing} onclick={() => (showUpdateDialog = true)}>
-                <Icon name="cloud-arrow-down" /> <span class="d-none d-xl-inline">{$t("updateStack")}</span>
-            </button>
-            {#if hasRunningServices}
-                <button class="btn btn-normal btn-hover-danger me-1" title={$t("tooltipStackStop")} disabled={processing} onclick={stopStack}>
-                    <Icon name="stop" /> <span class="d-none d-xl-inline">{$t("stopStack")}</span>
+                {#if hasExitedServices || hasInactiveServices() || !stack.started}
+                    <button class="btn btn-primary" title={$t("tooltipStackStart")} disabled={processing} onclick={startStack}>
+                        <Icon name="play" /> <span class="d-none d-xl-inline">{$t("startStack")}</span>
+                    </button>
+                {/if}
+                {#if hasRunningServices}
+                    <button class="btn btn-normal" title={$t("tooltipStackRestart")} disabled={processing} onclick={restartStack}>
+                        <Icon name="rotate" /> <span class="d-none d-xl-inline">{$t("restartStack")}</span>
+                    </button>
+                {/if}
+                <button class="btn btn-normal btn-hover-info" title={$t("tooltipStackUpdate")} disabled={processing} onclick={() => (showUpdateDialog = true)}>
+                    <Icon name="cloud-arrow-down" /> <span class="d-none d-xl-inline">{$t("updateStack")}</span>
                 </button>
+                {#if hasRunningServices}
+                    <button class="btn btn-normal btn-hover-danger" title={$t("tooltipStackStop")} disabled={processing} onclick={stopStack}>
+                        <Icon name="stop" /> <span class="d-none d-xl-inline">{$t("stopStack")}</span>
+                    </button>
+                {/if}
             {/if}
+        </div>
+        {#if !isEditMode}
             <div class="more-menu-wrap" use:clickOutside={() => (showMoreMenu = false)}>
-                <button class="btn btn-dark" disabled={processing} onclick={() => (showMoreMenu = !showMoreMenu)}>
+                <button class="btn btn-dark more-btn" disabled={processing} onclick={() => (showMoreMenu = !showMoreMenu)}>
                     <Icon name="ellipsis-v" />
                 </button>
                 {#if showMoreMenu}
@@ -456,7 +545,9 @@ onDestroy(() => {
                         <button class="dropdown-item" onclick={downStack}>
                             <Icon name="stop" /> {$t("downStack")}
                         </button>
-                        <button class="dropdown-item text-danger" onclick={() => { showMoreMenu = false; showDeleteDialog = true; }}>
+                        <button class="dropdown-item text-danger" onclick={() => {
+                            showMoreMenu = false; showDeleteDialog = true;
+                        }}>
                             <Icon name="trash" /> {$t("deleteStack")}
                         </button>
                     </div>
@@ -498,7 +589,7 @@ onDestroy(() => {
                     <div class="mt-3">
                         <label for="stack-endpoint" class="form-label">{$t("arbourAgent")}</label>
                         <select id="stack-endpoint" class="form-select" bind:value={stack.endpoint}>
-                            {#each Object.entries(socketStore.agentList) as [ep, agent] (ep)}
+                            {#each Object.entries(socketStore.agentList) as [ ep, agent ] (ep)}
                                 <option value={ep} disabled={socketStore.agentStatusList[ep] !== "online"}>
                                     {agent.name || agent.url || "Master"} ({socketStore.agentStatusList[ep]})
                                 </option>
@@ -514,7 +605,11 @@ onDestroy(() => {
                 <div class="input-group mb-3">
                     <input class="form-control" bind:value={newContainerName}
                         placeholder={$t("New Container Name...")}
-                        onkeyup={(e) => { if (e.key === "Enter") addContainer(); }} />
+                        onkeyup={(e) => {
+                            if (e.key === "Enter") {
+                                addContainer();
+                            }
+                        }} />
                     <button class="btn btn-primary" onclick={addContainer}>
                         {$t("addContainer")}
                     </button>
@@ -522,7 +617,7 @@ onDestroy(() => {
             {/if}
 
             <div bind:this={containerListRef}>
-                {#each Object.entries(composeDocument.services.getServices()) as [name] (name)}
+                {#each Object.entries(composeDocument.services.getServices()) as [ name ] (name)}
                     <Container
                         {name}
                         {isEditMode}
@@ -548,15 +643,17 @@ onDestroy(() => {
                 <div class="log-section mb-3">
                     <div class="log-header mb-2">
                         <h4 class="mb-0">{$t("log")}</h4>
-                        <div class="ts-controls">
+                        <div class="btn-group btn-group-sm" role="group">
                             {#each timestampOptions as opt (opt.value)}
-                                <button class="btn btn-sm" class:btn-primary={logTimestampMode === opt.value}
-                                    class:btn-outline-normal={logTimestampMode !== opt.value}
-                                    onclick={() => { logTimestampMode = opt.value as "full" | "short" | "none"; localStorage.setItem(LS_KEY, opt.value); }}>
+                                <button type="button" class="btn" class:btn-primary={logTimestampMode === opt.value}
+                                    class:btn-normal={logTimestampMode !== opt.value}
+                                    onclick={() => {
+                                        logTimestampMode = opt.value as "full" | "short" | "none"; localStorage.setItem(LS_KEY, opt.value);
+                                    }}>
                                     {opt.label}
                                 </button>
                             {/each}
-                            <button class="btn btn-sm btn-outline-normal" onclick={() => (logExpanded = true)}>
+                            <button type="button" class="btn btn-normal" title={$t("expand")} onclick={() => (logExpanded = true)}>
                                 <Icon name="expand" />
                             </button>
                         </div>
@@ -655,8 +752,11 @@ onDestroy(() => {
 {/if}
 
 <!-- Log expanded modal -->
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<dialog bind:this={logModalEl} class="log-modal" onclick={(e) => { if (e.target === e.currentTarget) logExpanded = false; }}
+<dialog bind:this={logModalEl} class="log-modal" onclick={(e) => {
+    if (e.target === e.currentTarget) {
+        logExpanded = false;
+    }
+}}
     onclose={() => (logExpanded = false)}>
     <div class="modal-content">
         <div class="modal-header">
@@ -673,9 +773,12 @@ onDestroy(() => {
 </dialog>
 
 <!-- Compose editor fullscreen modal -->
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog bind:this={composeEditorDialogEl} class="compose-editor-modal"
-    onclick={(e) => { if (e.target === e.currentTarget) composeEditorOpen = false; }}
+    onclick={(e) => {
+        if (e.target === e.currentTarget) {
+            composeEditorOpen = false;
+        }
+    }}
     onclose={() => (composeEditorOpen = false)}>
     <div class="modal-content">
         <div class="modal-header">
@@ -703,7 +806,10 @@ onDestroy(() => {
     yesText={$t("updateStack")}
     btnStyle="btn-primary"
     onyes={updateStack}
-    onno={() => { updateDialogData = { pruneAfterUpdate: false, pruneAllAfterUpdate: false }; }}
+    onno={() => {
+        updateDialogData = { pruneAfterUpdate: false,
+            pruneAllAfterUpdate: false };
+    }}
 >
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
     <p class="mb-3">{@html $t("updateStackMsg")}</p>
@@ -766,7 +872,8 @@ onDestroy(() => {
 h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .agent-name { font-size: 13px; color: var(--arbour-text-muted); }
 
-.action-bar { display: flex; flex-wrap: wrap; align-items: center; }
+.action-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.more-btn { border-radius: var(--arbour-radius); }
 
 .more-menu-wrap { position: relative; display: inline-block; }
 .more-menu { display: block; right: 0; left: auto; min-width: 160px; padding: 0.25rem 0; }
@@ -777,7 +884,6 @@ h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
 .log-section { display: flex; flex-direction: column; }
 .log-header { display: flex; align-items: center; justify-content: space-between; }
-.ts-controls { display: flex; gap: 4px; }
 .log-terminal { overflow: hidden; }
 
 .monospace { font-family: 'JetBrains Mono', monospace; }
@@ -803,10 +909,14 @@ h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
 .radio-group { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.25rem; }
 
-.log-modal { max-width: 900px; }
-.log-modal-body { padding: 0; height: 70vh; }
+:global(.log-modal) { max-width: 1140px !important; width: calc(100% - 2rem) !important; }
+:global(.log-modal .modal-content) { padding: 0; }
+:global(.log-modal .modal-header) { padding: 1rem 1.25rem; }
+:global(.log-modal .modal-body) { padding: 1rem 1.25rem; height: 70vh; }
 
-.compose-editor-modal { max-width: 1200px; width: calc(100% - 2rem); }
-.compose-editor-modal-body { padding: 1rem; max-height: 75vh; overflow-y: auto; }
-.compose-editor-modal-body .editor-box { min-height: 65vh; height: 65vh; }
+:global(.compose-editor-modal) { max-width: 1200px !important; width: calc(100% - 2rem) !important; }
+:global(.compose-editor-modal .modal-content) { padding: 0; }
+:global(.compose-editor-modal .modal-header) { padding: 1rem 1.25rem; }
+:global(.compose-editor-modal .modal-body) { padding: 1rem 1.25rem; max-height: 75vh; overflow-y: auto; }
+:global(.compose-editor-modal .editor-box) { min-height: 65vh; height: 65vh; }
 </style>

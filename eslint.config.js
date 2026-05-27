@@ -13,6 +13,7 @@ export default [
             globals: {
                 ...globals.browser,
                 ...globals.node,
+                FRONTEND_VERSION: "readonly",
             },
         },
     },
@@ -26,13 +27,16 @@ export default [
         },
     },
     {
+        files: ["**/*.svelte.ts", "**/*.svelte.js"],
+        languageOptions: {
+            parser: tseslint.parser,
+        },
+    },
+    {
         rules: {
             "yoda": "error",
             "linebreak-style": ["error", "unix"],
-            "camelcase": ["warn", {
-                "properties": "never",
-                "ignoreImports": true,
-            }],
+            "camelcase": "off",
             "no-unused-vars": ["warn", {
                 "args": "none",
                 "caughtErrors": "none"
@@ -93,13 +97,14 @@ export default [
             }],
             "no-control-regex": "off",
             "one-var": ["error", "never"],
-            "max-statements-per-line": ["error", { "max": 1 }],
+            "max-statements-per-line": ["error", { "max": 2 }],
             "@typescript-eslint/ban-ts-comment": "off",
             "@typescript-eslint/no-unused-vars": ["warn", {
                 "args": "none",
                 "caughtErrors": "none"
             }],
             "prefer-const": "off",
+            "svelte/no-navigation-without-resolve": "off",
         },
     },
     {

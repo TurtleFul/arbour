@@ -3,12 +3,12 @@ import { getContext } from "svelte";
 import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { COMPOSE_CONTEXT, type ComposeContext } from "$lib/context";
 import { parseDockerPort } from "../../../../common/util-common";
 import { LABEL_STATUS_IGNORE, LABEL_IMAGEUPDATES_CHECK, LABEL_IMAGEUPDATES_IGNORE, LABEL_IMAGEUPDATES_CHANGELOG } from "../../../../common/compose-labels";
 import type { ServiceData, StatsData, ServiceEventEntry } from "../../../../common/types";
 import Icon from "./Icon.svelte";
-import Confirm from "./Confirm.svelte";
 import DockerStats from "./DockerStats.svelte";
 import ArrayInput from "./ArrayInput.svelte";
 import ArraySelect from "./ArraySelect.svelte";
@@ -29,7 +29,8 @@ const ctx = getContext<ComposeContext>(COMPOSE_CONTEXT);
 
 let showConfig = $state(false);
 let expandedStats = $state(false);
-let updateDialogData = $state({ pruneAfterUpdate: false, pruneAllAfterUpdate: false });
+let updateDialogData = $state({ pruneAfterUpdate: false,
+    pruneAllAfterUpdate: false });
 let eventLogEntries = $state<ServiceEventEntry[]>([]);
 let eventLogLoading = $state(false);
 let showUpdateDialog = $state(false);
@@ -38,12 +39,24 @@ let updateDialogEl = $state<HTMLDialogElement | undefined>(undefined);
 let eventLogDialogEl = $state<HTMLDialogElement | undefined>(undefined);
 
 $effect(() => {
-    if (!updateDialogEl) return;
-    if (showUpdateDialog) updateDialogEl.showModal(); else updateDialogEl.close();
+    if (!updateDialogEl) {
+        return;
+    }
+    if (showUpdateDialog) {
+        updateDialogEl.showModal();
+    } else {
+        updateDialogEl.close();
+    }
 });
 $effect(() => {
-    if (!eventLogDialogEl) return;
-    if (showEventLogDialog) eventLogDialogEl.showModal(); else eventLogDialogEl.close();
+    if (!eventLogDialogEl) {
+        return;
+    }
+    if (showEventLogDialog) {
+        eventLogDialogEl.showModal();
+    } else {
+        eventLogDialogEl.close();
+    }
 });
 
 const inactive = $derived(Object.keys(service).length === 0);
@@ -55,9 +68,15 @@ const status = $derived(() => {
 
 const bgStyle = $derived(() => {
     const s = status();
-    if (s === "running" || s === "healthy") return "badge-running";
-    if (s === "unhealthy") return "bg-danger";
-    if (s === "inactive") return "badge-inactive";
+    if (s === "running" || s === "healthy") {
+        return "badge-running";
+    }
+    if (s === "unhealthy") {
+        return "bg-danger";
+    }
+    if (s === "inactive") {
+        return "badge-inactive";
+    }
     return "bg-secondary";
 });
 
@@ -106,18 +125,26 @@ function fetchEventLog() {
     eventLogLoading = true;
     socketStore.emitAgent(ctx.endpoint, "getServiceEventLog", ctx.stack.name, name, (res: { ok: boolean; events?: ServiceEventEntry[] }) => {
         eventLogLoading = false;
-        if (res.ok) eventLogEntries = res.events ?? [];
+        if (res.ok) {
+            eventLogEntries = res.events ?? [];
+        }
     });
 }
 
 function formatRelativeTime(timestamp: number): string {
     const diff = Date.now() - timestamp;
     const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 60) {
+        return `${seconds}s ago`;
+    }
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60) {
+        return `${minutes}m ago`;
+    }
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) {
+        return `${hours}h ago`;
+    }
     return `${Math.floor(hours / 24)}d ago`;
 }
 
@@ -127,48 +154,55 @@ function formatAbsoluteTime(timestamp: number): string {
 
 function eventTypeBadge(eventType: string): string {
     const map: Record<string, string> = {
-        update: "ev-primary", deploy: "ev-success", restart: "ev-warning",
-        recreate: "ev-info", start: "ev-success", stop: "ev-secondary", down: "ev-dark",
+        update: "ev-primary",
+        deploy: "ev-success",
+        restart: "ev-warning",
+        recreate: "ev-info",
+        start: "ev-success",
+        stop: "ev-secondary",
+        down: "ev-dark",
     };
     return map[eventType] ?? "ev-secondary";
 }
 
 function triggerBadge(trigger: string): string {
     const map: Record<string, string> = {
-        manual: "ev-secondary", scheduled: "ev-info", immediate: "ev-warning",
+        manual: "ev-secondary",
+        scheduled: "ev-info",
+        immediate: "ev-warning",
     };
     return map[trigger] ?? "ev-secondary";
 }
 
 function stopService() {
     ctx.startComposeAction();
-    socketStore.emitAgent(ctx.endpoint, "stopService", ctx.stack.name, name, (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(ctx.endpoint, "stopService", ctx.stack.name, name, (res: SocketRes) => {
         ctx.stopComposeAction();
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
     });
 }
 
 function startService() {
     ctx.startComposeAction();
-    socketStore.emitAgent(ctx.endpoint, "startService", ctx.stack.name, name, (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(ctx.endpoint, "startService", ctx.stack.name, name, (res: SocketRes) => {
         ctx.stopComposeAction();
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
     });
 }
 
 function restartService() {
     ctx.startComposeAction();
-    socketStore.emitAgent(ctx.endpoint, "restartService", ctx.stack.name, name, (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(ctx.endpoint, "restartService", ctx.stack.name, name, (res: SocketRes) => {
         ctx.stopComposeAction();
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
     });
 }
 
 function recreateService() {
     ctx.startComposeAction();
-    socketStore.emitAgent(ctx.endpoint, "recreateService", ctx.stack.name, name, (res: { ok: boolean; msg?: string }) => {
+    socketStore.emitAgent(ctx.endpoint, "recreateService", ctx.stack.name, name, (res: SocketRes) => {
         ctx.stopComposeAction();
-        socketStore.toastRes(res as any);
+        socketStore.toastRes(res);
     });
 }
 
@@ -177,9 +211,9 @@ function updateService() {
     ctx.startComposeAction();
     socketStore.emitAgent(ctx.endpoint, "updateService", ctx.stack.name, name,
         updateDialogData.pruneAfterUpdate, updateDialogData.pruneAllAfterUpdate,
-        (res: { ok: boolean; msg?: string }) => {
+        (res: SocketRes) => {
             ctx.stopComposeAction();
-            socketStore.toastRes(res as any);
+            socketStore.toastRes(res);
         });
 }
 
@@ -240,23 +274,24 @@ function updateChangelogLink(link: string) {
             {/if}
 
             {#if !isEditMode}
-                <button class="btn btn-sm btn-normal" title={$t("serviceEventLog")}
-                    onclick={() => { fetchEventLog(); showEventLogDialog = true; }}>
-                    <Icon name="clipboard-list" />
-                </button>
-            {/if}
-
-            {#if !isEditMode && started()}
                 <div class="btn-group">
-                    <a class="btn btn-sm btn-normal" title={$t("tooltipServiceLog")} href={logLink()}>
-                        <Icon name="file-lines" />
-                    </a>
-                    <a class="btn btn-sm btn-normal" title={$t("tooltipServiceInspect")} href={inspectLink()}>
-                        <Icon name="circle-info" />
-                    </a>
-                    <a class="btn btn-sm btn-normal" title={$t("tooltipServiceTerminal")} href={terminalLink()}>
-                        <Icon name="terminal" />
-                    </a>
+                    <button class="btn btn-sm btn-normal" title={$t("serviceEventLog")}
+                        onclick={() => {
+                            fetchEventLog(); showEventLogDialog = true;
+                        }}>
+                        <Icon name="heartbeat" />
+                    </button>
+                    {#if started()}
+                        <a class="btn btn-sm btn-normal" title={$t("tooltipServiceLog")} href={logLink()}>
+                            <Icon name="file-lines" />
+                        </a>
+                        <a class="btn btn-sm btn-normal" title={$t("tooltipServiceInspect")} href={inspectLink()}>
+                            <Icon name="circle-info" />
+                        </a>
+                        <a class="btn btn-sm btn-normal" title={$t("tooltipServiceTerminal")} href={terminalLink()}>
+                            <Icon name="terminal" />
+                        </a>
+                    {/if}
                 </div>
             {/if}
 
@@ -401,9 +436,12 @@ function updateChangelogLink(link: string) {
 </div>
 
 <!-- Image update dialog -->
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog bind:this={updateDialogEl} class="update-dialog" onclose={() => (showUpdateDialog = false)}
-    onclick={(e) => { if (e.target === e.currentTarget) showUpdateDialog = false; }}>
+    onclick={(e) => {
+        if (e.target === e.currentTarget) {
+            showUpdateDialog = false;
+        }
+    }}>
     <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{$tn("imageUpdate", 1)}</h5>
@@ -448,9 +486,12 @@ function updateChangelogLink(link: string) {
 </dialog>
 
 <!-- Event log dialog -->
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <dialog bind:this={eventLogDialogEl} class="event-log-dialog" onclose={() => (showEventLogDialog = false)}
-    onclick={(e) => { if (e.target === e.currentTarget) showEventLogDialog = false; }}>
+    onclick={(e) => {
+        if (e.target === e.currentTarget) {
+            showEventLogDialog = false;
+        }
+    }}>
     <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{$t("serviceEventLog")}</h5>
@@ -458,7 +499,7 @@ function updateChangelogLink(link: string) {
             </div>
             <div class="modal-body">
                 {#if eventLogLoading}
-                    <div class="loading-state"><Icon name="spinner" spin={true} /> {$t("loading")}</div>
+                    <!-- intentionally empty while loading; avoids spinner flash -->
                 {:else if eventLogEntries.length === 0}
                     <div class="empty-state">{$t("noEventsYet")}</div>
                 {:else}
@@ -507,37 +548,39 @@ function updateChangelogLink(link: string) {
                 {/if}
             </div>
         <div class="modal-footer">
-            <button class="btn btn-normal" onclick={() => (showEventLogDialog = false)}>{$t("close")}</button>
+            <button class="btn btn-primary" onclick={() => (showEventLogDialog = false)}>{$t("close")}</button>
         </div>
     </div>
 </dialog>
 
 <style>
+.container { max-width: 100%; }
+
 .service-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     column-gap: 12px;
     row-gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .service-title {
     margin: 0;
     margin-right: auto;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 500;
 }
 
 .service-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     flex-shrink: 0;
 }
 
-.notification { font-size: 0.9rem; color: var(--arbour-danger); margin-bottom: 0.5rem; }
+.notification { font-size: 1rem; color: var(--arbour-danger); margin-bottom: 0.5rem; }
 
 .service-meta {
     display: flex;
@@ -545,11 +588,13 @@ function updateChangelogLink(link: string) {
     align-items: center;
     font-size: 0.8rem;
     color: var(--arbour-text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
-.image-label .tag { color: var(--arbour-primary); }
+.image-label .tag { color: var(--arbour-text-muted); }
 
-.badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 
 .badge-running { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
 .badge-inactive { background: var(--arbour-bg-header-active); color: var(--arbour-text-muted); }
@@ -579,9 +624,12 @@ function updateChangelogLink(link: string) {
 
 .update-dialog { max-width: 480px; width: calc(100% - 2rem); }
 .event-log-dialog { max-width: 800px; width: calc(100% - 2rem); }
-.event-log-dialog .modal-body { max-height: 65vh; overflow-y: auto; }
+.event-log-dialog .modal-content { padding: 0; }
+.event-log-dialog .modal-header { padding: 1rem 1.25rem; }
+.event-log-dialog .modal-body { padding: 1rem 1.25rem; max-height: 65vh; overflow-y: auto; }
+.event-log-dialog .modal-footer { padding: 0.75rem 1.25rem; }
 
-.loading-state, .empty-state {
+.empty-state {
     padding: 1.5rem; text-align: center; color: var(--arbour-text-muted);
     display: flex; align-items: center; justify-content: center; gap: 0.5rem;
 }

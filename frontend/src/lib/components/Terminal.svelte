@@ -3,14 +3,12 @@ import { onMount, onDestroy } from "svelte";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { socketStore } from "$lib/stores/socket.svelte";
+import type { SocketRes } from "$lib/types";
 import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../../common/util-common";
 
 const {
     name,
     endpoint,
-    stackName = undefined,
-    serviceName = undefined,
-    shell = "bash",
     rows = TERMINAL_ROWS,
     cols = TERMINAL_COLS,
     mode = "displayOnly",
@@ -37,7 +35,9 @@ let cursorPosition = 0;
 let mounted = false; // plain (non-reactive) flag, won't re-trigger $effect
 
 function makeTimestampTransform(m: string): ((data: string) => string) | null {
-    if (m === "full") return null;
+    if (m === "full") {
+        return null;
+    }
     const iso = () => /\d{4}-\d{2}-\d{2}T(\d{2}:\d{2}:\d{2})(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?/g;
     const apache = () => /\[\d{2}\/\w+\/\d{4}:(\d{2}:\d{2}:\d{2}) [+-]\d{4}\]/g;
     const spaceDate = () => /\d{4}[-/]\d{2}[-/]\d{2} (\d{2}:\d{2}:\d{2})(?:\.\d+)?/g;
@@ -96,7 +96,9 @@ function mainTerminalConfig() {
         const code = e.key.charCodeAt(0);
 
         if (e.key === "\r") {
-            if (terminalInputBuffer.length === 0) return;
+            if (terminalInputBuffer.length === 0) {
+                return;
+            }
             const buffer = terminalInputBuffer;
             removeInput();
             socketStore.emitAgent(endpoint, "terminalInput", name, buffer + e.key, (err: { msg: string }) => {
@@ -124,14 +126,18 @@ function mainTerminalConfig() {
 function interactiveTerminalConfig() {
     terminal.onKey((e) => {
         socketStore.emitAgent(endpoint, "terminalInput", name, e.key, (res: { ok: boolean; msg: string }) => {
-            if (!res.ok) socketStore.toastError(res.msg);
+            if (!res.ok) {
+                socketStore.toastError(res.msg);
+            }
         });
     });
 }
 
 $effect(() => {
     const mode_ = timestampMode; // track reactively
-    if (!mounted) return;        // skip initial run — onMount handles setup
+    if (!mounted) {
+        return;
+    }        // skip initial run — onMount handles setup
     socketStore.setTerminalTransform(name, makeTimestampTransform(mode_));
     clearTerminal();
     bind();
@@ -146,12 +152,17 @@ onMount(() => {
         rows,
     });
 
-    if (mode === "mainTerminal") mainTerminalConfig();
-    else if (mode === "interactive") interactiveTerminalConfig();
+    if (mode === "mainTerminal") {
+        mainTerminalConfig();
+    } else if (mode === "interactive") {
+        interactiveTerminalConfig();
+    }
 
     terminal.open(terminalEl);
 
-    if (mode !== "displayOnly") terminal.focus();
+    if (mode !== "displayOnly") {
+        terminal.focus();
+    }
 
     terminal.onCursorMove(() => onhasdata?.());
 
@@ -161,8 +172,10 @@ onMount(() => {
     mounted = true;
 
     if (mode === "mainTerminal") {
-        socketStore.emitAgent(endpoint, "mainTerminal", name, (res: { ok: boolean }) => {
-            if (!res.ok) socketStore.toastRes(res as any);
+        socketStore.emitAgent(endpoint, "mainTerminal", name, (res: SocketRes) => {
+            if (!res.ok) {
+                socketStore.toastRes(res);
+            }
         });
     }
 

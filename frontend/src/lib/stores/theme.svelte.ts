@@ -1,4 +1,4 @@
-export const COLOR_THEMES = ["arbour", "dockge", "sundown", "unicorn", "retro"] as const;
+export const COLOR_THEMES = [ "arbour", "dockge", "sundown", "unicorn", "retro" ] as const;
 export type ColorTheme = typeof COLOR_THEMES[number];
 
 class ThemeStore {
