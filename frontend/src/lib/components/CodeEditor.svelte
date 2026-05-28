@@ -144,19 +144,18 @@ $effect(() => {
 });
 
 $effect(() => {
-    if (!view) {
-        return;
-    }
-    if (value === lastEditorValue) {
+    const next = value; // read first so this effect always tracks `value`, even
+    // on the initial run before `view` is assigned
+    if (!view || next === lastEditorValue) {
         return;
     }
     const current = view.state.doc.toString();
-    if (current !== value) {
+    if (current !== next) {
         view.dispatch({ changes: { from: 0,
             to: current.length,
-            insert: value } });
+            insert: next } });
     }
-    lastEditorValue = value;
+    lastEditorValue = next;
 });
 
 onMount(() => {

@@ -13,6 +13,10 @@ export interface ComposeContext {
     startComposeAction(): void;
     stopComposeAction(): void;
     saveStack(): void;
+    /** Notify that a GUI editor mutated composeDocument in place, so the page
+     *  re-serializes it to YAML. The document model uses in-place mutation that
+     *  Svelte's deep reactivity doesn't reliably observe, hence the explicit signal. */
+    notifyDocChanged(): void;
 }
 
 export interface AgentContext {

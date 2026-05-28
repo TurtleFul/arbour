@@ -17,21 +17,6 @@ let externalNetworkList = $state<string[]>([]);
 
 let prevNetworksData: unknown = null;
 
-// The networks object the compose document should hold, derived from the
-// current form state. Reading row.name/row.data and externalList here makes
-// this recompute whenever the user edits a name, adds/removes a row, or toggles
-// an external network — no manual dependency tracking needed.
-const composeNetworks = $derived.by(() => {
-    const networks: Record<string, unknown> = {};
-    for (const row of networkList) {
-        networks[row.name] = row.data;
-    }
-    for (const name in externalList) {
-        networks[name] = externalList[name];
-    }
-    return networks;
-});
-
 // External → internal: when the YAML editor owns the state and its network data
 // actually changed, refresh the form from the document.
 $effect(() => {
@@ -42,15 +27,23 @@ $effect(() => {
     }
 });
 
-// Internal → external: push the form's networks back into the document, unless
-// the YAML editor currently owns the state.
-$effect(() => {
-    const networks = composeNetworks;
+// Internal → external: push the form's networks back into the document. Driven
+// by explicit user actions (not an effect) to avoid an effect that both reads
+// composeDocument via the networks getter and writes it via replace().
+function commit() {
     if (ctx.editorFocus) {
         return;
     }
+    const networks: Record<string, unknown> = {};
+    for (const row of networkList) {
+        networks[row.name] = row.data;
+    }
+    for (const name in externalList) {
+        networks[name] = externalList[name];
+    }
     ctx.composeDocument.networks.replace(networks);
-});
+    ctx.notifyDocChanged();
+}
 
 function loadNetworkList() {
     const rows: NetworkRow[] = [];
@@ -90,10 +83,12 @@ function loadExternalNetworkList() {
 function addField() {
     networkList = [ ...networkList, { name: "",
         data: {} }];
+    commit();
 }
 
 function remove(index: number) {
     networkList = networkList.filter((_, i) => i !== index);
+    commit();
 }
 
 function toggleExternal(name: string, enabled: boolean) {
@@ -106,6 +101,7 @@ function toggleExternal(name: string, enabled: boolean) {
         delete next[name];
         externalList = next;
     }
+    commit();
 }
 
 onMount(() => {
@@ -125,6 +121,7 @@ onMount(() => {
                         type="text"
                         class="form-control no-bg network-name-input"
                         bind:value={row.name}
+                        oninput={commit}
                         placeholder={$t("Network name...")}
                     />
                     <button class="btn btn-sm btn-hover-danger remove-btn" onclick={() => remove(i)}>

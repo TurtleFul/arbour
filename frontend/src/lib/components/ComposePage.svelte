@@ -51,6 +51,7 @@ interface TerminalInstance { rebind(): void; updateTerminalSize(): void; }
 
 let stack = $state<StackData>({} as StackData);
 let composeDocument = $state(new ComposeDocument());
+let docVersion = $state(0);
 let processing = $state(false);
 let editorFocus = $state(false);
 let isEditMode = $state(false);
@@ -179,6 +180,9 @@ setContext(COMPOSE_CONTEXT, {
     startComposeAction,
     stopComposeAction,
     saveStack,
+    notifyDocChanged() {
+        docVersion++;
+    },
 });
 
 function yamlCodeChange() {
@@ -206,6 +210,7 @@ $effect(() => {
 });
 
 $effect(() => {
+    void docVersion; // re-serialize when a GUI editor signals an in-place mutation
     if (!editorFocus) {
         const yaml = composeDocument.toYAML();
         if (yaml !== stack.composeYAML) {
