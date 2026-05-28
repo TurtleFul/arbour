@@ -38,8 +38,20 @@ class SocketStore {
     });
 
     info = $state<Record<string, unknown>>({});
-    remember = $state(typeof localStorage !== "undefined" ? localStorage.remember !== "0" : true);
+    #remember = $state(typeof localStorage !== "undefined" ? localStorage.remember !== "0" : true);
     loggedIn = $state(false);
+
+    get remember(): boolean {
+        return this.#remember;
+    }
+
+    set remember(value: boolean) {
+        this.#remember = value;
+        if (typeof localStorage !== "undefined") {
+            localStorage.remember = value ? "1" : "0";
+        }
+    }
+
     allowLoginDialog = $state(false);
     username = $state<string | null>(null);
     composeTemplate = $state("");

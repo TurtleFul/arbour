@@ -123,11 +123,7 @@ const boxStyle = $derived(
 );
 
 function onScroll() {
-    if (window.top!.scrollY <= 133) {
-        windowTop = window.top!.scrollY;
-    } else {
-        windowTop = 133;
-    }
+    windowTop = Math.min(window.scrollY, 133);
 }
 
 function checkForUpdates() {

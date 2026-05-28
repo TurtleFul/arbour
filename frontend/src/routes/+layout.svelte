@@ -21,7 +21,7 @@ const { children } = $props<{ children: Snippet }>();
 
 const isSetup = $derived($page.url.pathname === "/setup");
 
-const hasNewVersion = $derived(() => {
+const hasNewVersion = $derived.by(() => {
     const info = socketStore.info;
     if (info.latestVersion && info.version) {
         return compareVersions(info.latestVersion as string, info.version as string) >= 1;
@@ -71,7 +71,7 @@ onMount(() => {
                     <AppLogo size={40} />
                     <span class="d-none d-md-inline fs-4 title ms-2">Arbour</span>
                 </a>
-                {#if hasNewVersion()}
+                {#if hasNewVersion}
                     <a target="_blank" href="https://github.com/turtleful/arbour/releases" class="ms-2 me-3 notification-icon">
                         <Icon name="arrow-up" />
                     </a>
