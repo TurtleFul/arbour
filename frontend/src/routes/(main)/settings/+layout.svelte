@@ -5,7 +5,7 @@ import { onMount, type Snippet } from "svelte";
 import { goto } from "$app/navigation";
 import { settingsStore } from "$lib/stores/settings.svelte";
 
-const { children } = $props<{ children: Snippet }>();
+const { children } : { children: Snippet } = $props();
 
 const subMenus = $derived({
     general: $t("general"),

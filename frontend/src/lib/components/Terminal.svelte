@@ -14,7 +14,7 @@ const {
     mode = "displayOnly",
     timestampMode = "full",
     onhasdata = undefined,
-} = $props<{
+} : {
     name: string;
     endpoint: string;
     stackName?: string;
@@ -25,7 +25,7 @@ const {
     mode?: "displayOnly" | "mainTerminal" | "interactive";
     timestampMode?: "full" | "short" | "none";
     onhasdata?: () => void;
-}>();
+} = $props();
 
 let terminalEl: HTMLDivElement;
 let terminal: XTerm;

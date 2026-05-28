@@ -3,11 +3,11 @@ import { t } from "svelte-i18n";
 import Icon from "./Icon.svelte";
 import type { ComposeArray } from "../../../../common/compose-document";
 
-const { composeArray, displayName, options } = $props<{
+const { composeArray, displayName, options } : {
     composeArray: ComposeArray;
     displayName: string;
     options: string[];
-}>();
+} = $props();
 
 const array = $derived(composeArray.composeData.data as string[]);
 </script>

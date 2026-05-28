@@ -11,10 +11,10 @@ import Confirm from "./Confirm.svelte";
 import NetworkInspectModal from "./NetworkInspectModal.svelte";
 import { DockerArtefactAction, type DockerArtefactData, type DockerArtefactInfo, type DockerArtefactItem } from "../../../../common/types";
 
-const { endpoint, artefact } = $props<{
+const { endpoint, artefact } : {
     endpoint: string;
     artefact: DockerArtefactInfo;
-}>();
+} = $props();
 
 const ctx = getContext<AgentContext>(AGENT_CONTEXT);
 

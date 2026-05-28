@@ -5,7 +5,7 @@ import { socketStore } from "$lib/stores/socket.svelte";
 import StackList from "$lib/components/StackList.svelte";
 import Icon from "$lib/components/Icon.svelte";
 
-const { children } = $props<{ children: Snippet }>();
+const { children } : { children: Snippet } = $props();
 </script>
 
 <div class="container-fluid">

@@ -17,7 +17,7 @@ import { clickOutside } from "$lib/actions/clickOutside";
 import "$lib/../styles/global.scss";
 import "$lib/../styles/localization.scss";
 
-const { children } = $props<{ children: Snippet }>();
+const { children } : { children: Snippet } = $props();
 
 const isSetup = $derived($page.url.pathname === "/setup");
 

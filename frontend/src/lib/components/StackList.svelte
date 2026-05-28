@@ -10,7 +10,7 @@ import type { SimpleStackData } from "../../../../common/types";
 import Icon from "./Icon.svelte";
 import StackListItem from "./StackListItem.svelte";
 
-const { embedded = false } = $props<{ embedded?: boolean }>();
+const { embedded = false } : { embedded?: boolean } = $props();
 
 let searchText = $state("");
 let closedAgents = new SvelteMap<string, boolean>();

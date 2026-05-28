@@ -12,7 +12,7 @@ import ProgressTerminal from "./ProgressTerminal.svelte";
 import Confirm from "./Confirm.svelte";
 import Icon from "./Icon.svelte";
 
-const { endpoint = "" } = $props<{ endpoint?: string }>();
+const { endpoint = "" } : { endpoint?: string } = $props();
 
 interface ProgressTerminalInstance {
     show(): void;

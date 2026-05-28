@@ -1,15 +1,15 @@
 <script lang="ts">
 import { t } from "svelte-i18n";
-import { StackStatusInfo } from "../../../../common/util-common";
+import { StackStatusInfo, UNKNOWN } from "../../../../common/util-common";
 import type { SimpleStackData } from "../../../../common/types";
 
-const { stack, fixedWidth = false } = $props<{
+const { stack, fixedWidth = false } : {
     stack: SimpleStackData | null;
     fixedWidth?: boolean;
     pill?: boolean;
-}>();
+} = $props();
 
-const info = $derived(StackStatusInfo.get(stack?.status));
+const info = $derived(StackStatusInfo.get(stack?.status ?? UNKNOWN));
 const className = $derived(
     `badge rounded-pill bg-${info.badgeColor}` + (fixedWidth ? " fixed-width" : "")
 );

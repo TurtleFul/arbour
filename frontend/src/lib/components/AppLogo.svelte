@@ -1,5 +1,5 @@
 <script lang="ts">
-const { size = 40 } = $props<{ size?: number }>();
+const { size = 40 } : { size?: number } = $props();
 </script>
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width={size} height={size}>

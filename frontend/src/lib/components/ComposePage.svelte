@@ -30,11 +30,11 @@ const {
     stackName: initialStackName = "",
     routeEndpoint = "",
     isAdd = false,
-} = $props<{
+} : {
     stackName?: string;
     routeEndpoint?: string;
     isAdd?: boolean;
-}>();
+} = $props();
 
 const composeTemplate = `services:
   nginx:

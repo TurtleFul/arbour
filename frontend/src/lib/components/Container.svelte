@@ -18,12 +18,12 @@ const {
     isEditMode = false,
     service = {} as ServiceData,
     stats = undefined,
-} = $props<{
+} : {
     name: string;
     isEditMode?: boolean;
     service?: ServiceData;
     stats?: StatsData;
-}>();
+} = $props();
 
 const ctx = getContext<ComposeContext>(COMPOSE_CONTEXT);
 

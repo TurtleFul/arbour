@@ -10,12 +10,12 @@ const {
     endpoint,
     rows = PROGRESS_TERMINAL_ROWS,
     autoHideTimeout = 10000,
-} = $props<{
+} : {
     name: string;
     endpoint: string;
     rows?: number;
     autoHideTimeout?: number;
-}>();
+} = $props();
 
 interface TerminalInstance {
     clearTerminal: () => void;

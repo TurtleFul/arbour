@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { HTMLInputAttributes } from "svelte/elements";
 import Icon from "./Icon.svelte";
 
 let {
@@ -8,14 +9,14 @@ let {
     autocomplete = "new-password",
     required = false,
     readonly = false,
-} = $props<{
+} : {
     value?: string;
     placeholder?: string;
     maxlength?: number;
-    autocomplete?: string;
+    autocomplete?: HTMLInputAttributes["autocomplete"];
     required?: boolean;
     readonly?: boolean;
-}>();
+} = $props();
 
 let visible = $state(false);
 </script>

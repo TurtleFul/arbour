@@ -11,7 +11,7 @@ let {
     onyes,
     onno,
     children,
-} = $props<{
+} : {
     open?: boolean;
     title?: string;
     yesText?: string;
@@ -20,7 +20,7 @@ let {
     onyes?: () => void;
     onno?: () => void;
     children?: Snippet;
-}>();
+} = $props();
 
 let dialogEl: HTMLDialogElement;
 

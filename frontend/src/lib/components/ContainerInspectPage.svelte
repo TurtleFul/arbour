@@ -4,10 +4,10 @@ import { t } from "svelte-i18n";
 import { socketStore } from "$lib/stores/socket.svelte";
 import CodeEditor from "./CodeEditor.svelte";
 
-const { containerName, endpoint = "" } = $props<{
+const { containerName, endpoint = "" } : {
     containerName: string;
     endpoint?: string;
-}>();
+} = $props();
 
 let inspectData = $state("fetching ...");
 

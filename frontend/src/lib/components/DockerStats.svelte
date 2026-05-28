@@ -2,7 +2,7 @@
 import { t } from "svelte-i18n";
 import type { StatsData } from "../../../../common/types";
 
-const { stats } = $props<{ stats: StatsData }>();
+const { stats } : { stats: StatsData } = $props();
 </script>
 
 <div class="stats-container">

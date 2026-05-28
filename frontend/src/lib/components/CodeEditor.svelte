@@ -16,13 +16,13 @@ let {
     isReadonly = false,
     onfocus = undefined,
     onblur = undefined,
-} = $props<{
+} : {
     value?: string;
     lang?: "yaml" | "json" | "env";
     isReadonly?: boolean;
     onfocus?: () => void;
     onblur?: () => void;
-}>();
+} = $props();
 
 let editorEl: HTMLDivElement;
 let view: EditorView;

@@ -8,11 +8,11 @@ let {
     open = $bindable(false),
     endpoint,
     networkId,
-} = $props<{
+} : {
     open?: boolean;
     endpoint: string;
     networkId: string;
-}>();
+} = $props();
 
 let dialogEl: HTMLDialogElement;
 let loading = $state(false);

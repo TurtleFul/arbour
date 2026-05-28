@@ -6,11 +6,11 @@ import { getContainerLogName } from "../../../../common/util-common";
 import Terminal from "./Terminal.svelte";
 import Icon from "./Icon.svelte";
 
-const { stackName, serviceName, endpoint = "" } = $props<{
+const { stackName, serviceName, endpoint = "" } : {
     stackName: string;
     serviceName: string;
     endpoint?: string;
-}>();
+} = $props();
 
 const LS_KEY = "logTimestampMode";
 const timestampOptions: { value: "full" | "short" | "none"; label: string }[] = [

@@ -6,7 +6,7 @@ import Confirm from "./Confirm.svelte";
 import type { SocketRes } from "$lib/types";
 import QRCode from "qrcode";
 
-let { open = $bindable(false) } = $props<{ open?: boolean }>();
+let { open = $bindable(false) } : { open?: boolean } = $props();
 
 let currentPassword = $state("");
 let processing = $state(false);

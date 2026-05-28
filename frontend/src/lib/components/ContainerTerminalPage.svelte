@@ -5,12 +5,12 @@ import { socketStore } from "$lib/stores/socket.svelte";
 import { getContainerTerminalName } from "../../../../common/util-common";
 import Terminal from "./Terminal.svelte";
 
-const { stackName, serviceName, shell, endpoint = "" } = $props<{
+const { stackName, serviceName, shell, endpoint = "" } : {
     stackName: string;
     serviceName: string;
     shell: string;
     endpoint?: string;
-}>();
+} = $props();
 
 const terminalName = $derived(getContainerTerminalName(endpoint, stackName, serviceName, shell, 0));
 

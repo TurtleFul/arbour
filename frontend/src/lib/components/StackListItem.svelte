@@ -5,7 +5,7 @@ import Icon from "./Icon.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import type { SimpleStackData } from "../../../../common/types";
 
-const { stack } = $props<{ stack: SimpleStackData }>();
+const { stack } : { stack: SimpleStackData } = $props();
 
 const url = $derived(
     stack.endpoint

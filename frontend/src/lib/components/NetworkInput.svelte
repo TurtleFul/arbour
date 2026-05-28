@@ -13,11 +13,27 @@ type NetworkRow = { name: string; data: unknown };
 
 let networkList = $state<NetworkRow[]>([]);
 let externalList = $state<Record<string, Record<string, unknown>>>({});
-let selectedExternalList = $state<Record<string, boolean>>({});
 let externalNetworkList = $state<string[]>([]);
 
 let prevNetworksData: unknown = null;
 
+// The networks object the compose document should hold, derived from the
+// current form state. Reading row.name/row.data and externalList here makes
+// this recompute whenever the user edits a name, adds/removes a row, or toggles
+// an external network — no manual dependency tracking needed.
+const composeNetworks = $derived.by(() => {
+    const networks: Record<string, unknown> = {};
+    for (const row of networkList) {
+        networks[row.name] = row.data;
+    }
+    for (const name in externalList) {
+        networks[name] = externalList[name];
+    }
+    return networks;
+});
+
+// External → internal: when the YAML editor owns the state and its network data
+// actually changed, refresh the form from the document.
 $effect(() => {
     const networksData = ctx.composeDocument.networks.composeData.data;
     if (ctx.editorFocus && networksData !== prevNetworksData) {
@@ -26,27 +42,14 @@ $effect(() => {
     }
 });
 
+// Internal → external: push the form's networks back into the document, unless
+// the YAML editor currently owns the state.
 $effect(() => {
-    void networkList.map(n => n.name); // track mutations
-    applyToComposeDocument();
-});
-
-$effect(() => {
-    const selected = { ...selectedExternalList }; // track
-    for (const networkName in selected) {
-        const enable = selected[networkName];
-        if (enable) {
-            if (!externalList[networkName]) {
-                externalList[networkName] = {};
-            }
-            externalList[networkName].external = true;
-        } else {
-            const next = { ...externalList };
-            delete next[networkName];
-            externalList = next;
-        }
+    const networks = composeNetworks;
+    if (ctx.editorFocus) {
+        return;
     }
-    applyToComposeDocument();
+    ctx.composeDocument.networks.replace(networks);
 });
 
 function loadNetworkList() {
@@ -64,12 +67,6 @@ function loadNetworkList() {
 
     networkList = rows;
     externalList = ext;
-
-    const sel: Record<string, boolean> = {};
-    for (const name in ext) {
-        sel[name] = true;
-    }
-    selectedExternalList = sel;
 }
 
 function loadExternalNetworkList() {
@@ -99,19 +96,16 @@ function remove(index: number) {
     networkList = networkList.filter((_, i) => i !== index);
 }
 
-function applyToComposeDocument() {
-    if (ctx.editorFocus) {
-        return;
+function toggleExternal(name: string, enabled: boolean) {
+    if (enabled) {
+        externalList = { ...externalList,
+            [name]: { ...(externalList[name] ?? {}),
+                external: true } };
+    } else {
+        const next = { ...externalList };
+        delete next[name];
+        externalList = next;
     }
-
-    const networks: Record<string, unknown> = {};
-    for (const row of networkList) {
-        networks[row.name] = row.data;
-    }
-    for (const name in externalList) {
-        networks[name] = externalList[name];
-    }
-    ctx.composeDocument.networks.replace(networks);
 }
 
 onMount(() => {
@@ -157,13 +151,8 @@ onMount(() => {
                         id="ext-net-{i}"
                         class="form-check-input"
                         type="checkbox"
-                        checked={selectedExternalList[networkName] ?? false}
-                        onchange={(e) => {
-                            selectedExternalList = {
-                                ...selectedExternalList,
-                                [networkName]: (e.target as HTMLInputElement).checked
-                            };
-                        }}
+                        checked={networkName in externalList}
+                        onchange={(e) => toggleExternal(networkName, (e.target as HTMLInputElement).checked)}
                     />
                     <label class="form-check-label" for="ext-net-{i}">{networkName}</label>
                 </div>
