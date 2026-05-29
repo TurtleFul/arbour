@@ -584,13 +584,12 @@ function updateChangelogLink(link: string) {
 
 .service-meta {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     font-size: 0.8rem;
     color: var(--arbour-text-muted);
     margin-bottom: 8px;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 4px;
 }
 .image-label .tag { color: var(--arbour-text-muted); }
 

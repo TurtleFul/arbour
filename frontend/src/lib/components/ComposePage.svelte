@@ -539,26 +539,26 @@ onDestroy(() => {
                     </button>
                 {/if}
             {/if}
+            {#if !isEditMode}
+                <div class="more-menu-wrap" use:clickOutside={() => (showMoreMenu = false)}>
+                    <button class="btn btn-dark more-btn" disabled={processing} onclick={() => (showMoreMenu = !showMoreMenu)}>
+                        <Icon name="chevron-down" />
+                    </button>
+                    {#if showMoreMenu}
+                        <div class="dropdown-menu show more-menu">
+                            <button class="dropdown-item" onclick={downStack}>
+                                <Icon name="stop" /> {$t("downStack")}
+                            </button>
+                            <button class="dropdown-item text-danger" onclick={() => {
+                                showMoreMenu = false; showDeleteDialog = true;
+                            }}>
+                                <Icon name="trash" /> {$t("deleteStack")}
+                            </button>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
         </div>
-        {#if !isEditMode}
-            <div class="more-menu-wrap" use:clickOutside={() => (showMoreMenu = false)}>
-                <button class="btn btn-dark more-btn" disabled={processing} onclick={() => (showMoreMenu = !showMoreMenu)}>
-                    <Icon name="ellipsis-v" />
-                </button>
-                {#if showMoreMenu}
-                    <div class="dropdown-menu show more-menu">
-                        <button class="dropdown-item" onclick={downStack}>
-                            <Icon name="stop" /> {$t("downStack")}
-                        </button>
-                        <button class="dropdown-item text-danger" onclick={() => {
-                            showMoreMenu = false; showDeleteDialog = true;
-                        }}>
-                            <Icon name="trash" /> {$t("deleteStack")}
-                        </button>
-                    </div>
-                {/if}
-            </div>
-        {/if}
     </div>
 {/if}
 
@@ -879,6 +879,9 @@ h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
 .action-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .more-btn { border-radius: var(--arbour-radius); }
+/* Join the dropdown toggle onto the end of the action button group (flat left edge) */
+.btn-group .more-menu-wrap { display: flex; margin-left: -1px; }
+.btn-group .more-btn { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
 .more-menu-wrap { position: relative; display: inline-block; }
 .more-menu { display: block; right: 0; left: auto; min-width: 160px; padding: 0.25rem 0; }

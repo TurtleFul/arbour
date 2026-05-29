@@ -90,12 +90,12 @@ export function hideWithTimeout() {
     justify-content: flex-start;
     gap: 0.5rem;
     width: 100%;
-    padding: 0.6rem 1rem;
+    padding: 0.75rem 1rem;
     background: var(--arbour-bg-header);
     border: none;
     color: var(--arbour-text);
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-family: inherit;
     text-align: left;
     transition: background 0.1s;

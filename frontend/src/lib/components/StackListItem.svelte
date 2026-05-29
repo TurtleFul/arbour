@@ -35,7 +35,22 @@ const endpointDisplay = $derived(socketStore.getAgentName(stack.endpoint ?? ""))
 </a>
 
 <style>
-.item { color: var(--arbour-text); }
+.item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 5px 8px;
+    margin-bottom: 2px;
+    border-radius: var(--arbour-radius);
+    color: var(--arbour-text);
+    text-decoration: none;
+    transition: background-color ease-in-out 0.15s;
+}
+
+.item:hover { background-color: var(--arbour-bg-deep); }
+.item.active { background-color: var(--arbour-bg-deep); }
+.item.disabled { opacity: 0.3; }
 
 .title { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
 

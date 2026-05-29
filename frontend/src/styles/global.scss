@@ -573,6 +573,16 @@ button, .btn {
 }
 
 .btn-group-sm > .btn { padding: 0.25rem 0.6rem; font-size: 0.82rem; }
+// Pill end-caps on small segmented groups (log view toggle, container actions),
+// matching main where btn-sm carried the pill radius.
+.btn-group-sm > .btn:first-child {
+    border-top-left-radius: var(--arbour-radius-pill);
+    border-bottom-left-radius: var(--arbour-radius-pill);
+}
+.btn-group-sm > .btn:last-child {
+    border-top-right-radius: var(--arbour-radius-pill);
+    border-bottom-right-radius: var(--arbour-radius-pill);
+}
 
 /* ─── Shadow box ──────────────────────────────────────────────────────────── */
 
@@ -766,7 +776,7 @@ dialog::backdrop {
 
 /* ─── Nav pills ───────────────────────────────────────────────────────────── */
 
-.nav { display: flex; flex-wrap: wrap; padding-left: 0; margin-bottom: 0; list-style: none; }
+.nav { display: flex; flex-wrap: wrap; padding-left: 0; margin: 0; list-style: none; }
 
 .nav-item { display: flex; }
 
