@@ -107,7 +107,6 @@ export function hideWithTimeout() {
 }
 
 .terminal-body {
-    padding: 0.5rem;
     background: #000;
 }
 </style>

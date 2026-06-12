@@ -105,12 +105,12 @@ onMount(() => {
 
                     <li class="nav-item">
                         <div class="dropdown dropdown-profile-pic" use:clickOutside={() => (dropdownOpen = false)}>
-                            <button type="button" class="nav-link profile-toggle" onclick={() => (dropdownOpen = !dropdownOpen)}>
+                            <button type="button" class="nav-link profile-toggle" class:active={dropdownOpen} onclick={() => (dropdownOpen = !dropdownOpen)}>
                                 <span class="profile-pic d-none d-sm-flex">{socketStore.usernameFirstChar}</span>
                                 <Icon name="ellipsis-v" />
                             </button>
 
-                            <ul class="dropdown-menu" class:show={dropdownOpen}>
+                            <ul class="dropdown-menu dropdown-menu-end" class:show={dropdownOpen}>
                                 <li>
                                     {#if socketStore.username}
                                         <span class="dropdown-item-text">
@@ -196,11 +196,6 @@ main { min-height: calc(100vh - 160px); }
     color: inherit;
     font-family: inherit;
     font-size: inherit;
-}
-
-.dropdown-profile-pic :global(.dropdown-menu) {
-    right: 0;
-    left: auto;
 }
 
 .profile-pic {

@@ -199,8 +199,7 @@ export { clearTerminal, bind, rebind, updateTerminalSize };
 <style>
 .terminal-wrap {
     background-color: #000;
-    border-radius: var(--arbour-radius);
-    overflow: hidden;
+    padding: 10px;
     height: 100%;
 }
 

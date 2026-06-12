@@ -79,12 +79,14 @@ const baseTheme = EditorView.theme({
 
 const selectionTheme = EditorView.theme({
     "&.cm-focused .cm-selectionBackground, .cm-selectionBackground": {
-        backgroundColor: "var(--arbour-selection-bg)",
+        backgroundColor: "var(--arbour-selection-bg) !important",
     },
-    ".cm-content ::selection": {
-        backgroundColor: "var(--arbour-selection-bg)",
-        color: "var(--arbour-selection-color)",
+    "&.cm-focused .cm-selectionLayer .cm-selectionBackground": {
+        backgroundColor: "var(--arbour-selection-bg) !important",
     },
+    "& .cm-content ::selection": { backgroundColor: "transparent !important" },
+    "& .cm-line ::selection": { backgroundColor: "transparent !important" },
+    "& ::selection": { backgroundColor: "transparent !important" },
 });
 
 const editorTheme = EditorView.theme({

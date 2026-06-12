@@ -541,11 +541,11 @@ onDestroy(() => {
             {/if}
             {#if !isEditMode}
                 <div class="more-menu-wrap" use:clickOutside={() => (showMoreMenu = false)}>
-                    <button class="btn btn-dark more-btn" disabled={processing} onclick={() => (showMoreMenu = !showMoreMenu)}>
-                        <Icon name="chevron-down" />
+                    <button class="btn btn-normal more-btn" class:active={showMoreMenu} disabled={processing} onclick={() => (showMoreMenu = !showMoreMenu)}>
+                        <Icon name="ellipsis-v" />
                     </button>
                     {#if showMoreMenu}
-                        <div class="dropdown-menu show more-menu">
+                        <div class="dropdown-menu show dropdown-menu-end more-menu">
                             <button class="dropdown-item" onclick={downStack}>
                                 <Icon name="stop" /> {$t("downStack")}
                             </button>
@@ -884,7 +884,7 @@ h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .btn-group .more-btn { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 
 .more-menu-wrap { position: relative; display: inline-block; }
-.more-menu { display: block; right: 0; left: auto; min-width: 160px; padding: 0.25rem 0; }
+.more-menu { min-width: 160px; }
 
 .urls { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .url-badge { display: inline-block; max-width: 100%; text-decoration: none; }
@@ -892,7 +892,10 @@ h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
 .log-section { display: flex; flex-direction: column; }
 .log-header { display: flex; align-items: center; justify-content: space-between; }
-.log-terminal { overflow: hidden; }
+.log-terminal {
+    overflow: hidden;
+    border-radius: var(--arbour-radius);
+}
 
 .monospace { font-family: 'JetBrains Mono', monospace; }
 

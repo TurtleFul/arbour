@@ -113,7 +113,10 @@ function enableAuth() {
         {/if}
 
         <h5 class="settings-subheading mb-3">{$t("Advanced")}</h5>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-primary" onclick={() => (twoFAOpen = true)}>
+                {$t("Setup 2FA")}
+            </button>
             {#if settingsStore.settings.disableAuth}
                 <button class="btn btn-outline-primary" onclick={enableAuth}>
                     {$t("Enable Auth")}

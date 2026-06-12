@@ -120,7 +120,7 @@ export default [
             "data/",
             "stacks/",
             ".dagger/",
-            ".svelte-kit/",
+            "**/.svelte-kit/",
         ],
     },
 ];

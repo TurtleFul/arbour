@@ -334,7 +334,7 @@ function updateChangelogLink(link: string) {
             <span class="badge {bgStyle()}">{status()}</span>
             {#if started()}
                 {#each composeService.get("ports", [], true) as port (port)}
-                    <a href={parsePort(port).url} target="_blank">
+                    <a href={parsePort(port).url} target="_blank" class="port-link">
                         <span class="badge bg-secondary">{parsePort(port).display}</span>
                     </a>
                 {/each}
@@ -586,14 +586,15 @@ function updateChangelogLink(link: string) {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    font-size: 0.8rem;
-    color: var(--arbour-text-muted);
+    font-size: 0.85rem;
+    color: var(--arbour-text-subtle);
     margin-bottom: 8px;
     gap: 4px;
 }
-.image-label .tag { color: var(--arbour-text-muted); }
+.image-label .tag { color: var(--arbour-text-subtle); }
 
-.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.port-link { display: inline-flex; align-items: center; text-decoration: none; }
 
 .badge-running { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
 .badge-inactive { background: var(--arbour-bg-header-active); color: var(--arbour-text-muted); }

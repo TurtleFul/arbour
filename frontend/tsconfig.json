@@ -10,13 +10,6 @@
     "include": ["src/**/*", "../common/**/*", "../.svelte-kit/ambient.d.ts", "../.svelte-kit/non-ambient.d.ts"],
     "exclude": [
         "../node_modules",
-        "src/router.ts",
-        "src/main.ts",
-        "src/mixins/**/*",
-        "src/layouts/**/*.vue",
-        "src/components/**/*.vue",
-        "src/pages/**/*.vue",
-        "src/App.vue",
         "../common/__tests__/**/*"
     ]
 }

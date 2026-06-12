@@ -19,11 +19,16 @@ const className = $derived(
 
 <style>
 .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-width: 62px;
-    padding: 0.35em 0.65em;
+    height: 22px;
+    padding: 0 0.65em;
     font-size: 0.75em;
     font-weight: 700;
     line-height: 1;
+    text-align: center;
 }
 
 .fixed-width {

@@ -157,5 +157,10 @@ h1 { font-size: 1.4rem; margin: 0; }
 }
 .compress-btn:hover { color: var(--arbour-text); }
 
-.terminal-height { flex: 1; min-height: 0; }
+.terminal-height {
+    flex: 1;
+    min-height: 0;
+    border-radius: var(--arbour-radius);
+    overflow: hidden;
+}
 </style>

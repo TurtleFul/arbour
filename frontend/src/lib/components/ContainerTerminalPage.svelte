@@ -46,5 +46,9 @@ h1 { font-size: 1.4rem; margin: 0 0 0.75rem; }
 .btn { padding: 0.3rem 0.7rem; border-radius: var(--arbour-radius-sm); cursor: pointer; border: 1px solid var(--arbour-border); font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; }
 .btn-ghost { background: var(--arbour-bg-deep); color: var(--arbour-text-muted); }
 .btn-ghost:hover { background: var(--arbour-bg-header-active); color: var(--arbour-text); }
-.terminal-wrap { height: 410px; }
+.terminal-wrap {
+    height: 410px;
+    border-radius: var(--arbour-radius);
+    overflow: hidden;
+}
 </style>

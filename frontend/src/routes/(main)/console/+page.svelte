@@ -36,7 +36,11 @@ onMount(() => {
 
 <style>
 h1 { font-size: 2rem; margin: 0 0 1rem; }
-.terminal-wrap { height: 410px; }
+.terminal-wrap {
+    height: 410px;
+    border-radius: var(--arbour-radius);
+    overflow: hidden;
+}
 .alert {
     background: color-mix(in srgb, var(--arbour-warning) 12%, transparent);
     border: 1px solid var(--arbour-warning);

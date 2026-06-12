@@ -132,7 +132,7 @@ function getAgentLink(agent: AgentData): string {
         <!-- Left column -->
         <div class="col-left">
             <!-- Status counts -->
-            <div class="status-card">
+            <div class="status-card shadow-box">
                 <div class="status-row">
                     {#each StackStatusInfo.ALL as info (info.label)}
                         {#if getStatusCount(info.statusIds) > 0}
@@ -159,7 +159,7 @@ function getAgentLink(agent: AgentData): string {
             </div>
 
             {#each Object.entries(socketStore.agentList) as [ endpoint, agent ] (endpoint)}
-                <div class="agent-card">
+                <div class="agent-card shadow-box">
                     <div class="agent-header">
                         <div class="agent-title">
                             <h4>{getAgentName(agent)}</h4>
@@ -333,10 +333,6 @@ h5 { font-size: 1rem; margin: 0; }
 }
 
 .status-card {
-    background: var(--arbour-bg);
-    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
-    border-radius: var(--arbour-radius);
-    padding: 20px;
     margin-bottom: 3rem;
     text-align: center;
 }
@@ -357,13 +353,9 @@ h5 { font-size: 1rem; margin: 0; }
 }
 .status-num:hover { opacity: 0.8; }
 
-.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; padding: 0 1rem; }
 
 .agent-card {
-    background: var(--arbour-bg);
-    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
-    border-radius: var(--arbour-radius);
-    padding: 20px;
     margin-bottom: 1rem;
 }
 .agent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
@@ -379,8 +371,10 @@ h5 { font-size: 1rem; margin: 0; }
 .icon-btn-danger:hover { color: var(--arbour-danger); }
 
 .badge {
-    display: inline-block; padding: 0.2em 0.5em;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.2em 0.5em; height: 22px;
     border-radius: var(--arbour-radius-pill); font-size: 0.75rem; font-weight: 600;
+    text-align: center;
 }
 .badge-primary { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
 .badge-danger { background: var(--arbour-danger); color: var(--arbour-text-on-primary); }
