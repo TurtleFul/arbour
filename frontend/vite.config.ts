@@ -11,7 +11,7 @@ export default defineConfig({
             // SvelteKit hardcodes path.resolve('src') in its allow list, but this
             // project keeps source under frontend/src/ — so lang/ and other dirs
             // outside lib/ and routes/ are blocked without this explicit entry.
-            allow: [ "frontend/src" ],
+            allow: [ "frontend/src", "../CHANGELOG.md" ],
         },
     },
     define: {
@@ -19,6 +19,18 @@ export default defineConfig({
     },
     plugins: [
         sveltekit(),
+        {
+            name: "watch-external-files",
+            configureServer(server) {
+                server.watcher.add("../CHANGELOG.md");
+            },
+            handleHotUpdate({ file, server }) {
+                if (file.endsWith("CHANGELOG.md")) {
+                    server.ws.send({ type: "full-reload" });
+                    return [];
+                }
+            }
+        },
         viteCompression({
             algorithm: "gzip",
             filter: viteCompressionFilter,
