@@ -1,42 +1,36 @@
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import Components from "unplugin-vue-components/vite";
-import { BootstrapVueNextResolver } from "unplugin-vue-components/resolvers";
+import { sveltekit } from "@sveltejs/kit/vite";
 import viteCompression from "vite-plugin-compression";
-import "vue";
 
 const viteCompressionFilter = /\.(js|mjs|json|css|html|svg)$/i;
 
-// https://vitejs.dev/config/
 export default defineConfig({
     server: {
         port: 5000,
-    },
-    css: {
-        preprocessorOptions: {
-            scss: {
-                silenceDeprecations: [
-                    "import",
-                    "global-builtin",
-                    "color-functions",
-                    "if-function",
-                ],
-            },
+        fs: {
+            // SvelteKit hardcodes path.resolve('src') in its allow list, but this
+            // project keeps source under frontend/src/ — so lang/ and other dirs
+            // outside lib/ and routes/ are blocked without this explicit entry.
+            allow: [ "frontend/src", "../CHANGELOG.md" ],
         },
     },
     define: {
-        "FRONTEND_VERSION": JSON.stringify(process.env.npm_package_version),
-    },
-    root: "./frontend",
-    build: {
-        outDir: "../frontend-dist",
+        FRONTEND_VERSION: JSON.stringify(process.env.npm_package_version),
     },
     plugins: [
-        vue(),
-        Components({
-            resolvers: [ BootstrapVueNextResolver() ],
-            globs: [ "**/*.vue", "!**/CodeEditor.vue" ],
-        }),
+        sveltekit(),
+        {
+            name: "watch-external-files",
+            configureServer(server) {
+                server.watcher.add("../CHANGELOG.md");
+            },
+            handleHotUpdate({ file, server }) {
+                if (file.endsWith("CHANGELOG.md")) {
+                    server.ws.send({ type: "full-reload" });
+                    return [];
+                }
+            }
+        },
         viteCompression({
             algorithm: "gzip",
             filter: viteCompressionFilter,

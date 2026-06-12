@@ -1,39 +1,42 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import pluginVue from "eslint-plugin-vue";
-import vueParser from "vue-eslint-parser";
+import sveltePlugin from "eslint-plugin-svelte";
+import svelteParser from "svelte-eslint-parser";
 import globals from "globals";
 
 export default [
     eslint.configs.recommended,
     ...tseslint.configs.recommended,
-    ...pluginVue.configs["flat/recommended"],
+    ...sveltePlugin.configs["flat/recommended"],
     {
         languageOptions: {
             globals: {
                 ...globals.browser,
                 ...globals.node,
+                FRONTEND_VERSION: "readonly",
             },
         },
     },
     {
-        files: ["**/*.vue"],
+        files: ["**/*.svelte"],
         languageOptions: {
-            parser: vueParser,
+            parser: svelteParser,
             parserOptions: {
                 parser: tseslint.parser,
             },
         },
     },
     {
+        files: ["**/*.svelte.ts", "**/*.svelte.js"],
+        languageOptions: {
+            parser: tseslint.parser,
+        },
+    },
+    {
         rules: {
             "yoda": "error",
             "linebreak-style": ["error", "unix"],
-            "camelcase": ["warn", {
-                "properties": "never",
-                "ignoreImports": true,
-                "allow": ["^CONSOLE_STYLE_"]
-            }],
+            "camelcase": "off",
             "no-unused-vars": ["warn", {
                 "args": "none",
                 "caughtErrors": "none"
@@ -48,13 +51,6 @@ export default [
             ],
             quotes: ["error", "double"],
             semi: "error",
-            "vue/html-indent": ["error", 4],
-            "vue/max-attributes-per-line": "off",
-            "vue/singleline-html-element-content-newline": "off",
-            "vue/html-self-closing": "off",
-            "vue/require-component-is": "off",
-            "vue/attribute-hyphenation": "off",
-            "vue/multi-word-component-names": "off",
             "no-multi-spaces": ["error", {
                 ignoreEOLComments: true,
             }],
@@ -101,19 +97,18 @@ export default [
             }],
             "no-control-regex": "off",
             "one-var": ["error", "never"],
-            "max-statements-per-line": ["error", { "max": 1 }],
+            "max-statements-per-line": ["error", { "max": 2 }],
             "@typescript-eslint/ban-ts-comment": "off",
             "@typescript-eslint/no-unused-vars": ["warn", {
                 "args": "none",
                 "caughtErrors": "none"
             }],
-            "vue/no-v-html": "off",
             "prefer-const": "off",
+            "svelte/no-navigation-without-resolve": "off",
         },
     },
     {
-        // Base no-unused-vars doesn't understand TS enum members; TS rule handles it correctly
-        files: ["**/*.ts", "**/*.vue"],
+        files: ["**/*.ts", "**/*.svelte"],
         rules: {
             "no-unused-vars": "off",
         },
@@ -125,6 +120,7 @@ export default [
             "data/",
             "stacks/",
             ".dagger/",
+            "**/.svelte-kit/",
         ],
     },
 ];

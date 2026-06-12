@@ -367,3 +367,76 @@ describe("ComposeDocument — networks", () => {
         expect(net.external).toBe(false);
     });
 });
+
+// ---------------------------------------------------------------------------
+// networks.replace() ↔ toYAML — regression for GUI network editing.
+// NetworkInput.commit() builds a networks object from the form and calls
+// networks.replace(); these guard that the result serializes to compose.yaml
+// (the data layer of the bug where GUI-added networks never reached the YAML).
+// ---------------------------------------------------------------------------
+
+describe("ComposeDocument — networks.replace() serialization", () => {
+    test("replace adds a networks block when none existed", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        expect(doc.networks.names).toHaveLength(0);
+
+        doc.networks.replace({ "frontend-net": {} });
+
+        expect(doc.networks.names).toContain("frontend-net");
+        const yaml = doc.toYAML();
+        expect(yaml).toContain("networks:");
+        expect(yaml).toContain("frontend-net");
+    });
+
+    test("added network survives a YAML round-trip", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.networks.replace({ "frontend-net": {} });
+        const reparsed = new ComposeDocument(doc.toYAML());
+        expect(reparsed.networks.names).toContain("frontend-net");
+    });
+
+    test("replace renames/removes networks, dropping the previous set", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.networks.replace({ "old-net": {} });
+        doc.networks.replace({ "new-net": {} });
+        const yaml = doc.toYAML();
+        expect(yaml).toContain("new-net");
+        expect(yaml).not.toContain("old-net");
+    });
+
+    test("external network from replace serializes external: true and round-trips", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.networks.replace({ "shared-net": { external: true } });
+        const yaml = doc.toYAML();
+        expect(yaml).toContain("shared-net");
+        expect(yaml).toContain("external: true");
+        const reparsed = new ComposeDocument(yaml);
+        expect(reparsed.networks.getNetwork("shared-net").external).toBe(true);
+    });
+
+    test("getNetworks() splits internal and external (loadNetworkList input)", () => {
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        doc.networks.replace({ internal: {},
+            ext: { external: true } });
+        const nets = doc.networks.getNetworks();
+        expect(nets.internal.external).toBe(false);
+        expect(nets.ext.external).toBe(true);
+    });
+
+    test("commit-shaped object (internal rows + external map) serializes fully", () => {
+        // mirrors NetworkInput.commit(): { ...internalRows, ...externalList }
+        const doc = new ComposeDocument(SIMPLE_COMPOSE);
+        const internalRows = { app: {},
+            db: {} };
+        const externalList = { proxy: { external: true } };
+        doc.networks.replace({ ...internalRows,
+            ...externalList });
+
+        const reparsed = new ComposeDocument(doc.toYAML());
+        expect(reparsed.networks.names).toContain("app");
+        expect(reparsed.networks.names).toContain("db");
+        expect(reparsed.networks.names).toContain("proxy");
+        expect(reparsed.networks.getNetwork("proxy").external).toBe(true);
+        expect(reparsed.networks.getNetwork("app").external).toBe(false);
+    });
+});

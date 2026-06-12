@@ -32,7 +32,7 @@ Or individually:
 ```bash
 bun run lint        # eslint (check only)
 bun run fmt         # eslint --fix
-bun run typecheck   # vue-tsc --noEmit
+bun run typecheck   # svelte-check
 bun test            # unit tests
 ```
 

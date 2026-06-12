@@ -155,7 +155,8 @@ describe("StackAutoUpdateManager cron scheduling", () => {
 function makeStack(name: string, services: string[], autoUpdateResult: boolean): Partial<Stack> {
     return {
         name,
-        getServicesWithAvailableImageUpdates: () => services.map(s => ({ name: s, image: `img/${s}` }) as never),
+        getServicesWithAvailableImageUpdates: () => services.map(s => ({ name: s,
+            image: `img/${s}` }) as never),
         autoUpdateService: async () => autoUpdateResult,
         updateImageInfos: async () => {},
     };
@@ -166,7 +167,7 @@ const stubServerWithSend = { sendStackList: () => {} } as never;
 describe("StackAutoUpdateManager service event logging", () => {
     test("applyUpdates logs success=true for each updated service", async () => {
         const manager = new TestableStackAutoUpdateManager(stubServerWithSend);
-        const stack = makeStack("jellyfin", ["jellyfin", "jellyseerr"], true);
+        const stack = makeStack("jellyfin", [ "jellyfin", "jellyseerr" ], true);
         await (manager as never as { applyUpdates(s: Partial<Stack>, t: EventTrigger): Promise<void> })
             .applyUpdates(stack, "scheduled");
         const ev1 = getServiceEvents("jellyfin", "jellyfin");
@@ -178,7 +179,7 @@ describe("StackAutoUpdateManager service event logging", () => {
 
     test("applyUpdates logs success=false when autoUpdateService fails", async () => {
         const manager = new TestableStackAutoUpdateManager(stubServerWithSend);
-        const stack = makeStack("jellyfin", ["jellyfin"], false);
+        const stack = makeStack("jellyfin", [ "jellyfin" ], false);
         await (manager as never as { applyUpdates(s: Partial<Stack>, t: EventTrigger): Promise<void> })
             .applyUpdates(stack, "scheduled");
         const events = getServiceEvents("jellyfin", "jellyfin");
@@ -220,7 +221,7 @@ describe("StackAutoUpdateManager service event logging", () => {
 
     test("immediate trigger is recorded correctly", async () => {
         const manager = new TestableStackAutoUpdateManager(stubServerWithSend);
-        const stack = makeStack("mystack", ["app"], true);
+        const stack = makeStack("mystack", [ "app" ], true);
         await (manager as never as { applyUpdates(s: Partial<Stack>, t: EventTrigger): Promise<void> })
             .applyUpdates(stack, "immediate");
         const events = getServiceEvents("mystack", "app");
@@ -237,15 +238,19 @@ class TrackingScheduleManager extends StackAutoUpdateManager {
     protected override scheduleCron(stackName: string, _schedule: string): void {
         this.scheduledStacks.push(stackName);
     }
+
     protected override async runScheduledUpdate(): Promise<void> {}
 }
 
 describe("StackAutoUpdateManager.init", () => {
     test("schedules cron for each stack with mode=scheduled", async () => {
         const manager = new TrackingScheduleManager(stubServer);
-        await manager.setSettings("alpha", { mode: "scheduled", schedule: "0 3 * * *" });
-        await manager.setSettings("beta", { mode: "scheduled", schedule: "0 4 * * *" });
-        await manager.setSettings("gamma", { mode: "disabled", schedule: null });
+        await manager.setSettings("alpha", { mode: "scheduled",
+            schedule: "0 3 * * *" });
+        await manager.setSettings("beta", { mode: "scheduled",
+            schedule: "0 4 * * *" });
+        await manager.setSettings("gamma", { mode: "disabled",
+            schedule: null });
 
         manager.scheduledStacks = [];
         await manager.init();
@@ -257,8 +262,10 @@ describe("StackAutoUpdateManager.init", () => {
 
     test("does not schedule cron for disabled or immediate stacks", async () => {
         const manager = new TrackingScheduleManager(stubServer);
-        await manager.setSettings("immediate-stack", { mode: "immediate", schedule: null });
-        await manager.setSettings("disabled-stack", { mode: "disabled", schedule: null });
+        await manager.setSettings("immediate-stack", { mode: "immediate",
+            schedule: null });
+        await manager.setSettings("disabled-stack", { mode: "disabled",
+            schedule: null });
 
         manager.scheduledStacks = [];
         await manager.init();
@@ -286,7 +293,8 @@ describe("StackAutoUpdateManager.onImageUpdateDetected", () => {
             }
         }
         const manager = new TrackingApplyManager(stubServerWithSend);
-        await manager.setSettings("mystack", { mode: "immediate", schedule: null });
+        await manager.setSettings("mystack", { mode: "immediate",
+            schedule: null });
         const fakeStack = makeStack("mystack", [], true) as Stack;
         await manager.onImageUpdateDetected(fakeStack);
         expect(applyCalled).toBe(true);
@@ -301,7 +309,8 @@ describe("StackAutoUpdateManager.onImageUpdateDetected", () => {
             }
         }
         const manager = new TrackingApplyManager(stubServerWithSend);
-        await manager.setSettings("mystack", { mode: "scheduled", schedule: "0 3 * * *" });
+        await manager.setSettings("mystack", { mode: "scheduled",
+            schedule: "0 3 * * *" });
         const fakeStack = makeStack("mystack", [], true) as Stack;
         await manager.onImageUpdateDetected(fakeStack);
         expect(applyCalled).toBe(false);

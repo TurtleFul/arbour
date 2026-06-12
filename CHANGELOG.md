@@ -2,6 +2,58 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] — 2026-06-12
+
+## Major Frontend Rewrite
+
+### Changed
+I like svelte. I don't mind vue. But I much prefer to work with Svelte. 
+So I did use an LLM to help me rewrite the frontend to use Svelte.
+This is to make it easier to add new features and maintain the codebase.
+I have tested this pretty thuroughly myself, since I do use Arbour a lot, but please report any issues you find. 
+
+### Fixed
+- Stack List filter reactivity bug where toggling options didn't immediately update the UI.
+- "Double-highlighting" glitch in CodeMirror 6 YAML editor where browser's native selection stacked with the editor's custom selection.
+- Terminal clipping issue where top-left characters were cut off by rounded corners.
+- Missing "Setup 2FA" button in Security settings page restored, and missing English translation keys for 2FA dialogs added.
+
+### Removed
+- Remaining Vue-specific exclusions and build tools from `tsconfig.json`, `eslint.config.js`, and developer documentation.
+
+## [0.4.7] — 2026-06-05
+
+### Added
+- Enhanced testing coverage for pipeline execution and deployment workflows.
+
+### Changed
+- Dependency maintenance: Updated core packages to latest compatible versions.
+- Pipeline optimizations for faster CI feedback loops.
+
+## [0.4.6] — 2026-05-28
+
+### Added
+- Unit tests for backend image processing and stack management logic.
+
+### Changed
+- Improved log view scrolling performance and memory usage.
+
+### Fixed
+- Dependency vulnerability fixes and general maintenance updates.
+
+## [0.4.5] — 2026-05-15
+
+### Changed
+- Refined theme color palettes (especially for Retro and Unicorn) to improve accessibility and contrast.
+
+## [0.4.4] — 2026-05-10
+
+### Added
+- `CODEOWNERS` file to maintain repository structure and review workflows.
+
+### Fixed
+- Responsive wrapping issues for long service titles and action buttons on narrow viewports.
+
 ## [0.4.3] — 2026-05-02
 
 ### Added
@@ -11,6 +63,20 @@ All notable changes to this project are documented here. The format is based on 
 - Frontend TypeScript errors eliminated — `frontend/tsconfig.json` and `vue-augmentation.d.ts` added so Volar and `vue-tsc` correctly type-check all Vue files.
 - `$t`, `$root`, and common socket callback types now properly declared via Vue `ComponentCustomProperties` augmentation.
 - Several minor property-name bugs and unused import warnings cleaned up.
+
+## [0.4.2] — 2026-04-30
+
+### Fixed
+- Missing test dependency for backend unit tests.
+
+## [0.4.1] — 2026-04-29
+
+### Added
+- Initial backend unit test suite covering core service logic.
+- Documentation updates to the `README.md`.
+
+### Removed
+- Unused legacy dependencies and leftover Vue assets.
 
 ## [0.4.0] — 2026-04-28
 
@@ -104,7 +170,14 @@ First public release of the Arbour fork. Renamed from Dockge and refocused on lo
 - Broken release scripts (`release-final`, `release-beta`, `mark-as-nightly`) that referenced missing files.
 - Obsolete `.vscode/tasks.json` entries (npm-based, pre-Bun).
 
+[0.5.0]: https://github.com/turtleful/arbour/compare/v0.4.7...v0.5.0
+[0.4.7]: https://github.com/turtleful/arbour/compare/v0.4.6...v0.4.7
+[0.4.6]: https://github.com/turtleful/arbour/compare/v0.4.5...v0.4.6
+[0.4.5]: https://github.com/turtleful/arbour/compare/v0.4.4...v0.4.5
+[0.4.4]: https://github.com/turtleful/arbour/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/turtleful/arbour/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/turtleful/arbour/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/turtleful/arbour/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/turtleful/arbour/compare/v0.3.5...v0.4.0
 [0.3.5]: https://github.com/turtleful/arbour/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/turtleful/arbour/compare/v0.3.3...v0.3.4
