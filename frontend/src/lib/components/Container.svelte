@@ -597,7 +597,7 @@ function updateChangelogLink(link: string) {
 .port-link { display: inline-flex; align-items: center; text-decoration: none; }
 
 .badge-running { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
-.badge-inactive { background: var(--arbour-bg-header-active); color: var(--arbour-text-muted); }
+.badge-inactive { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header-muted, var(--arbour-text-muted)); }
 
 .stats-row {
     display: flex;
@@ -650,6 +650,6 @@ function updateChangelogLink(link: string) {
 .ev-success { background: var(--arbour-success); color: var(--arbour-text-on-primary); }
 .ev-warning { background: var(--arbour-warning); color: var(--arbour-text-on-warning); }
 .ev-info { background: var(--arbour-info); color: var(--arbour-text-on-primary); }
-.ev-secondary { background: var(--arbour-bg-header-active); color: var(--arbour-text-muted); }
+.ev-secondary { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header-muted, var(--arbour-text-muted)); }
 .ev-dark { background: var(--arbour-bg-deep); color: var(--arbour-text-muted); }
 </style>

@@ -303,7 +303,7 @@ onDestroy(() => {
 }
 .refresh-btn:hover:not(:disabled) {
     background: var(--arbour-bg-header-active);
-    color: var(--arbour-text);
+    color: var(--arbour-text-on-header);
 }
 .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -329,7 +329,7 @@ onDestroy(() => {
     margin-bottom: 0;
     font-size: 0.85rem;
 }
-.filter-option:hover { background: var(--arbour-bg-header-active); }
+.filter-option:hover { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header); }
 
 .stack-list {
     flex: 1;
@@ -352,7 +352,7 @@ onDestroy(() => {
     background: var(--arbour-bg-header);
     border: none;
     border-bottom: 1px solid var(--arbour-border);
-    color: var(--arbour-text-muted);
+    color: var(--arbour-text-on-header-muted, var(--arbour-text-muted));
     font-size: 0.85rem;
     font-weight: 500;
     padding: 0.4rem 0.75rem;
@@ -360,5 +360,5 @@ onDestroy(() => {
     text-align: left;
     user-select: none;
 }
-.agent-header:hover { background: var(--arbour-bg-header-active); }
+.agent-header:hover { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header); }
 </style>

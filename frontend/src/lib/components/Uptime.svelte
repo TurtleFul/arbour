@@ -23,12 +23,13 @@ const className = $derived(
     align-items: center;
     justify-content: center;
     min-width: 62px;
-    height: 22px;
+    height: 24px;
     padding: 0 0.65em;
     font-size: 0.75em;
     font-weight: 700;
     line-height: 1;
     text-align: center;
+    vertical-align: middle;
 }
 
 .fixed-width {

@@ -1,4 +1,4 @@
-export const COLOR_THEMES = [ "arbour", "dockge", "sundown", "unicorn", "retro" ] as const;
+export const COLOR_THEMES = [ "arbour", "dockge", "sundown", "almost-one-dark", "unicorn", "retro" ] as const;
 export type ColorTheme = typeof COLOR_THEMES[number];
 
 class ThemeStore {
@@ -27,10 +27,11 @@ class ThemeStore {
         const metaColors: Record<string, string> = {
             dockge: "#161B22",
             sundown: "#1f1135",
+            "almost-one-dark": "#21252b",
             unicorn: "#ec4899",
-            retro: "#8c8680",
+            retro: "#6f655a",
         };
-        const metaColor = metaColors[theme] ?? "#1c2e1e";
+        const metaColor = metaColors[theme] ?? "#272e33";
         document.querySelector("#theme-color")?.setAttribute("content", metaColor);
 
         if (theme === "arbour") {

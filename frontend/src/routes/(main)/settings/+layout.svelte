@@ -78,10 +78,12 @@ onMount(() => {
 
 .settings-menu :global(.menu-item:hover) {
     background: var(--arbour-bg-header-active);
+    color: var(--arbour-text-on-header);
 }
 
 .settings-menu :global(.active .menu-item-v) {
     background: var(--arbour-bg-header-active);
+    color: var(--arbour-text-on-header);
     border-left: 4px solid var(--arbour-primary);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
@@ -89,6 +91,7 @@ onMount(() => {
 
 .settings-menu :global(.active .menu-item-h) {
     background: var(--arbour-bg-header-active);
+    color: var(--arbour-text-on-header);
     border-bottom: 4px solid var(--arbour-primary);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -102,5 +105,6 @@ onMount(() => {
     padding: 12.5px 1em;
     font-size: 26px;
     background: var(--arbour-bg-header);
+    color: var(--arbour-text-on-header);
 }
 </style>

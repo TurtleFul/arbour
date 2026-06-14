@@ -56,7 +56,7 @@ const endpointDisplay = $derived(socketStore.getAgentName(stack.endpoint ?? ""))
 
 .uptime-wrap { display: inline-flex; align-items: center; }
 
-.name { font-weight: 500; }
+.name { font-weight: 500; line-height: 1; }
 
 .endpoint { font-size: 12px; color: var(--arbour-text-muted); }
 

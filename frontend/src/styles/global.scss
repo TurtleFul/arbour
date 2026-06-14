@@ -149,6 +149,14 @@ input::placeholder, textarea::placeholder,
     appearance: none;
 }
 
+/* When the option list drops directly beneath, square the bottom corners so the
+   control merges flush with it (same as the terminal header). Browsers without
+   :open support simply keep the full radius. */
+.form-select:open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 .form-control:disabled, .form-control[readonly] {
     background-color: var(--arbour-bg-disabled);
     opacity: 1;
@@ -420,7 +428,7 @@ button, .btn {
     background: transparent;
     border: 1px solid var(--arbour-border);
     &:hover, &:active, &:focus, &.active {
-        color: var(--arbour-text);
+        color: var(--arbour-text-on-header);
         background: var(--arbour-bg-header-active);
     }
 }
@@ -432,7 +440,7 @@ button, .btn {
     &:hover {
         background-color: var(--arbour-bg-header-active);
         border-color: var(--arbour-border);
-        color: var(--arbour-text);
+        color: var(--arbour-text-on-header);
     }
 }
 
@@ -520,7 +528,7 @@ button, .btn {
     background: var(--arbour-bg-deep);
     border: 1px solid var(--arbour-border);
     color: var(--arbour-text-muted);
-    &:hover:not(:disabled) { background: var(--arbour-bg-header-active); color: var(--arbour-text); }
+    &:hover:not(:disabled) { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header); }
     &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
@@ -551,6 +559,9 @@ button, .btn {
 }
 
 body.light .btn-close { filter: invert(1); }
+/* Modal headers use the dark header surface even in light themes — keep the
+   close glyph light so it stays visible. */
+body.light .modal-header .btn-close { filter: none; }
 
 /* Button group */
 .btn-group {
@@ -649,7 +660,7 @@ dialog::backdrop {
 
 .modal-title {
     margin: 0;
-    color: var(--arbour-text);
+    color: var(--arbour-text-on-header);
     font-size: 1.25rem;
     line-height: 1.5;
     font-weight: 600;
@@ -852,7 +863,7 @@ dialog::backdrop {
 .btn.active {
     background-color: var(--arbour-bg-header-active) !important;
     border-color: var(--arbour-border) !important;
-    color: var(--arbour-text) !important;
+    color: var(--arbour-text-on-header) !important;
 }
 
 .dropdown-divider {
@@ -878,6 +889,7 @@ dialog::backdrop {
     color: var(--arbour-text);
     background: none;
     border: 0;
+    border-radius: 0;
     text-align: left;
     text-decoration: none;
     font-family: inherit;
@@ -887,9 +899,13 @@ dialog::backdrop {
     position: relative;
     z-index: 1;
 
-    &:hover:not(.active) { background-color: var(--arbour-bg-header-active); color: var(--arbour-text); text-decoration: none; }
-    &.active { background-color: var(--arbour-dropdown-selected); color: var(--arbour-text); }
+    &:hover:not(.active) { background-color: var(--arbour-bg-header-active); color: var(--arbour-text-on-header); text-decoration: none; }
+    &.active { background-color: var(--arbour-dropdown-selected); color: var(--arbour-text-on-header); }
 }
+
+/* The profile dropdown lives inside <header>, so `header span` would otherwise
+   paint this with the on-header (light) colour — wrong on the light menu. */
+.dropdown-menu .dropdown-item-text { color: var(--arbour-text-muted); }
 
 /* ─── Badges ──────────────────────────────────────────────────────────────── */
 

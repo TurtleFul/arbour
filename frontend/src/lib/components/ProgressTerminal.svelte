@@ -55,6 +55,7 @@ export function hideWithTimeout() {
     <button
         type="button"
         class="terminal-header"
+        class:open={showTerminal}
         onclick={() => (showTerminal = !showTerminal)}
     >
         <Icon name={showTerminal ? "chevron-down" : "chevron-right"} />
@@ -93,13 +94,21 @@ export function hideWithTimeout() {
     padding: 0.75rem 1rem;
     background: var(--arbour-bg-header);
     border: none;
-    color: var(--arbour-text);
+    border-radius: var(--arbour-radius);
+    color: var(--arbour-text-on-header);
     cursor: pointer;
     font-size: 1rem;
     font-family: inherit;
     text-align: left;
     transition: background 0.1s;
     white-space: nowrap;
+}
+
+/* When the terminal drops open directly beneath, square the bottom corners
+   so the header merges flush with the body. */
+.terminal-header.open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .terminal-header:hover {

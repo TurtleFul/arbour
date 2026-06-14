@@ -378,7 +378,7 @@ h5 { font-size: 1rem; margin: 0; }
 }
 .badge-primary { background: var(--arbour-primary); color: var(--arbour-text-on-primary); }
 .badge-danger { background: var(--arbour-danger); color: var(--arbour-text-on-primary); }
-.badge-secondary { background: var(--arbour-bg-header-active); color: var(--arbour-text-muted); }
+.badge-secondary { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header-muted, var(--arbour-text-muted)); }
 
 .status-inline { font-size: 0.95rem; color: var(--arbour-text); }
 .status-num-sm { background: none; border: none; cursor: pointer; font-weight: 700; padding: 0; font-size: 0.95rem; }

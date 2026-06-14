@@ -16,7 +16,6 @@ import {
 } from "../../../../common/util-common";
 import { ComposeDocument } from "../../../../common/compose-document";
 import type { StackData, StackAutoUpdateSettings, AutoUpdateMode, StatsData } from "../../../../common/types";
-import Uptime from "./Uptime.svelte";
 import Container from "./Container.svelte";
 import NetworkInput from "./NetworkInput.svelte";
 import ArrayInput from "./ArrayInput.svelte";
@@ -491,9 +490,8 @@ onDestroy(() => {
 {#if isAdd}
     <h1 class="mb-3">{$t("compose")}</h1>
 {:else}
-    <h1 class="mb-3">
-        <Uptime stack={stack} pill={true} />
-        {stack.name}
+    <h1 class="mb-3 stack-title">
+        <span class="stack-name">{stack.name}</span>
         {#if socketStore.agentCount > 1 && endpoint !== ""}
             <span class="agent-name">({agentName})</span>
         {/if}
@@ -875,6 +873,9 @@ onDestroy(() => {
 
 <style>
 h1 { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+/* line-height:1 makes the name box hug the glyph so the badge centres on the
+   text optically, not on the line box (which has descender slack). */
+.stack-name { line-height: 1; }
 .agent-name { font-size: 13px; color: var(--arbour-text-muted); }
 
 .action-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }

@@ -171,7 +171,19 @@ header {
 }
 
 header :global(span) {
-    color: var(--arbour-text);
+    color: var(--arbour-text-on-header, var(--arbour-text));
+}
+
+header :global(.nav-link) {
+    color: var(--arbour-text-on-header, var(--arbour-text));
+}
+
+/* Header nav hover/active must contrast the header bg — primary equals the
+   header bg on some themes (e.g. unicorn), which made the label vanish. */
+header :global(.nav-link:hover),
+header :global(.nav-link:focus),
+header :global(.nav-pills .nav-link.active) {
+    color: var(--arbour-header-link-hover, var(--arbour-primary));
 }
 
 .title { font-weight: bold; }

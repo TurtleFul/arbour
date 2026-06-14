@@ -148,12 +148,12 @@ setContext(AGENT_CONTEXT, {
 
 .tab.artefact-tab:hover {
     background: var(--arbour-bg-header-active);
-    color: var(--arbour-text);
+    color: var(--arbour-text-on-header);
 }
 
 .tab.active-artefact-tab {
     background: var(--arbour-bg-header-active);
-    color: var(--arbour-text);
+    color: var(--arbour-text-on-header);
     border-bottom-color: var(--arbour-primary);
 }
 </style>

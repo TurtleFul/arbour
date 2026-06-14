@@ -769,7 +769,19 @@ export class Stack {
 
     async joinCombinedTerminal(socket: ArbourSocket) {
         const terminalName = getCombinedTerminalName(socket.endpoint, this.name);
-        const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker", [ "compose", "logs", "-f", "--tail", "100" ], this.path);
+        // The "<service> |" prefix distinguishes services in a multi-service
+        // stack, but is pure noise (and wastes width) when there's only one.
+        let singleService = false;
+        try {
+            singleService = Object.keys(this.composeDocument.services.getServices()).length <= 1;
+        } catch {
+            singleService = false;
+        }
+        const logArgs = [ "compose", "logs", "-f", "--tail", "100" ];
+        if (singleService) {
+            logArgs.push("--no-log-prefix");
+        }
+        const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker", logArgs, this.path);
         terminal.enableKeepAlive = true;
         terminal.rows = COMBINED_TERMINAL_ROWS;
         terminal.cols = COMBINED_TERMINAL_COLS;
@@ -797,7 +809,9 @@ export class Stack {
         let terminal = Terminal.getTerminal(terminalName);
 
         if (!terminal) {
-            terminal = new Terminal(this.server, terminalName, "docker", [ "compose", "logs", "-f", "--tail", "100", serviceName ], this.path);
+            // --no-log-prefix: single-service view, so the repeated "<service> |"
+            // prefix is pure noise and wastes width, causing premature wrapping.
+            terminal = new Terminal(this.server, terminalName, "docker", [ "compose", "logs", "-f", "--tail", "100", "--no-log-prefix", serviceName ], this.path);
             terminal.enableKeepAlive = true;
             terminal.rows = TERMINAL_ROWS;
             log.debug("joinContainerLog", "Terminal created");

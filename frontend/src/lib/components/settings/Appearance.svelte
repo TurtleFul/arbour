@@ -33,6 +33,7 @@ const langs = Object.entries(languageList);
             <option value="arbour">Arbour</option>
             <option value="dockge">Dockge Classic</option>
             <option value="sundown">SunDown</option>
+            <option value="almost-one-dark">Almost One Dark</option>
             <option value="unicorn">Unicorn</option>
             <option value="retro">Retro</option>
         </select>

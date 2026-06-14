@@ -9,6 +9,8 @@ import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } 
 import { tags } from "@lezer/highlight";
 import { yaml } from "@codemirror/lang-yaml";
 import { json } from "@codemirror/lang-json";
+import { oneDark } from "@codemirror/theme-one-dark";
+import { themeStore } from "$lib/stores/theme.svelte";
 
 let {
     value = $bindable(""),
@@ -31,6 +33,7 @@ let lastEditorValue = "";
 const langComp = new Compartment();
 const editableComp = new Compartment();
 const readOnlyComp = new Compartment();
+const editorThemeComp = new Compartment();
 
 const arbourHighlight = HighlightStyle.define([
     { tag: tags.keyword,
@@ -116,6 +119,15 @@ const editorTheme = EditorView.theme({
     },
 });
 
+// The "almost-one-dark" app theme isn't authentic One Dark in the UI, so the
+// editor uses the real Atom One Dark theme/highlight there. Other themes use the
+// CSS-var-driven theme so the editor tracks the active palette.
+function themeExtensions(theme: string) {
+    return theme === "almost-one-dark"
+        ? [ oneDark ]
+        : [ editorTheme, syntaxHighlighting(arbourHighlight) ];
+}
+
 function getLangExtension(l: string) {
     if (l === "yaml" || l === "env") {
         return yaml();
@@ -132,6 +144,14 @@ $effect(() => {
     }
     const l = lang;
     view.dispatch({ effects: langComp.reconfigure(getLangExtension(l)) });
+});
+
+$effect(() => {
+    const theme = themeStore.colorTheme;
+    if (!view) {
+        return;
+    }
+    view.dispatch({ effects: editorThemeComp.reconfigure(themeExtensions(theme)) });
 });
 
 $effect(() => {
@@ -167,7 +187,7 @@ onMount(() => {
             extensions: [
                 baseTheme,
                 selectionTheme,
-                editorTheme,
+                editorThemeComp.of(themeExtensions(themeStore.colorTheme)),
                 lineNumbers(),
                 highlightActiveLine(),
                 highlightActiveLineGutter(),
@@ -180,7 +200,6 @@ onMount(() => {
                 autocompletion(),
                 highlightSelectionMatches(),
                 EditorView.lineWrapping,
-                syntaxHighlighting(arbourHighlight),
                 langComp.of(getLangExtension(lang)),
                 editableComp.of(EditorView.editable.of(!isReadonly)),
                 readOnlyComp.of(EditorState.readOnly.of(isReadonly)),
