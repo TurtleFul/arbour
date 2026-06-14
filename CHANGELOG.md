@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.1] — 2026-06-14
+
+### Changed
+- Theme and styling refinements following the Svelte rewrite.
+
+### Fixed
+- ESLint `no-useless-assignment` error in the combined-terminal logic that broke the original 0.5.1 release build.
+
+### Added
+- Pre-commit hook that runs `bun run lint` so lint errors are caught before they reach CI, plus a `bun run lint:fix` script.
+
 ## [0.5.0] — 2026-06-12
 
 ## Major Frontend Rewrite
