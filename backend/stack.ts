@@ -771,7 +771,7 @@ export class Stack {
         const terminalName = getCombinedTerminalName(socket.endpoint, this.name);
         // The "<service> |" prefix distinguishes services in a multi-service
         // stack, but is pure noise (and wastes width) when there's only one.
-        let singleService = false;
+        let singleService: boolean;
         try {
             singleService = Object.keys(this.composeDocument.services.getServices()).length <= 1;
         } catch {

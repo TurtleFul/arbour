@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# Arbour pre-commit hook: lint before allowing a commit.
+# Catches lint errors locally that would otherwise fail CI/release.
+# Bypass with `git commit --no-verify` if you really must.
+
+echo "Running lint (pre-commit)…"
+if ! bun run lint; then
+    echo
+    echo "✖ Lint failed. Fix issues or run 'bun run lint:fix', then commit again."
+    exit 1
+fi

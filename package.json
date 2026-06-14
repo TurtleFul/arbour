@@ -8,6 +8,8 @@
     "scripts": {
         "fmt": "eslint \"**/*.{ts,svelte}\" --fix",
         "lint": "eslint \"**/*.{ts,svelte}\"",
+        "lint:fix": "eslint \"**/*.{ts,svelte}\" --fix",
+        "prepare": "git config core.hooksPath .githooks || true",
         "typecheck": "svelte-kit sync && svelte-check --tsconfig ./frontend/tsconfig.json",
         "test": "ARBOUR_HIDE_LOG=error_console,error_autoupdate bun test",
         "test:watch": "ARBOUR_HIDE_LOG=error_console,error_autoupdate bun test --watch",
