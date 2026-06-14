@@ -59,7 +59,7 @@ export class Arbour {
         return this.base(source).withExec(["sh", "-c", "bun run lint 2>&1"]).stdout();
     }
 
-    /** Run vue-tsc --noEmit. */
+    /** Run svelte-check. */
     @func()
     async typecheck(@argument({ defaultPath: "." }) source: Directory): Promise<string> {
         return this.base(source).withExec(["sh", "-c", "bun run typecheck 2>&1"]).stdout();

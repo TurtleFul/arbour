@@ -110,8 +110,12 @@ bun run typecheck
 
 ```bash
 bun run lint        # check
-bun run fmt         # fix
+bun run lint:fix    # check + auto-fix (alias: bun run fmt)
 ```
+
+A `pre-commit` git hook (in `.githooks/`, wired up automatically by `bun install`)
+runs `bun run lint` before each commit so lint errors are caught before CI. Bypass
+with `git commit --no-verify` if needed.
 
 ## Running Everything at Once
 
@@ -146,10 +150,11 @@ Module source: `.dagger/src/index.ts`.
 ```bash
 dagger call test             --source=.    # bun test
 dagger call lint             --source=.    # eslint
-dagger call check-ts         --source=.    # tsc --noEmit
+dagger call typecheck        --source=.    # svelte-check
+dagger call verify           --source=.    # fmt + typecheck + test
 dagger call build-frontend   --source=. export --path=./frontend-dist
 dagger call build-image      --source=. as-tarball export --path=./arbour.tar
-dagger call ci               --source=.    # test + lint + check-ts in parallel
+dagger call ci               --source=.    # runs verify (fmt + typecheck + test)
 ```
 
 Install Dagger with Homebrew: `brew install dagger`.
