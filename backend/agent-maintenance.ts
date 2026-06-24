@@ -224,23 +224,28 @@ export class AgentMaintenance {
             throw new Error(`No inspect data for network ${networkId}`);
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const raw: any = JSON.parse(res.stdout)[0];
+        const raw = JSON.parse(res.stdout)[0] as {
+            Id?: string;
+            Name?: string;
+            Driver?: string;
+            Scope?: string;
+            Internal?: boolean;
+            EnableIPv6?: boolean;
+            IPAM?: { Config?: { Subnet?: string; Gateway?: string }[] };
+            Containers?: Record<string, { Name: string; IPv4Address: string; IPv6Address: string; MacAddress: string }>;
+        };
 
-        const subnets = (raw.IPAM?.Config ?? []).map((c: { Subnet?: string; Gateway?: string }) => ({
+        const subnets = (raw.IPAM?.Config ?? []).map((c) => ({
             subnet: c.Subnet ?? "",
             gateway: c.Gateway ?? "",
         }));
 
-        const containers = Object.values(raw.Containers ?? {}).map((c: unknown) => {
-            const container = c as { Name: string; IPv4Address: string; IPv6Address: string; MacAddress: string };
-            return {
-                name: container.Name,
-                ipv4: container.IPv4Address,
-                ipv6: container.IPv6Address,
-                mac: container.MacAddress,
-            };
-        });
+        const containers = Object.values(raw.Containers ?? {}).map((container) => ({
+            name: container.Name,
+            ipv4: container.IPv4Address,
+            ipv6: container.IPv6Address,
+            mac: container.MacAddress,
+        }));
 
         return {
             id: raw.Id,

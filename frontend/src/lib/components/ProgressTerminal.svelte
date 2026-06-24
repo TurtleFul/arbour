@@ -92,8 +92,8 @@ export function hideWithTimeout() {
     gap: 0.5rem;
     width: 100%;
     padding: 0.75rem 1rem;
-    background: var(--arbour-bg-header);
-    border: none;
+    background: var(--arbour-bg-input-group);
+    border: 1px solid var(--arbour-border);
     border-radius: var(--arbour-radius);
     color: var(--arbour-text-on-header);
     cursor: pointer;

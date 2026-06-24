@@ -168,7 +168,7 @@ function eventTypeBadge(eventType: string): string {
 
 function triggerBadge(trigger: string): string {
     const map: Record<string, string> = {
-        manual: "ev-secondary",
+        manual: "ev-manual",
         scheduled: "ev-info",
         immediate: "ev-warning",
     };
@@ -602,7 +602,7 @@ function updateChangelogLink(link: string) {
 
 .stats-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
     margin-top: 0.5rem;
     font-size: 0.8rem;
@@ -610,6 +610,8 @@ function updateChangelogLink(link: string) {
 .stats-toggle {
     background: none; border: none; color: var(--arbour-text-muted);
     cursor: pointer; padding: 0; font-size: 0.9rem;
+    line-height: 1.4;
+    flex-shrink: 0;
 }
 .stat { color: var(--arbour-text-muted); }
 
@@ -651,6 +653,13 @@ function updateChangelogLink(link: string) {
 .ev-success { background: var(--arbour-success); color: var(--arbour-text-on-primary); }
 .ev-warning { background: var(--arbour-warning); color: var(--arbour-text-on-warning); }
 .ev-info { background: var(--arbour-info); color: var(--arbour-text-on-primary); }
-.ev-secondary { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header-muted, var(--arbour-text-muted)); }
+.ev-secondary { background: var(--arbour-text-muted); color: var(--arbour-bg); }
+/* manual = a human-initiated action: a calm, muted accent tint that still reads
+   as a colour, distinguishing it from the automated triggers (info/warning). */
+.ev-manual {
+    background: color-mix(in srgb, var(--arbour-primary) 16%, var(--arbour-bg));
+    color: var(--arbour-primary);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--arbour-primary) 32%, transparent);
+}
 .ev-dark { background: var(--arbour-bg-deep); color: var(--arbour-text-muted); }
 </style>
