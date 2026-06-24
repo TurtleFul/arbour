@@ -78,6 +78,48 @@ export class StackStatusInfo {
     constructor(readonly label: string, readonly statusIds: number[], readonly badgeColor: string, readonly textColor: string ) {}
 }
 
+export interface StackStatusCounts {
+    running: number;
+    exited: number;
+    ignoredRunning: number;
+    ignoredExited: number;
+    created: number;
+    unhealthy: boolean;
+}
+
+/**
+ * Reduce per-service container counts to a single stack status.
+ *
+ * Precedence: a mix of running and exited services is "partially running";
+ * otherwise running wins over exited. Services whose state is ignored (via the
+ * arbour.status.ignore label) only count as a fallback when no non-ignored
+ * service determines the status. An unhealthy service overrides everything.
+ */
+export function computeStackStatus(counts: StackStatusCounts): number {
+    let status: number;
+    if (counts.running > 0 && counts.exited > 0) {
+        status = RUNNING_AND_EXITED;
+    } else if (counts.running > 0) {
+        status = RUNNING;
+    } else if (counts.exited > 0) {
+        status = EXITED;
+    } else if (counts.ignoredRunning > 0) {
+        status = RUNNING;
+    } else if (counts.ignoredExited > 0) {
+        status = EXITED;
+    } else if (counts.created > 0) {
+        status = CREATED_STACK;
+    } else {
+        status = UNKNOWN;
+    }
+
+    if (counts.unhealthy) {
+        status = UNHEALTHY;
+    }
+
+    return status;
+}
+
 export class StackFilter {
     agents = new StackFilterCategory<string>("agent");
     status = new StackFilterCategory<string>("status");

@@ -7,6 +7,7 @@ import { socketStore } from "$lib/stores/socket.svelte";
 import type { SocketRes } from "$lib/types";
 import { COMPOSE_CONTEXT } from "$lib/context";
 import { clickOutside } from "$lib/actions/clickOutside";
+import { normalizeCron } from "$lib/cron";
 import {
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
@@ -425,39 +426,6 @@ function importStack() {
             socketStore.toastRes(res);
         }
     });
-}
-
-// Tidy a cron expression for display: collapse stray whitespace, and if the
-// user ran the fields together (e.g. "03***") split them back into tokens
-// ("0 3 * * *"). Multi-digit fields are only recoverable when spaces are kept,
-// so a spaced input is just whitespace-normalised.
-function normalizeCron(value: string): string {
-    const trimmed = value.trim();
-    if (!trimmed) {
-        return "";
-    }
-    if (/\s/.test(trimmed)) {
-        return trimmed.replace(/\s+/g, " ");
-    }
-    // No spaces: walk the string and start a new field at every "*" or at a digit
-    // that follows another digit/"*". Operators (/ - ,) keep their operands in the
-    // same field so steps/ranges like "*/5" stay intact.
-    const tokens: string[] = [];
-    let current = "";
-    for (const ch of trimmed) {
-        const prev = current[current.length - 1];
-        const startNew = current !== "" && (ch === "*" || (/\d/.test(ch) && /[\d*]/.test(prev)));
-        if (startNew) {
-            tokens.push(current);
-            current = ch;
-        } else {
-            current += ch;
-        }
-    }
-    if (current) {
-        tokens.push(current);
-    }
-    return tokens.join(" ");
 }
 
 function saveAutoUpdateSettings() {

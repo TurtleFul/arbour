@@ -92,3 +92,30 @@ export class ImageInfo {
         return !!this.localDigest && !!this.remoteDigest && this.localDigest !== this.remoteDigest;
     }
 }
+
+/**
+ * Whether a running service's image differs from the image declared in its
+ * compose file. When true the stack needs re-creating (Arbour shows the
+ * "rocket" indicator) and image-update checks are skipped for that service.
+ */
+export function isRecreateNecessary(runningImage: string, composeImage: string | undefined): boolean {
+    return runningImage !== composeImage;
+}
+
+/**
+ * Whether image-update checking should run for a service. Skipped when the
+ * service already needs re-creation, or when the arbour.imageupdates.check
+ * label is explicitly set to false.
+ */
+export function shouldCheckImageUpdates(recreateNecessary: boolean, imageUpdatesCheckDisabled: boolean): boolean {
+    return !recreateNecessary && !imageUpdatesCheckDisabled;
+}
+
+/**
+ * Whether a pending image update should be surfaced for a service (the
+ * "arrow-up" indicator): local and remote digests differ and the remote digest
+ * has not been explicitly ignored via the arbour.imageupdates.ignore label.
+ */
+export function isServiceImageUpdateAvailable(imageInfo: ImageInfo, ignoreDigest: string | undefined): boolean {
+    return imageInfo.isImageUpdateAvailable() && imageInfo.remoteDigest !== ignoreDigest;
+}

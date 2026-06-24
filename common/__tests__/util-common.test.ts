@@ -16,8 +16,16 @@ import {
     StackFilterCategory,
     compareVersions,
     sleep,
+    computeStackStatus,
     RUNNING, RUNNING_AND_EXITED, UNHEALTHY, EXITED, UNKNOWN, CREATED_FILE, CREATED_STACK,
 } from "../util-common";
+
+const noCounts = { running: 0,
+    exited: 0,
+    ignoredRunning: 0,
+    ignoredExited: 0,
+    created: 0,
+    unhealthy: false };
 
 // ---------------------------------------------------------------------------
 // intHash
@@ -396,5 +404,76 @@ describe("sleep", () => {
 
     test("resolves immediately for 0ms", async () => {
         await expect(sleep(0)).resolves.toBeUndefined();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// computeStackStatus
+// ---------------------------------------------------------------------------
+
+describe("computeStackStatus", () => {
+    test("UNKNOWN when there is nothing to report", () => {
+        expect(computeStackStatus(noCounts)).toBe(UNKNOWN);
+    });
+
+    test("RUNNING when only running services", () => {
+        expect(computeStackStatus({ ...noCounts,
+            running: 2 })).toBe(RUNNING);
+    });
+
+    test("EXITED when only exited services", () => {
+        expect(computeStackStatus({ ...noCounts,
+            exited: 2 })).toBe(EXITED);
+    });
+
+    test("RUNNING_AND_EXITED when both running and exited", () => {
+        expect(computeStackStatus({ ...noCounts,
+            running: 1,
+            exited: 1 })).toBe(RUNNING_AND_EXITED);
+    });
+
+    test("CREATED_STACK when only created services", () => {
+        expect(computeStackStatus({ ...noCounts,
+            created: 1 })).toBe(CREATED_STACK);
+    });
+
+    test("ignored running counts only as a fallback", () => {
+        expect(computeStackStatus({ ...noCounts,
+            ignoredRunning: 3 })).toBe(RUNNING);
+    });
+
+    test("ignored exited counts only as a fallback", () => {
+        expect(computeStackStatus({ ...noCounts,
+            ignoredExited: 3 })).toBe(EXITED);
+    });
+
+    test("non-ignored services take precedence over ignored ones", () => {
+        expect(computeStackStatus({ ...noCounts,
+            exited: 1,
+            ignoredRunning: 5 })).toBe(EXITED);
+    });
+
+    test("running fallback wins over exited fallback", () => {
+        expect(computeStackStatus({ ...noCounts,
+            ignoredRunning: 1,
+            ignoredExited: 1 })).toBe(RUNNING);
+    });
+
+    test("unhealthy overrides a running stack", () => {
+        expect(computeStackStatus({ ...noCounts,
+            running: 2,
+            unhealthy: true })).toBe(UNHEALTHY);
+    });
+
+    test("unhealthy overrides even when nothing else is set", () => {
+        expect(computeStackStatus({ ...noCounts,
+            unhealthy: true })).toBe(UNHEALTHY);
+    });
+
+    test("unhealthy overrides a mixed running/exited stack", () => {
+        expect(computeStackStatus({ ...noCounts,
+            running: 1,
+            exited: 1,
+            unhealthy: true })).toBe(UNHEALTHY);
     });
 });
