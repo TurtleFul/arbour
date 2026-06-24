@@ -128,6 +128,11 @@ export class StackAutoUpdateManager {
 
         if (anyUpdated) {
             await stack.updateImageInfos();
+            // Recompute stack state (status + the imageUpdatesAvailable flag) from
+            // the now-updated containers. updateImageInfos() only refreshes the
+            // digest cache; without updateData() the stale "update available" flag
+            // (and its arrow indicator) lingers until the next periodic refresh.
+            await stack.updateData();
             this.server.sendStackList();
         }
     }

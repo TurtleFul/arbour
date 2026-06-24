@@ -159,6 +159,7 @@ function makeStack(name: string, services: string[], autoUpdateResult: boolean):
             image: `img/${s}` }) as never),
         autoUpdateService: async () => autoUpdateResult,
         updateImageInfos: async () => {},
+        updateData: async () => {},
     };
 }
 
@@ -195,6 +196,30 @@ describe("StackAutoUpdateManager service event logging", () => {
             .applyUpdates(stack, "scheduled");
         const events = getServiceEvents("jellyfin", "jellyfin");
         expect(events).toHaveLength(0);
+    });
+
+    test("applyUpdates refreshes stack data after a successful update so the update flag clears", async () => {
+        const manager = new TestableStackAutoUpdateManager(stubServerWithSend);
+        let updateDataCalls = 0;
+        const stack = { ...makeStack("jellyfin", [ "jellyfin" ], true),
+            updateData: async () => {
+                updateDataCalls++;
+            } };
+        await (manager as never as { applyUpdates(s: Partial<Stack>, t: EventTrigger): Promise<void> })
+            .applyUpdates(stack, "scheduled");
+        expect(updateDataCalls).toBe(1);
+    });
+
+    test("applyUpdates does not refresh stack data when nothing was updated", async () => {
+        const manager = new TestableStackAutoUpdateManager(stubServerWithSend);
+        let updateDataCalls = 0;
+        const stack = { ...makeStack("jellyfin", [ "jellyfin" ], false),
+            updateData: async () => {
+                updateDataCalls++;
+            } };
+        await (manager as never as { applyUpdates(s: Partial<Stack>, t: EventTrigger): Promise<void> })
+            .applyUpdates(stack, "scheduled");
+        expect(updateDataCalls).toBe(0);
     });
 
     test("runScheduledUpdate logs stack-level failure when stack lookup throws", async () => {
