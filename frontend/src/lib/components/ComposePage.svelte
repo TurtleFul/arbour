@@ -7,6 +7,7 @@ import { socketStore } from "$lib/stores/socket.svelte";
 import type { SocketRes } from "$lib/types";
 import { COMPOSE_CONTEXT } from "$lib/context";
 import { clickOutside } from "$lib/actions/clickOutside";
+import { normalizeCron } from "$lib/cron";
 import {
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
@@ -694,7 +695,8 @@ onDestroy(() => {
                             <div class="mt-3">
                                 <!-- svelte-ignore a11y_label_has_associated_control -->
                                 <label class="form-label">{$t("autoUpdateSchedule")}</label>
-                                <input class="form-control monospace" bind:value={autoUpdateCustomSchedule} placeholder="0 3 * * *" />
+                                <input class="form-control monospace" bind:value={autoUpdateCustomSchedule} placeholder="0 3 * * *"
+                                    onblur={() => (autoUpdateCustomSchedule = normalizeCron(autoUpdateCustomSchedule))} />
                                 <div class="form-text">{$t("autoUpdateCronHint")}</div>
                             </div>
                         {/if}

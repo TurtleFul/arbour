@@ -9,18 +9,17 @@ import {
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
     CREATED_FILE,
-    CREATED_STACK,
-    EXITED, getCombinedTerminalName,
+    getCombinedTerminalName,
     getComposeTerminalName, getContainerTerminalName,
     getContainerLogName,
     RUNNING, RUNNING_AND_EXITED, UNHEALTHY,
     TERMINAL_ROWS, UNKNOWN,
-    sleep
+    sleep, computeStackStatus
 } from "../common/util-common";
 import { InteractiveTerminal, Terminal } from "./terminal";
 import { exec } from "./spawn";
 import { Settings } from "./settings";
-import { ImageRepository } from "./image-repository";
+import { ImageRepository, isRecreateNecessary, shouldCheckImageUpdates, isServiceImageUpdateAvailable } from "./image-repository";
 import { SimpleStackData, StackData, ServiceData, StatsData } from "../common/types";
 import { ComposeDocument } from "../common/compose-document";
 import { LABEL_STATUS_IGNORE, LABEL_IMAGEUPDATES_CHECK, LABEL_IMAGEUPDATES_IGNORE } from "../common/compose-labels";
@@ -356,7 +355,7 @@ export class Stack {
                     const composeService = composeDocument.services.getService(serviceInfo.Service);
                     const composeServiceLabels = composeService.labels;
 
-                    const recreateNecessary = serviceInfo.Image !== composeService.image;
+                    const recreateNecessary = isRecreateNecessary(serviceInfo.Image, composeService.image);
                     if (recreateNecessary) {
                         this._recreateNecessary = true;
                     }
@@ -364,7 +363,7 @@ export class Stack {
                     let imageInfo = Stack.imageRepository.getImageInfo(this.name, serviceInfo.Service, serviceInfo.Image);
 
                     let serviceImageUpdateAvailable = false;
-                    if (!recreateNecessary && !composeServiceLabels.isFalse(LABEL_IMAGEUPDATES_CHECK)) {
+                    if (shouldCheckImageUpdates(recreateNecessary, composeServiceLabels.isFalse(LABEL_IMAGEUPDATES_CHECK))) {
                         const localImageId = serviceInfo.Labels?.match(/com\.docker\.compose\.image=([^,]+)/)?.[1] ?? "";
 
                         if (localImageId !== imageInfo.localId) {
@@ -375,10 +374,7 @@ export class Stack {
                             }
                         }
 
-                        if (
-                            imageInfo.isImageUpdateAvailable()
-                            && imageInfo.remoteDigest !== composeServiceLabels.get(LABEL_IMAGEUPDATES_IGNORE)
-                        ) {
+                        if (isServiceImageUpdateAvailable(imageInfo, composeServiceLabels.get(LABEL_IMAGEUPDATES_IGNORE))) {
                             serviceImageUpdateAvailable = true;
                             this._imageUpdatesAvailable = true;
                         }
@@ -425,25 +421,14 @@ export class Stack {
                 }
             }
 
-            if (runningCount > 0 && exitedCount > 0) {
-                this._status = RUNNING_AND_EXITED;
-            } else if (runningCount > 0) {
-                this._status = RUNNING;
-            } else if (exitedCount > 0) {
-                this._status = EXITED;
-            } else if (ignoredRunningCount > 0) {
-                this._status = RUNNING;
-            } else if (ignoredExitedCount > 0) {
-                this._status = EXITED;
-            } else if (createdCount > 0) {
-                this._status = CREATED_STACK;
-            } else {
-                this._status = UNKNOWN;
-            }
-
-            if (this._unhealthy) {
-                this._status = UNHEALTHY;
-            }
+            this._status = computeStackStatus({
+                running: runningCount,
+                exited: exitedCount,
+                ignoredRunning: ignoredRunningCount,
+                ignoredExited: ignoredExitedCount,
+                created: createdCount,
+                unhealthy: this._unhealthy,
+            });
 
             this._services = services;
         } catch (e) {

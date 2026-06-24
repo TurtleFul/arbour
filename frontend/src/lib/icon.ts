@@ -42,5 +42,8 @@ export function getIconHtml(name: string, extraClass = ""): string {
     if (!extraClass) {
         return svg;
     }
-    return svg.replace("<svg ", `<svg class="${extraClass}" `);
+    // The generated svg already carries class="svg-inline--fa ...". Merge into it
+    // rather than adding a second class attribute (browsers keep only the first,
+    // which would drop the sizing class svg-inline--fa).
+    return svg.replace(/class="([^"]*)"/, `class="$1 ${extraClass}"`);
 }

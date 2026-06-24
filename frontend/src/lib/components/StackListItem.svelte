@@ -2,7 +2,6 @@
 import { page } from "$app/stores";
 import Uptime from "./Uptime.svelte";
 import Icon from "./Icon.svelte";
-import { socketStore } from "$lib/stores/socket.svelte";
 import type { SimpleStackData } from "../../../../common/types";
 
 const { stack } : { stack: SimpleStackData } = $props();
@@ -14,8 +13,6 @@ const url = $derived(
 );
 
 const isActive = $derived($page.url.pathname === url);
-const agentCount = $derived(socketStore.agentCount);
-const endpointDisplay = $derived(socketStore.getAgentName(stack.endpoint ?? ""));
 </script>
 
 <a href={url} class="item" class:active={isActive} class:disabled={!stack.isManagedByArbour}>
@@ -28,9 +25,6 @@ const endpointDisplay = $derived(socketStore.getAgentName(stack.endpoint ?? ""))
         {#if stack.started && stack.imageUpdatesAvailable}
             <Icon name="arrow-up" class="notification-icon" />
         {/if}
-        {#if agentCount > 1}
-            <div class="endpoint">{endpointDisplay}</div>
-        {/if}
     </div>
 </a>
 
@@ -39,26 +33,32 @@ const endpointDisplay = $derived(socketStore.getAgentName(stack.endpoint ?? ""))
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: 52px;
-    padding: 5px 8px;
-    margin-bottom: 2px;
-    border-radius: var(--arbour-radius);
+    min-height: 48px;
+    padding: 6px 10px;
+    border-radius: var(--arbour-radius-sm);
+    background-color: transparent;
+    border: 1px solid var(--arbour-border);
     color: var(--arbour-text);
     text-decoration: none;
-    transition: background-color ease-in-out 0.15s;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.item:hover { background-color: var(--arbour-bg-deep); }
-.item.active { background-color: var(--arbour-bg-deep); }
-.item.disabled { opacity: 0.3; }
+.item:hover {
+    background-color: var(--arbour-bg-header-active);
+    border-color: var(--arbour-text-muted);
+}
+.item.active {
+    background-color: var(--arbour-bg-header-active);
+    border-color: var(--arbour-primary);
+    box-shadow: inset 3px 0 0 var(--arbour-primary);
+}
+.item.disabled { opacity: 0.4; }
 
 .title { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
 
 .uptime-wrap { display: inline-flex; align-items: center; }
 
 .name { font-weight: 500; line-height: 1; }
-
-.endpoint { font-size: 12px; color: var(--arbour-text-muted); }
 
 :global(.notification-icon) { color: var(--arbour-info); }
 </style>

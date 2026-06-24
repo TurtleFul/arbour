@@ -10,6 +10,7 @@
     "include": ["src/**/*", "../common/**/*", "../.svelte-kit/ambient.d.ts", "../.svelte-kit/non-ambient.d.ts"],
     "exclude": [
         "../node_modules",
-        "../common/__tests__/**/*"
+        "../common/__tests__/**/*",
+        "src/**/__tests__/**/*"
     ]
 }

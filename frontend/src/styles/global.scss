@@ -5,6 +5,29 @@
 @import "@fontsource/jetbrains-mono/index.css";
 @import "@xterm/xterm/css/xterm.css";
 
+/* ─── FontAwesome inline SVG sizing ─────────────────────────────────────────
+   We render icons via fontawesome-svg-core (see frontend/src/lib/icon.ts) which
+   emits <svg class="svg-inline--fa"> with a viewBox but no width/height. Without
+   FA's own stylesheet these fall back to viewBox sizing (e.g. arrow-up balloons).
+   Replicate the essential FA rules so icons size to the current font-size. */
+
+.svg-inline--fa {
+    display: inline-block;
+    height: 1em;
+    width: auto;
+    vertical-align: -0.125em;
+    overflow: visible;
+}
+
+.fa-spin {
+    animation: fa-spin 1.5s linear infinite;
+}
+
+@keyframes fa-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* ─── Reset ───────────────────────────────────────────────────────────────── */
 
 *, *::before, *::after { box-sizing: border-box; }
