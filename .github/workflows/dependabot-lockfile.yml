@@ -1,0 +1,46 @@
+name: Dependabot lockfile sync
+
+# Dependabot can bump package.json but cannot regenerate Bun's lockfile, so
+# `bun install --frozen-lockfile` (used by the CI pipeline and the Docker build)
+# fails on Dependabot PRs with "lockfile had changes, but lockfile is frozen".
+# This job regenerates bun.lock on Dependabot PRs and pushes it to the branch.
+#
+# NOTE: commits pushed with the default GITHUB_TOKEN do not retrigger workflows.
+# To have CI re-run automatically after the lockfile is synced, add a repository
+# secret named DEPENDABOT_PAT (a fine-grained PAT with contents:write). Without
+# it the lockfile is still fixed, but CI must be re-run manually on the PR.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  sync-lockfile:
+    name: Sync bun.lock
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.DEPENDABOT_PAT || secrets.GITHUB_TOKEN }}
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Regenerate lockfile
+        run: bun install
+
+      - name: Commit and push if bun.lock changed
+        run: |
+          if git diff --quiet bun.lock; then
+            echo "bun.lock already in sync — nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          git commit --no-verify -m "chore: sync bun.lock with dependency bump"
+          git push

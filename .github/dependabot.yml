@@ -1,13 +1,24 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /
+    directories:
+      - /
+      - /.dagger
     schedule:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
     labels:
       - dependencies
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    ignore:
+      # @xterm/* are pinned to prerelease (beta) versions. Dependabot has no
+      # generic "skip prereleases" switch, so it churns out beta-to-beta bumps.
+      # Ignore these until they are moved to a stable release line, then remove.
+      - dependency-name: "@xterm/*"
     groups:
       npm-all:
         patterns:
@@ -21,6 +32,9 @@ updates:
     labels:
       - dependencies
       - docker
+    commit-message:
+      prefix: chore
+      include: scope
     groups:
       docker-all:
         patterns:
@@ -34,6 +48,9 @@ updates:
     labels:
       - dependencies
       - github-actions
+    commit-message:
+      prefix: ci
+      include: scope
     groups:
       actions-all:
         patterns:
