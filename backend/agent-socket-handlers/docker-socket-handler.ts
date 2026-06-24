@@ -8,6 +8,8 @@ import { EXITED, RUNNING } from "../../common/util-common";
 import { promises as fsAsync } from "fs";
 import path from "path";
 import { logServiceEvent, getServiceEvents } from "../service-event-logger";
+import { log } from "../log";
+import { deployStackWithRollback } from "../deploy-stack";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : ArbourSocket, server : ArbourServer, agentSocket : AgentSocket) {
@@ -19,7 +21,20 @@ export class DockerSocketHandler extends AgentSocketHandler {
             try {
                 checkLogin(socket);
                 const stack = await this.saveStack(server, name, composeYAML, composeENV, isAdd);
-                await stack.deploy(socket);
+                // A port conflict etc. only surfaces at `compose up`; if a brand-new
+                // stack fails to come up, roll it back so it isn't left behind.
+                await deployStackWithRollback({
+                    isAdd: isAdd === true,
+                    deploy: () => stack.deploy(socket),
+                    rollback: async () => {
+                        try {
+                            await stack.delete(socket);
+                        } catch (cleanupError) {
+                            log.error("deployStack", `Rollback of '${stack.name}' failed: ${cleanupError}`);
+                        }
+                        server.sendStackList();
+                    },
+                });
                 logServiceEvent(stack.name, "", "deploy", "manual", true);
                 server.sendStackList();
                 callbackResult({

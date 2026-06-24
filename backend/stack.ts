@@ -253,10 +253,20 @@ export class Stack {
             }
         }
 
-        await this.validate();
+        try {
+            await this.validate();
 
-        // Everthing is good, writing the main files
-        await this.saveFiles(path.join(dir, this._composeFileName), path.join(dir, ".env"));
+            // Everthing is good, writing the main files
+            await this.saveFiles(path.join(dir, this._composeFileName), path.join(dir, ".env"));
+        } catch (e) {
+            // For a newly-created stack, don't leave the folder we just made behind
+            // when validation (or the file write) fails — keep creation atomic.
+            if (isAdd) {
+                await fsAsync.rm(dir, { recursive: true,
+                    force: true }).catch(() => {});
+            }
+            throw e;
+        }
     }
 
     private async saveFiles(yamlPath: string, envPath: string) {

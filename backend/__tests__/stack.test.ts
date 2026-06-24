@@ -299,4 +299,72 @@ describe("Stack.save()", () => {
                 force: true });
         }
     });
+
+    test("removes the newly-created folder when validation fails (isAdd=true)", async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "arbour-test-"));
+        const stack = new Stack(mockServer(tmpDir), "badapp",
+            "services:\n  web:\n    image: nginx\n", "");
+
+        // Simulate `docker compose config` rejecting the stack.
+        const validateSpy = spyOn(Stack.prototype, "validate")
+            .mockImplementation(async () => {
+                throw new ValidationError("invalid compose");
+            });
+
+        try {
+            await expect(stack.save(true)).rejects.toBeInstanceOf(ValidationError);
+            // Creation must be atomic: no empty/partial folder left behind.
+            expect(fs.existsSync(path.join(tmpDir, "badapp"))).toBe(false);
+        } finally {
+            validateSpy.mockRestore();
+            fs.rmSync(tmpDir, { recursive: true,
+                force: true });
+        }
+    });
+
+    test("does not write compose files when validation fails (isAdd=true)", async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "arbour-test-"));
+        const stack = new Stack(mockServer(tmpDir), "badapp2",
+            "services:\n  web:\n    image: nginx\n", "FOO=bar");
+
+        const validateSpy = spyOn(Stack.prototype, "validate")
+            .mockImplementation(async () => {
+                throw new ValidationError("invalid compose");
+            });
+
+        try {
+            await expect(stack.save(true)).rejects.toBeInstanceOf(ValidationError);
+            expect(fs.existsSync(path.join(tmpDir, "badapp2", "compose.yaml"))).toBe(false);
+            expect(fs.existsSync(path.join(tmpDir, "badapp2", ".env"))).toBe(false);
+        } finally {
+            validateSpy.mockRestore();
+            fs.rmSync(tmpDir, { recursive: true,
+                force: true });
+        }
+    });
+
+    test("preserves an existing stack folder when validation fails (isAdd=false)", async () => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "arbour-test-"));
+        const stackDir = path.join(tmpDir, "existing");
+        fs.mkdirSync(stackDir);
+        fs.writeFileSync(path.join(stackDir, "compose.yaml"), "services:\n  web:\n    image: nginx\n");
+        const stack = new Stack(mockServer(tmpDir), "existing",
+            "services:\n  web:\n    image: nginx\n", "");
+
+        const validateSpy = spyOn(Stack.prototype, "validate")
+            .mockImplementation(async () => {
+                throw new ValidationError("invalid compose");
+            });
+
+        try {
+            await expect(stack.save(false)).rejects.toBeInstanceOf(ValidationError);
+            // An existing stack must NOT be deleted just because a re-save failed.
+            expect(fs.existsSync(stackDir)).toBe(true);
+            expect(fs.existsSync(path.join(stackDir, "compose.yaml"))).toBe(true);
+        } finally {
+            validateSpy.mockRestore();
+            fs.rmSync(tmpDir, { recursive: true,
+                force: true });
+        }
+    });
 });

@@ -341,7 +341,7 @@ onDestroy(() => {
 .stack-list {
     flex: 1;
     overflow-y: auto;
-    padding: 0.5rem;
+    padding: 0 0.5rem 0.5rem;
 }
 
 .agent-group { display: flex; flex-direction: column; }
@@ -353,9 +353,7 @@ onDestroy(() => {
     gap: 0.35rem;
 }
 .agent-group.grouped .agent-stacks {
-    padding: 0.45rem 0 0.15rem 0.6rem;
-    margin-left: 0.35rem;
-    border-left: 2px solid var(--arbour-border);
+    padding: 0.5rem 0 0.15rem;
 }
 
 .empty-msg {
@@ -368,20 +366,22 @@ onDestroy(() => {
 .agent-header {
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     width: 100%;
+    /* Aligned to the same column width as the stack items below. The bar is
+       opaque and sits above the items (z-index), so stacks scrolling underneath
+       are fully covered without needing to bleed past the item column. */
     background: var(--arbour-bg-header);
-    border: 1px solid var(--arbour-border);
-    border-radius: var(--arbour-radius-sm);
+    border-bottom: 1px solid var(--arbour-border);
     color: var(--arbour-text-on-header-muted, var(--arbour-text-muted));
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    padding: 0.45rem 0.6rem;
+    padding: 0.55rem 0.7rem;
     cursor: pointer;
     text-align: left;
     user-select: none;

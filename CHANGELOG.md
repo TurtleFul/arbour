@@ -2,6 +2,50 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.6] — 2026-06-24
+
+### Fixed
+- Failed stack creation no longer leaves a broken stack behind. A new stack that fails validation, or fails to come up at deploy time (e.g. a host port is already in use), is now rolled back — its folder, files, and any partially-started containers are removed. Existing stacks are never deleted when a re-deploy fails.
+
+### Changed
+- Tidied the multi-host stack list: the host header bar and stack cards now align to a single clean column (removed the offset left rail and edge-to-edge header).
+
+### Added
+- Tests covering stack creation and deploy failure/rollback paths (`deployStackWithRollback`, atomic `save()` rollback).
+
+## [0.5.5] — 2026-06-24
+
+### Changed
+- Major code-quality pass guided by a TypeScript style guide: enabled ESLint `consistent-type-imports`, `ban-ts-comment`, and `no-explicit-any` (warn); replaced every `@ts-ignore` with a described `@ts-expect-error`; removed redundant `export default`s in favour of named exports; tightened `object`/`any` types; and converted `.then()` chains to `async`/`await`. Removed blanket ESLint ignores in favour of documented, scoped exceptions.
+
+### Fixed
+- Smaller styling fixes: the `manual` event-log badge now uses a muted accent colour (distinct from the automated triggers), improved terminal-panel contrast, the container resource-usage chevron no longer shifts when toggled, and sticky host headers no longer overlap stacks while scrolling.
+
+## [0.5.4] — 2026-06-24
+
+### Fixed
+- Image-update arrow indicator lingered after an auto-update finished — stack state (including the "update available" flag) is now recomputed immediately after an update completes, with a regression test.
+
+### Changed
+- Dependabot now also covers the `.dagger` CI module, uses Conventional Commit prefixes, and ignores xterm prerelease churn. A new workflow regenerates `bun.lock` on Dependabot PRs so CI no longer fails on frozen-lockfile mismatches.
+- Dependency maintenance (TypeScript 6, `actions/checkout` v7, and others).
+
+## [0.5.3] — 2026-06-24
+
+### Added
+- Expanded backend unit tests around image-update detection and stack status, with the decision logic extracted into pure, testable helpers; added `LimitQueue` tests.
+
+## [0.5.2] — 2026-06-24
+
+### Added
+- Cron schedule input now tidies itself on blur — e.g. `03***` is reformatted to `0 3 * * *`.
+
+### Changed
+- Restyled the stack list: each stack renders as a distinct card, and the multi-host view groups stacks under host headers with per-host stack counts.
+
+### Fixed
+- Image-update arrow and other FontAwesome icons rendered at full viewport size (missing inline-SVG sizing); icons now size to the surrounding text.
+
 ## [0.5.1] — 2026-06-14
 
 ### Changed
@@ -181,6 +225,12 @@ First public release of the Arbour fork. Renamed from Dockge and refocused on lo
 - Broken release scripts (`release-final`, `release-beta`, `mark-as-nightly`) that referenced missing files.
 - Obsolete `.vscode/tasks.json` entries (npm-based, pre-Bun).
 
+[0.5.6]: https://github.com/turtleful/arbour/compare/v0.5.5...HEAD
+[0.5.5]: https://github.com/turtleful/arbour/compare/v0.5.4...v0.5.5
+[0.5.4]: https://github.com/turtleful/arbour/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/turtleful/arbour/compare/v0.5.2...v0.5.3
+[0.5.2]: https://github.com/turtleful/arbour/compare/v0.5.1...v0.5.2
+[0.5.1]: https://github.com/turtleful/arbour/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/turtleful/arbour/compare/v0.4.7...v0.5.0
 [0.4.7]: https://github.com/turtleful/arbour/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/turtleful/arbour/compare/v0.4.5...v0.4.6
