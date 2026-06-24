@@ -13,7 +13,7 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Run CI pipeline
         uses: dagger/dagger-for-github@v8.4.1
@@ -31,7 +31,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build frontend
         uses: dagger/dagger-for-github@v8.4.1
@@ -82,7 +82,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Create release
         run: gh release create "${{ github.ref_name }}" --generate-notes --verify-tag
