@@ -1,6 +1,6 @@
 import { describe, expect, test, spyOn } from "bun:test";
 import { AgentManager } from "../agent-manager";
-import { ArbourSocket } from "../util-server";
+import type { ArbourSocket } from "../util-server";
 import { log } from "../log";
 import semver from "semver";
 

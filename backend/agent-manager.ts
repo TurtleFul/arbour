@@ -1,13 +1,15 @@
-import { ArbourSocket } from "./util-server";
-import { io, Socket as SocketClient } from "socket.io-client";
+import type { ArbourSocket } from "./util-server";
+import type { Socket as SocketClient } from "socket.io-client";
+import { io } from "socket.io-client";
 import { log } from "./log";
 import { Agent } from "./models/agent";
-import { isDev, LooseObject } from "../common/util-common";
+import type { LooseObject } from "../common/util-common";
+import { isDev } from "../common/util-common";
 import semver from "semver";
 import { getDb } from "./db/index";
 import { agent as agentTable } from "./db/schema";
 import { eq } from "drizzle-orm";
-import { AgentData } from "../common/types";
+import type { AgentData } from "../common/types";
 
 /**
  * Arbour Instance Manager

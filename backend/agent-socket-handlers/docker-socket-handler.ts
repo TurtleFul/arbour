@@ -1,8 +1,9 @@
 import { AgentSocketHandler } from "../agent-socket-handler";
-import { ArbourServer } from "../arbour-server";
-import { callbackError, callbackResult, checkLogin, ArbourSocket, ValidationError } from "../util-server";
+import type { ArbourServer } from "../arbour-server";
+import type { ArbourSocket } from "../util-server";
+import { callbackError, callbackResult, checkLogin, ValidationError } from "../util-server";
 import { Stack } from "../stack";
-import { AgentSocket } from "../../common/agent-socket";
+import type { AgentSocket } from "../../common/agent-socket";
 import { EXITED, RUNNING } from "../../common/util-common";
 import { promises as fsAsync } from "fs";
 import path from "path";

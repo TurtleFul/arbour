@@ -5,11 +5,13 @@ import { t } from "svelte-i18n";
 import { tn } from "$lib/stores/lang.svelte";
 import { socketStore } from "$lib/stores/socket.svelte";
 import type { SocketRes } from "$lib/types";
-import { AGENT_CONTEXT, type AgentContext } from "$lib/context";
+import { AGENT_CONTEXT } from "$lib/context";
+import type { AgentContext } from "$lib/context";
 import Icon from "./Icon.svelte";
 import Confirm from "./Confirm.svelte";
 import NetworkInspectModal from "./NetworkInspectModal.svelte";
-import { DockerArtefactAction, type DockerArtefactData, type DockerArtefactInfo, type DockerArtefactItem } from "../../../../common/types";
+import { DockerArtefactAction } from "../../../../common/types";
+import type { DockerArtefactData, DockerArtefactInfo, DockerArtefactItem } from "../../../../common/types";
 
 const { endpoint, artefact } : {
     endpoint: string;

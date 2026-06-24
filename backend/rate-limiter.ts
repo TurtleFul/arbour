@@ -1,13 +1,19 @@
 // "limit" is bugged in Typescript, use "limiter-es6-compat" instead
 // See https://github.com/jhurliman/node-rate-limiter/issues/80
-import { RateLimiter, RateLimiterOpts } from "limiter-es6-compat";
+import type { RateLimiterOpts } from "limiter-es6-compat";
+import { RateLimiter } from "limiter-es6-compat";
 import { log } from "./log";
 
 export interface KumaRateLimiterOpts extends RateLimiterOpts {
     errorMessage : string;
 }
 
-export type KumaRateLimiterCallback = (err : object) => void;
+export interface RateLimiterResult {
+    ok: boolean;
+    msg: string;
+}
+
+export type KumaRateLimiterCallback = (res : RateLimiterResult) => void;
 
 export class KumaRateLimiter {
 

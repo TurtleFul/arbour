@@ -1,6 +1,6 @@
 import { describe, expect, test, spyOn } from "bun:test";
 import { Stack } from "../stack";
-import { ArbourServer } from "../arbour-server";
+import type { ArbourServer } from "../arbour-server";
 import { ValidationError } from "../util-server";
 import {
     RUNNING, RUNNING_AND_EXITED, UNHEALTHY,

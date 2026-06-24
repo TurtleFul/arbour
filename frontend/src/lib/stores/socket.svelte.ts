@@ -1,7 +1,8 @@
-import { io, type Socket } from "socket.io-client";
+import { io } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 import { SvelteMap, SvelteSet } from "svelte/reactivity";
-import { Terminal } from "@xterm/xterm";
+import type { Terminal } from "@xterm/xterm";
 import { AgentSocket } from "../../../../common/agent-socket";
 import type { AgentData, SimpleStackData } from "../../../../common/types";
 import { StackFilter, StackStatusInfo, ALL_ENDPOINTS } from "../../../../common/util-common";

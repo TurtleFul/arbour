@@ -1,8 +1,9 @@
 import { SocketHandler } from "../socket-handler.js";
-import { ArbourServer } from "../arbour-server";
+import type { ArbourServer } from "../arbour-server";
 import { log } from "../log";
-import { callbackError, callbackResult, checkLogin, ArbourSocket } from "../util-server";
-import { LooseObject } from "../../common/util-common";
+import type { ArbourSocket } from "../util-server";
+import { callbackError, callbackResult, checkLogin } from "../util-server";
+import type { LooseObject } from "../../common/util-common";
 
 export class ManageAgentSocketHandler extends SocketHandler {
 

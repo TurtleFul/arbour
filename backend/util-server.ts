@@ -1,5 +1,5 @@
-import { Socket } from "socket.io";
-import { Terminal } from "./terminal";
+import type { Socket } from "socket.io";
+import type { Terminal } from "./terminal";
 
 import { log } from "./log";
 import { ERROR_TYPE_VALIDATION } from "../common/util-common";
@@ -7,9 +7,9 @@ import { getDb } from "./db/index";
 import { user as userTable } from "./db/schema";
 import { eq, and } from "drizzle-orm";
 import { verifyPassword } from "./password-hash";
-import User from "./models/user";
+import { User } from "./models/user";
 import fs from "fs";
-import { AgentManager } from "./agent-manager";
+import type { AgentManager } from "./agent-manager";
 
 export interface JWTDecoded {
     username : string;
@@ -104,8 +104,11 @@ export async function doubleCheckPassword(socket: ArbourSocket, currentPassword:
     return new User(row);
 }
 
-export function fileExists(file : string) {
-    return fs.promises.access(file, fs.constants.F_OK)
-        .then(() => true)
-        .catch(() => false);
+export async function fileExists(file : string) {
+    try {
+        await fs.promises.access(file, fs.constants.F_OK);
+        return true;
+    } catch {
+        return false;
+    }
 }

@@ -1,7 +1,8 @@
 <script lang="ts">
 import { page } from "$app/stores";
 import { t } from "svelte-i18n";
-import { onMount, type Snippet } from "svelte";
+import { onMount } from "svelte";
+import type { Snippet } from "svelte";
 import { goto } from "$app/navigation";
 import { settingsStore } from "$lib/stores/settings.svelte";
 

@@ -22,7 +22,7 @@ export class ImageRepository {
                 remoteDigest = resRemote.stdout.trim();
             }
 
-            imageInfo = new ImageInfo(remoteDigest, imageInfo.localDigest, imageInfo.localId);
+            imageInfo = new ImageInfo(remoteDigest, imageInfo.localDigests, imageInfo.localId);
             this.updateInfo(stack, service, image, imageInfo);
         }
 
@@ -35,30 +35,31 @@ export class ImageRepository {
         const resLocal = await exec("docker", [ "inspect", "--format", "json", image ]);
 
         let localId = "";
-        let localDigest = "";
+        const localDigests: string[] = [];
         if (resLocal.stdout) {
             const localInspect = JSON.parse(resLocal.stdout);
             if (Array.isArray(localInspect) && localInspect[0]) {
                 localId = localInspect[0].Id;
 
-                const localRepoDigest = localInspect[0].RepoDigests;
-                if (Array.isArray(localRepoDigest)) {
-                    localDigest = localRepoDigest[0];
-                }
-                if (!!localDigest) {
-                    const indexOfAt = localDigest.indexOf("@");
-                    if (indexOfAt > 0) {
-                        localDigest = localDigest.substring(indexOfAt + 1);
+                const repoDigests = localInspect[0].RepoDigests;
+                if (Array.isArray(repoDigests)) {
+                    // A tag can carry multiple repo digests (e.g. "repo@sha256:..").
+                    // Keep them all — any match against the remote means up to date.
+                    for (const repoDigest of repoDigests) {
+                        const indexOfAt = String(repoDigest).indexOf("@");
+                        if (indexOfAt > 0) {
+                            localDigests.push(String(repoDigest).substring(indexOfAt + 1));
+                        }
                     }
                 }
             }
         }
 
-        if (!(!!localDigest && !!localId)) {
-            log.warn("updateLocal", "Image '" + image + "': Local id '" + localId + "' digest '" + localDigest + "'");
+        if (!(localDigests.length > 0 && !!localId)) {
+            log.warn("updateLocal", "Image '" + image + "': Local id '" + localId + "' digests '" + localDigests.join(", ") + "'");
         }
 
-        imageInfo = new ImageInfo(imageInfo.remoteDigest, localDigest, localId);
+        imageInfo = new ImageInfo(imageInfo.remoteDigest, localDigests, localId);
         this.updateInfo(stack, service, image, imageInfo);
 
         return imageInfo;
@@ -82,14 +83,33 @@ export class ImageRepository {
 }
 
 export class ImageInfo {
+    readonly localDigests: string[];
+
     constructor(
         public readonly remoteDigest: string,
-        public readonly localDigest: string,
+        localDigests: string[] | string,
         public readonly localId: string
-    ) {}
+    ) {
+        // Accept a single digest (back-compat / callers that only have one) or
+        // the full list. A tag can resolve to several repo digests for the same
+        // content (e.g. the registry re-pushes the manifest), and any of them is
+        // a valid "up to date" match against the remote digest.
+        this.localDigests = (Array.isArray(localDigests) ? localDigests : [ localDigests ]).filter(Boolean);
+    }
+
+    /** Primary local digest (first repo digest) — used for display/back-compat. */
+    get localDigest(): string {
+        return this.localDigests[0] ?? "";
+    }
 
     isImageUpdateAvailable() {
-        return !!this.localDigest && !!this.remoteDigest && this.localDigest !== this.remoteDigest;
+        // An update is available only when the remote digest is not among ANY of
+        // the image's local repo digests. Comparing against just the first digest
+        // produces false positives that never clear (the up-to-date digest may sit
+        // at a later index).
+        return this.localDigests.length > 0
+            && !!this.remoteDigest
+            && !this.localDigests.includes(this.remoteDigest);
     }
 }
 

@@ -1,12 +1,17 @@
+// This module is a dynamic model over arbitrary parsed YAML: a node's data may
+// be a scalar, a map, or an array depending on the compose file. Typing it as
+// `unknown` only pushes equivalent `as` casts onto every accessor and onto
+// consumers (e.g. ArrayInput), adding noise without real safety — so `any` is an
+// intentional, scoped choice here rather than across the codebase.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Document, Pair, parseDocument, Scalar } from "yaml";
 import dotenv from "dotenv";
 import type { DotenvParseOutput } from "dotenv";
 import type { LooseObject } from "./util-common";
-// @ts-ignore
+// @ts-expect-error @inventage/envsubst has no type declarations
 import { replaceVariablesSync } from "@inventage/envsubst";
 
-function convertToBoolean(value: any, fallbackVal: boolean | undefined = undefined): boolean | undefined {
+function convertToBoolean(value: unknown, fallbackVal: boolean | undefined = undefined): boolean | undefined {
     if (value === true || value === "true") {
         return true;
     }
@@ -501,7 +506,7 @@ function envsubst(string : string, variables : LooseObject) : string {
 function envsubstYAML(content : string, env : DotenvParseOutput) : string {
     const doc = parseDocument(content);
     if (doc.contents) {
-        // @ts-ignore
+        // @ts-expect-error yaml AST node shape is not statically typed here
         for (const item of doc.contents.items) {
             traverseYAML(item, env);
         }
@@ -515,9 +520,9 @@ function envsubstYAML(content : string, env : DotenvParseOutput) : string {
  * @param env
  */
 function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
-    // @ts-ignore
+    // @ts-expect-error yaml AST node shape is not statically typed here
     if (pair.value && pair.value.items) {
-        // @ts-ignore
+        // @ts-expect-error yaml AST node shape is not statically typed here
         for (const item of pair.value.items) {
             if (item instanceof Pair) {
                 traverseYAML(item, env);
@@ -529,9 +534,9 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
                 }
             }
         }
-    // @ts-ignore
+    // @ts-expect-error yaml AST node shape is not statically typed here
     } else if (pair.value && typeof(pair.value.value) === "string") {
-        // @ts-ignore
+        // @ts-expect-error yaml AST node shape is not statically typed here
         pair.value.value = envsubst(pair.value.value, env);
     }
 }
@@ -541,7 +546,7 @@ function copyYAMLComments(doc : Document, src : Document) {
     doc.commentBefore = src.commentBefore;
 
     if (doc && doc.contents && src && src.contents) {
-        // @ts-ignore
+        // @ts-expect-error yaml AST node shape is not statically typed here
         copyYAMLCommentsItems(doc.contents.items, src.contents.items);
     }
 }

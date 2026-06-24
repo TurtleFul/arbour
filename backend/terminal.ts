@@ -1,7 +1,7 @@
-import { ArbourServer } from "./arbour-server";
+import type { ArbourServer } from "./arbour-server";
 import * as os from "node:os";
 import { LimitQueue } from "./utils/limit-queue";
-import { ArbourSocket } from "./util-server";
+import type { ArbourSocket } from "./util-server";
 import {
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
@@ -9,7 +9,8 @@ import {
 } from "../common/util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
-import { spawn as ptySpawn, type IPty } from "bun-pty";
+import { spawn as ptySpawn } from "bun-pty";
+import type { IPty } from "bun-pty";
 
 /**
  * Terminal for running commands, no user interaction

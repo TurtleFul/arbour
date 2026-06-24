@@ -2,7 +2,7 @@ import { log } from "./log";
 import { getDb } from "./db/index";
 import { setting } from "./db/schema";
 import { eq, inArray } from "drizzle-orm";
-import { LooseObject } from "../common/util-common";
+import type { LooseObject } from "../common/util-common";
 
 export class Settings {
 
@@ -46,7 +46,7 @@ export class Settings {
         }
     }
 
-    static async set(key: string, value: object | string | number | boolean, type: string | null = null) {
+    static async set(key: string, value: Record<PropertyKey, unknown> | unknown[] | string | number | boolean, type: string | null = null) {
         const db = getDb();
         const existing = db.select({ id: setting.id })
             .from(setting)

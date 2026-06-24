@@ -98,7 +98,15 @@ export default [
             "no-control-regex": "off",
             "one-var": ["error", "never"],
             "max-statements-per-line": ["error", { "max": 2 }],
-            "@typescript-eslint/ban-ts-comment": "off",
+            "@typescript-eslint/ban-ts-comment": ["error", {
+                "ts-ignore": true,
+                "ts-expect-error": "allow-with-description",
+                "minimumDescriptionLength": 3
+            }],
+            "@typescript-eslint/consistent-type-imports": ["error", {
+                "fixStyle": "separate-type-imports"
+            }],
+            "@typescript-eslint/no-explicit-any": "warn",
             "@typescript-eslint/no-unused-vars": ["warn", {
                 "args": "none",
                 "caughtErrors": "none"

@@ -1,16 +1,18 @@
 import { AgentSocketHandler } from "../agent-socket-handler";
-import { AgentSocket } from "../../common/agent-socket";
-import { ArbourServer } from "../arbour-server";
+import type { AgentSocket } from "../../common/agent-socket";
+import type { ArbourServer } from "../arbour-server";
 import { log } from "../log";
+import type {
+    ArbourSocket } from "../util-server";
 import {
     callbackResult,
     callbackError,
     checkLogin,
-    ArbourSocket,
     ValidationError
 } from "../util-server";
 import { AgentMaintenance } from "../agent-maintenance";
-import { DockerArtefactAction, DockerArtefactData, DockerArtefactInfos } from "../../common/types";
+import type { DockerArtefactData } from "../../common/types";
+import { DockerArtefactAction, DockerArtefactInfos } from "../../common/types";
 
 export class AgentMaintenanceSocketHandler extends AgentSocketHandler {
 

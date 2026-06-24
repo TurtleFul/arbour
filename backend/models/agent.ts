@@ -1,6 +1,6 @@
 import { getDb } from "../db/index";
 import { agent as agentTable } from "../db/schema";
-import { AgentData } from "../../common/types";
+import type { AgentData } from "../../common/types";
 
 export type AgentRow = typeof agentTable.$inferSelect;
 
@@ -52,5 +52,3 @@ export class Agent {
         };
     }
 }
-
-export default Agent;

@@ -33,12 +33,17 @@ $effect(() => {
 });
 
 $effect(() => {
-    if (uri) {
-        QRCode.toDataURL(uri, { color: { light: "#ffffffff" },
-            width: 210 }).then((url) => {
-            qrDataUrl = url;
-        });
+    if (!uri) {
+        return;
     }
+    void (async () => {
+        try {
+            qrDataUrl = await QRCode.toDataURL(uri, { color: { light: "#ffffffff" },
+                width: 210 });
+        } catch (e) {
+            console.error("Failed to render 2FA QR code", e);
+        }
+    })();
 });
 
 onMount(() => {

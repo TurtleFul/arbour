@@ -1,8 +1,9 @@
 import { SocketHandler } from "../socket-handler.js";
-import { ArbourServer } from "../arbour-server";
+import type { ArbourServer } from "../arbour-server";
 import { log } from "../log";
-import { checkLogin, ArbourSocket } from "../util-server";
-import { AgentSocket } from "../../common/agent-socket";
+import type { ArbourSocket } from "../util-server";
+import { checkLogin } from "../util-server";
+import type { AgentSocket } from "../../common/agent-socket";
 import { ALL_ENDPOINTS } from "../../common/util-common";
 
 export class AgentProxySocketHandler extends SocketHandler {

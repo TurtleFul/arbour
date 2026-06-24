@@ -65,5 +65,4 @@ class CheckVersion {
     }
 }
 
-const checkVersion = new CheckVersion();
-export default checkVersion;
+export const checkVersion = new CheckVersion();

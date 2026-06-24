@@ -6,7 +6,7 @@ import { User } from "../backend/models/user";
 import { ArbourServer } from "../backend/arbour-server";
 import { log } from "../backend/log";
 import { io } from "socket.io-client";
-import { BaseRes } from "../common/util-common";
+import type { BaseRes } from "../common/util-common";
 
 console.log("== Arbour Reset Password Tool ==");
 

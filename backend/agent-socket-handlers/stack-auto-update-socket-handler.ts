@@ -1,8 +1,10 @@
 import { AgentSocketHandler } from "../agent-socket-handler";
-import { ArbourServer } from "../arbour-server";
-import { callbackError, callbackResult, checkLogin, ArbourSocket, ValidationError } from "../util-server";
-import { AgentSocket } from "../../common/agent-socket";
-import { StackAutoUpdateSettings } from "../../common/types";
+import { log } from "../log";
+import type { ArbourServer } from "../arbour-server";
+import type { ArbourSocket } from "../util-server";
+import { callbackError, callbackResult, checkLogin, ValidationError } from "../util-server";
+import type { AgentSocket } from "../../common/agent-socket";
+import type { StackAutoUpdateSettings } from "../../common/types";
 
 export class StackAutoUpdateSocketHandler extends AgentSocketHandler {
     create(socket: ArbourSocket, server: ArbourServer, agentSocket: AgentSocket) {
@@ -60,7 +62,9 @@ export class StackAutoUpdateSocketHandler extends AgentSocketHandler {
         agentSocket.on("checkForUpdates", async (callback: unknown) => {
             try {
                 checkLogin(socket);
-                server.checkForImageUpdates().catch(() => {});
+                server.checkForImageUpdates().catch((err) => {
+                    log.error("checkForUpdates", err);
+                });
                 callbackResult({ ok: true,
                     msg: "checkForUpdatesStarted",
                     msgi18n: true }, callback);

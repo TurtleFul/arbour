@@ -50,5 +50,3 @@ export class User {
         }, jwtSecret);
     }
 }
-
-export default User;

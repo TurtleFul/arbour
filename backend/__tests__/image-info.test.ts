@@ -22,6 +22,30 @@ describe("ImageInfo.isImageUpdateAvailable", () => {
     test("true when localDigest and remoteDigest differ", () => {
         expect(new ImageInfo("sha256:remote", "sha256:local", "id1").isImageUpdateAvailable()).toBe(true);
     });
+
+    test("false when remote matches a non-first local repo digest", () => {
+        // A tag can resolve to several repo digests for identical content (the
+        // registry re-pushed the manifest). The up-to-date digest may not be
+        // first; matching ANY of them means no update is available.
+        const info = new ImageInfo("sha256:remote", [ "sha256:stale", "sha256:remote" ], "id1");
+        expect(info.isImageUpdateAvailable()).toBe(false);
+    });
+
+    test("true when remote matches none of the local repo digests", () => {
+        const info = new ImageInfo("sha256:new", [ "sha256:old1", "sha256:old2" ], "id1");
+        expect(info.isImageUpdateAvailable()).toBe(true);
+    });
+
+    test("localDigest getter returns the first repo digest", () => {
+        const info = new ImageInfo("sha256:remote", [ "sha256:first", "sha256:second" ], "id1");
+        expect(info.localDigest).toBe("sha256:first");
+    });
+
+    test("ignores empty entries in the local digest list", () => {
+        const info = new ImageInfo("sha256:remote", [ "", "sha256:remote" ], "id1");
+        expect(info.isImageUpdateAvailable()).toBe(false);
+        expect(info.localDigests).toEqual([ "sha256:remote" ]);
+    });
 });
 
 describe("isRecreateNecessary", () => {

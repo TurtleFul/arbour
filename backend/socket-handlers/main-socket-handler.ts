@@ -1,7 +1,7 @@
-// @ts-ignore
+// @ts-expect-error third-party module is untyped
 import composerize from "composerize";
 import { SocketHandler } from "../socket-handler.js";
-import { ArbourServer } from "../arbour-server";
+import type { ArbourServer } from "../arbour-server";
 import { log } from "../log";
 import { getDb } from "../db/index";
 import { user as userTable } from "../db/schema";
@@ -9,12 +9,13 @@ import { eq, and } from "drizzle-orm";
 import { loginRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
+import type {
+    ArbourSocket,
+    JWTDecoded } from "../util-server";
 import {
     callbackError,
     checkLogin,
-    ArbourSocket,
     doubleCheckPassword,
-    JWTDecoded,
     ValidationError
 } from "../util-server";
 import { passwordStrength } from "check-password-strength";
@@ -176,7 +177,7 @@ export class MainSocketHandler extends SocketHandler {
                 }
 
                 if (data.token) {
-                    // @ts-ignore
+                    // @ts-expect-error third-party module is untyped
                     const verify = notp.totp.verify(data.token, user.twofa_secret, twoFAVerifyOptions);
 
                     if (user.twofa_last_token !== data.token && verify) {

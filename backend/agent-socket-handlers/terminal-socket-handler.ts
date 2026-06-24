@@ -1,9 +1,10 @@
-import { ArbourServer } from "../arbour-server";
-import { callbackError, callbackResult, checkLogin, ArbourSocket, ValidationError } from "../util-server";
+import type { ArbourServer } from "../arbour-server";
+import type { ArbourSocket } from "../util-server";
+import { callbackError, callbackResult, checkLogin, ValidationError } from "../util-server";
 import { log } from "../log";
 import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { AgentSocketHandler } from "../agent-socket-handler";
-import { AgentSocket } from "../../common/agent-socket";
+import type { AgentSocket } from "../../common/agent-socket";
 
 export class TerminalSocketHandler extends AgentSocketHandler {
     create(socket : ArbourSocket, server : ArbourServer, agentSocket : AgentSocket) {
@@ -166,9 +167,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 }
             } catch (e) {
                 log.warn("terminalResize",
-                        // Added to prevent the lint error when adding the type
-                        // and ts type checker saying type is unknown.
-                        // @ts-ignore
+                        // @ts-expect-error e is typed as unknown in the catch clause
                         `Error on ${terminalName}: ${e.message}`
                 );
             }

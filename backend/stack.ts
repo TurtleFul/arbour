@@ -1,8 +1,9 @@
-import { ArbourServer } from "./arbour-server";
+import type { ArbourServer } from "./arbour-server";
 import fs, { promises as fsAsync } from "fs";
 import { log } from "./log";
 import yaml from "yaml";
-import { ArbourSocket, fileExists, ValidationError } from "./util-server";
+import type { ArbourSocket } from "./util-server";
+import { fileExists, ValidationError } from "./util-server";
 import path from "path";
 import {
     acceptedComposeFileNames,
@@ -20,7 +21,7 @@ import { InteractiveTerminal, Terminal } from "./terminal";
 import { exec } from "./spawn";
 import { Settings } from "./settings";
 import { ImageRepository, isRecreateNecessary, shouldCheckImageUpdates, isServiceImageUpdateAvailable } from "./image-repository";
-import { SimpleStackData, StackData, ServiceData, StatsData } from "../common/types";
+import type { SimpleStackData, StackData, ServiceData, StatsData } from "../common/types";
 import { ComposeDocument } from "../common/compose-document";
 import { LABEL_STATUS_IGNORE, LABEL_IMAGEUPDATES_CHECK, LABEL_IMAGEUPDATES_IGNORE } from "../common/compose-labels";
 
@@ -702,6 +703,12 @@ export class Stack {
             if (exitCode !== 0) {
                 throw new Error("Failed to restart, please check the terminal output for more information.");
             }
+
+            // Recompute state from the redeployed containers so the
+            // imageUpdatesAvailable flag (and its arrow) clears immediately
+            // instead of lingering until the next periodic refresh.
+            await this.updateImageInfos();
+            await this.updateData();
         }
 
         if (pruneAfterUpdate) {

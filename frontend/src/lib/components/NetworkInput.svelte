@@ -3,7 +3,8 @@ import { getContext, onMount } from "svelte";
 import { t } from "svelte-i18n";
 import { socketStore } from "$lib/stores/socket.svelte";
 import type { SocketRes } from "$lib/types";
-import { COMPOSE_CONTEXT, type ComposeContext } from "$lib/context";
+import { COMPOSE_CONTEXT } from "$lib/context";
+import type { ComposeContext } from "$lib/context";
 import type { ComposeNetwork } from "../../../../common/compose-document";
 import Icon from "./Icon.svelte";
 

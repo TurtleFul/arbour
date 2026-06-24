@@ -1,5 +1,6 @@
 import { getDb } from "./db/index";
-import { serviceEventLog, EventType, EventTrigger } from "./db/schema";
+import type { EventType, EventTrigger } from "./db/schema";
+import { serviceEventLog } from "./db/schema";
 import { desc, eq, and, or } from "drizzle-orm";
 import { log } from "./log";
 

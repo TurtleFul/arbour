@@ -1,13 +1,13 @@
 import { Cron } from "croner";
 import { log } from "./log";
 import { getDb } from "./db/index";
-import { stackAutoUpdate as stackAutoUpdateTable, AutoUpdateMode } from "./db/schema";
+import { stackAutoUpdate as stackAutoUpdateTable } from "./db/schema";
 import { eq } from "drizzle-orm";
 import { Stack } from "./stack";
-import { ArbourServer } from "./arbour-server";
-import { StackAutoUpdateSettings } from "../common/types";
+import type { ArbourServer } from "./arbour-server";
+import type { StackAutoUpdateSettings } from "../common/types";
 import { logServiceEvent } from "./service-event-logger";
-import type { EventTrigger } from "./db/schema";
+import type { EventTrigger, AutoUpdateMode } from "./db/schema";
 
 export class StackAutoUpdateManager {
 

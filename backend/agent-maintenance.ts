@@ -1,7 +1,8 @@
-import { ArbourServer } from "./arbour-server";
-import { DockerArtefactAction, DockerArtefactData, DockerArtefactInfos, NetworkInspectData } from "../common/types";
+import type { ArbourServer } from "./arbour-server";
+import type { DockerArtefactData, NetworkInspectData } from "../common/types";
+import { DockerArtefactAction, DockerArtefactInfos } from "../common/types";
 import { getAgentMaintenanceTerminalName } from "../common/util-common";
-import { ArbourSocket } from "./util-server";
+import type { ArbourSocket } from "./util-server";
 import { Terminal } from "./terminal";
 import { log } from "./log";
 import { exec } from "./spawn";

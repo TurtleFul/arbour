@@ -1,7 +1,8 @@
 <script lang="ts">
 import { t } from "svelte-i18n";
 import { langStore, languageList } from "$lib/stores/lang.svelte";
-import { themeStore, type ColorTheme } from "$lib/stores/theme.svelte";
+import { themeStore } from "$lib/stores/theme.svelte";
+import type { ColorTheme } from "$lib/stores/theme.svelte";
 
 const langs = Object.entries(languageList);
 </script>
