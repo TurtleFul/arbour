@@ -427,6 +427,39 @@ function importStack() {
     });
 }
 
+// Tidy a cron expression for display: collapse stray whitespace, and if the
+// user ran the fields together (e.g. "03***") split them back into tokens
+// ("0 3 * * *"). Multi-digit fields are only recoverable when spaces are kept,
+// so a spaced input is just whitespace-normalised.
+function normalizeCron(value: string): string {
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return "";
+    }
+    if (/\s/.test(trimmed)) {
+        return trimmed.replace(/\s+/g, " ");
+    }
+    // No spaces: walk the string and start a new field at every "*" or at a digit
+    // that follows another digit/"*". Operators (/ - ,) keep their operands in the
+    // same field so steps/ranges like "*/5" stay intact.
+    const tokens: string[] = [];
+    let current = "";
+    for (const ch of trimmed) {
+        const prev = current[current.length - 1];
+        const startNew = current !== "" && (ch === "*" || (/\d/.test(ch) && /[\d*]/.test(prev)));
+        if (startNew) {
+            tokens.push(current);
+            current = ch;
+        } else {
+            current += ch;
+        }
+    }
+    if (current) {
+        tokens.push(current);
+    }
+    return tokens.join(" ");
+}
+
 function saveAutoUpdateSettings() {
     const schedule = autoUpdateMode === "scheduled" ? autoUpdateCustomSchedule.trim() || null : null;
     if (autoUpdateMode === "scheduled" && !schedule) {
@@ -694,7 +727,8 @@ onDestroy(() => {
                             <div class="mt-3">
                                 <!-- svelte-ignore a11y_label_has_associated_control -->
                                 <label class="form-label">{$t("autoUpdateSchedule")}</label>
-                                <input class="form-control monospace" bind:value={autoUpdateCustomSchedule} placeholder="0 3 * * *" />
+                                <input class="form-control monospace" bind:value={autoUpdateCustomSchedule} placeholder="0 3 * * *"
+                                    onblur={() => (autoUpdateCustomSchedule = normalizeCron(autoUpdateCustomSchedule))} />
                                 <div class="form-text">{$t("autoUpdateCronHint")}</div>
                             </div>
                         {/if}

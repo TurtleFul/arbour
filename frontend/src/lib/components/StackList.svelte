@@ -214,17 +214,24 @@ onDestroy(() => {
         {/if}
 
         {#each agentStackList as agent (agent.endpoint)}
-            {#if socketStore.agentCount > 1}
-                <button class="agent-header" onclick={() => toggleAgent(agent.endpoint)}>
-                    <Icon name={closedAgents.get(agent.endpoint) ? "chevron-right" : "chevron-down"} />
-                    <span>{socketStore.getAgentName(agent.endpoint)}</span>
-                </button>
-            {/if}
-            {#if !closedAgents.get(agent.endpoint)}
-                {#each agent.stacks as stack (stack.name + stack.endpoint)}
-                    <StackListItem {stack} />
-                {/each}
-            {/if}
+            {@const grouped = socketStore.agentCount > 1}
+            <div class="agent-group" class:grouped>
+                {#if grouped}
+                    <button class="agent-header" class:closed={closedAgents.get(agent.endpoint)}
+                        onclick={() => toggleAgent(agent.endpoint)}>
+                        <Icon name={closedAgents.get(agent.endpoint) ? "chevron-right" : "chevron-down"} class="agent-chevron" />
+                        <span class="agent-name">{socketStore.getAgentName(agent.endpoint)}</span>
+                        <span class="agent-count">{agent.stacks.length}</span>
+                    </button>
+                {/if}
+                {#if !closedAgents.get(agent.endpoint)}
+                    <div class="agent-stacks">
+                        {#each agent.stacks as stack (stack.name + stack.endpoint)}
+                            <StackListItem {stack} />
+                        {/each}
+                    </div>
+                {/if}
+            </div>
         {/each}
     </div>
 </div>
@@ -337,6 +344,20 @@ onDestroy(() => {
     padding: 0.5rem;
 }
 
+.agent-group { display: flex; flex-direction: column; }
+.agent-group.grouped { margin-bottom: 0.5rem; }
+
+.agent-stacks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.agent-group.grouped .agent-stacks {
+    padding: 0.45rem 0 0.15rem 0.6rem;
+    margin-left: 0.35rem;
+    border-left: 2px solid var(--arbour-border);
+}
+
 .empty-msg {
     text-align: center;
     padding: 1.5rem;
@@ -345,20 +366,48 @@ onDestroy(() => {
 }
 
 .agent-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     width: 100%;
     background: var(--arbour-bg-header);
-    border: none;
-    border-bottom: 1px solid var(--arbour-border);
+    border: 1px solid var(--arbour-border);
+    border-radius: var(--arbour-radius-sm);
     color: var(--arbour-text-on-header-muted, var(--arbour-text-muted));
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 0.4rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.45rem 0.6rem;
     cursor: pointer;
     text-align: left;
     user-select: none;
+    transition: background 0.15s, color 0.15s;
 }
 .agent-header:hover { background: var(--arbour-bg-header-active); color: var(--arbour-text-on-header); }
+
+.agent-name { flex: 1; }
+
+.agent-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    padding: 0 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--arbour-text-on-header-muted, var(--arbour-text-muted));
+    background: var(--arbour-bg-deep);
+    border: 1px solid var(--arbour-border);
+    border-radius: var(--arbour-radius-pill);
+}
+
+.agent-header :global(.agent-chevron) {
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
 </style>
