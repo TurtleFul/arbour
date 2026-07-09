@@ -711,7 +711,7 @@ dialog::backdrop {
     margin-bottom: 1rem;
     color: var(--arbour-text);
     border-color: var(--arbour-border);
-    vertical-align: top;
+    vertical-align: middle;
     border-collapse: collapse;
 
     > :not(caption) > * > * {
@@ -722,6 +722,10 @@ dialog::backdrop {
 
     thead { vertical-align: bottom; }
     tbody { vertical-align: inherit; }
+
+    /* Browsers center <th> by default — keep headers flush with the
+       left-aligned cell content beneath them. */
+    th { text-align: left; }
 }
 
 .table-sm > :not(caption) > * > * { padding: 0.25rem; }

@@ -165,6 +165,26 @@ $effect(() => {
     ] });
 });
 
+// Replace only the changed range (common prefix/suffix stripped) so CodeMirror
+// maps selection and scroll position through external updates instead of
+// resetting them, e.g. when a poll delivers a compose file changed on disk.
+function minimalDiff(current: string, next: string) {
+    let from = 0;
+    const minLen = Math.min(current.length, next.length);
+    while (from < minLen && current[from] === next[from]) {
+        from++;
+    }
+    let curEnd = current.length;
+    let nextEnd = next.length;
+    while (curEnd > from && nextEnd > from && current[curEnd - 1] === next[nextEnd - 1]) {
+        curEnd--;
+        nextEnd--;
+    }
+    return { from,
+        to: curEnd,
+        insert: next.slice(from, nextEnd) };
+}
+
 $effect(() => {
     const next = value; // read first so this effect always tracks `value`, even
     // on the initial run before `view` is assigned
@@ -173,9 +193,7 @@ $effect(() => {
     }
     const current = view.state.doc.toString();
     if (current !== next) {
-        view.dispatch({ changes: { from: 0,
-            to: current.length,
-            insert: next } });
+        view.dispatch({ changes: minimalDiff(current, next) });
     }
     lastEditorValue = next;
 });

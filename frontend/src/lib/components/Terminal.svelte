@@ -30,9 +30,12 @@ const {
 let terminalEl: HTMLDivElement;
 let terminal: XTerm;
 let fitAddon: FitAddon;
+let resizeObserver: ResizeObserver | undefined;
 let terminalInputBuffer = "";
 let cursorPosition = 0;
-let mounted = false; // plain (non-reactive) flag, won't re-trigger $effect
+// Plain (non-reactive) flag, won't re-trigger $effect. Set on the first
+// successful fit+bind (once the container has a size), not in onMount.
+let mounted = false;
 
 function makeTimestampTransform(m: string): ((data: string) => string) | null {
     if (m === "full") {
@@ -78,17 +81,17 @@ function rebind() {
 }
 
 function updateTerminalSize() {
+    // Fitting against a hidden or not-yet-laid-out container (e.g. a dialog
+    // before showModal()) yields a garbage 1–2 column terminal, so only fit
+    // when the element has real dimensions.
+    if (!terminalEl.clientWidth || !terminalEl.clientHeight) {
+        return;
+    }
     if (!fitAddon) {
         fitAddon = new FitAddon();
         terminal.loadAddon(fitAddon);
-        window.addEventListener("resize", onResizeEvent);
     }
     fitAddon.fit();
-}
-
-function onResizeEvent() {
-    fitAddon.fit();
-    socketStore.emitAgent(endpoint, "terminalResize", name, terminal.rows, terminal.cols);
 }
 
 function mainTerminalConfig() {
@@ -166,26 +169,39 @@ onMount(() => {
 
     terminal.onCursorMove(() => onhasdata?.());
 
-    socketStore.setTerminalTransform(name, makeTimestampTransform(timestampMode));
-    bind();
-
-    mounted = true;
-
-    if (mode === "mainTerminal") {
-        socketStore.emitAgent(endpoint, "mainTerminal", name, (res: SocketRes) => {
-            if (!res.ok) {
-                socketStore.toastRes(res);
+    // Defer the first fit + bind until the container actually has a size —
+    // inside a dialog the element is 0×0 until showModal() runs, and binding
+    // earlier replays the buffer into a mis-sized terminal. The observer also
+    // handles window resizes and layout changes afterwards.
+    resizeObserver = new ResizeObserver(() => {
+        if (!terminalEl.clientWidth || !terminalEl.clientHeight) {
+            return;
+        }
+        updateTerminalSize();
+        if (!mounted) {
+            mounted = true;
+            socketStore.setTerminalTransform(name, makeTimestampTransform(timestampMode));
+            bind();
+            if (mode === "mainTerminal") {
+                socketStore.emitAgent(endpoint, "mainTerminal", name, (res: SocketRes) => {
+                    if (!res.ok) {
+                        socketStore.toastRes(res);
+                    }
+                });
             }
-        });
-    }
-
-    updateTerminalSize();
+        } else if (mode !== "displayOnly") {
+            socketStore.emitAgent(endpoint, "terminalResize", name, terminal.rows, terminal.cols);
+        }
+    });
+    resizeObserver.observe(terminalEl);
 });
 
 onDestroy(() => {
-    window.removeEventListener("resize", onResizeEvent);
-    socketStore.unbindTerminal(endpoint, name);
-    socketStore.setTerminalTransform(name, null);
+    resizeObserver?.disconnect();
+    // Pass this instance so other consumers of the same terminal name (e.g. an
+    // inline log behind a closing modal) keep their stream; unbindTerminal only
+    // leaves server-side and clears the transform when the last one detaches.
+    socketStore.unbindTerminal(endpoint, name, terminal);
     terminal?.dispose();
 });
 

@@ -239,6 +239,17 @@ export class Terminal {
     public static getTerminalCount() {
         return Terminal.terminalMap.size;
     }
+
+    /**
+     * Close every open terminal and kill its underlying process.
+     * Used on server shutdown so no spawned PTYs outlive the server.
+     */
+    public static closeAll() {
+        for (const terminal of Terminal.terminalMap.values()) {
+            terminal.close();
+        }
+        Terminal.terminalMap.clear();
+    }
 }
 
 /**

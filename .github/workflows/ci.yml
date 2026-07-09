@@ -83,8 +83,38 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Full history so the notes step can diff against the previous tag
+          fetch-depth: 0
+
+      # GitHub's --generate-notes builds notes from merged PRs, which stay
+      # empty for direct-to-main commits — so build them from the commit log
+      # between the previous tag and this one, grouped by conventional prefix.
+      - name: Generate release notes
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          prev="$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || true)"
+          if [ -n "$prev" ]; then
+            range="${prev}..${tag}"
+          else
+            range="$tag"
+          fi
+
+          commits="$(git log --no-merges --pretty='- %s (%h)' "$range")"
+          feats="$(printf '%s\n' "$commits" | grep -E '^- feat(\(|:|!)' || true)"
+          fixes="$(printf '%s\n' "$commits" | grep -E '^- fix(\(|:|!|es )' || true)"
+          other="$(printf '%s\n' "$commits" | grep -vE '^- (feat|fix)(\(|:|!|es )' | grep -v '^- chore: release' || true)"
+
+          {
+            if [ -n "$feats" ]; then printf '## Features\n%s\n\n' "$feats"; fi
+            if [ -n "$fixes" ]; then printf '## Fixes\n%s\n\n' "$fixes"; fi
+            if [ -n "$other" ]; then printf '## Other changes\n%s\n\n' "$other"; fi
+            if [ -n "$prev" ]; then
+              printf '**Full Changelog**: https://github.com/%s/compare/%s...%s\n' "$GITHUB_REPOSITORY" "$prev" "$tag"
+            fi
+          } > release-notes.md
 
       - name: Create release
-        run: gh release create "${{ github.ref_name }}" --generate-notes --verify-tag
+        run: gh release create "${{ github.ref_name }}" --notes-file release-notes.md --verify-tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

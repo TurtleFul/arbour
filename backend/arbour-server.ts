@@ -28,6 +28,7 @@ import { DockerSocketHandler } from "./agent-socket-handlers/docker-socket-handl
 import expressStaticGzip from "express-static-gzip";
 import path from "path";
 import { TerminalSocketHandler } from "./agent-socket-handlers/terminal-socket-handler";
+import { Terminal } from "./terminal";
 import { Stack } from "./stack";
 import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
@@ -784,7 +785,7 @@ export class ArbourServer {
         log.info("server", "Shutdown requested");
         log.info("server", "Called signal: " + signal);
 
-        // TODO: Close all terminals?
+        Terminal.closeAll();
 
         await Database.close();
         Settings.stopCacheCleaner();

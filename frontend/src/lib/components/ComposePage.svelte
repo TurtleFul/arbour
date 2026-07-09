@@ -47,7 +47,6 @@ const envDefault = "# VARIABLE=value #comment";
 const LS_KEY = "logTimestampMode";
 
 interface ProgressTerminalInstance { show(): void; hideWithTimeout(): void; }
-interface TerminalInstance { rebind(): void; updateTerminalSize(): void; }
 
 let stack = $state<StackData>({} as StackData);
 let composeDocument = $state(new ComposeDocument());
@@ -98,8 +97,6 @@ $effect(() => {
 });
 let containerListRef = $state<HTMLElement | undefined>(undefined);
 let progressTerminalRef = $state<ProgressTerminalInstance | undefined>(undefined);
-let combinedTerminalRef = $state<TerminalInstance | undefined>(undefined);
-let modalTerminalRef = $state<TerminalInstance | undefined>(undefined);
 let stopUpdateTimeouts = false;
 let yamlErrorTimeout: ReturnType<typeof setTimeout> | undefined;
 let updateStackDataTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -220,14 +217,6 @@ $effect(() => {
             stack = { ...stack,
                 composeYAML: yaml };
         }
-    }
-});
-
-$effect(() => {
-    if (logExpanded) {
-        setTimeout(() => modalTerminalRef?.updateTerminalSize(), 350);
-    } else {
-        setTimeout(() => combinedTerminalRef?.rebind(), 0);
     }
 });
 
@@ -666,7 +655,7 @@ onDestroy(() => {
                         </div>
                     </div>
                     <div class="log-terminal" style="height: 315px;">
-                        <Terminal bind:this={combinedTerminalRef} name={combinedTerminalName} {endpoint}
+                        <Terminal name={combinedTerminalName} {endpoint}
                             rows={COMBINED_TERMINAL_ROWS} cols={COMBINED_TERMINAL_COLS}
                             timestampMode={logTimestampMode} />
                     </div>
@@ -773,7 +762,7 @@ onDestroy(() => {
         </div>
         <div class="modal-body log-modal-body">
             {#if logExpanded}
-                <Terminal bind:this={modalTerminalRef} name={combinedTerminalName} {endpoint}
+                <Terminal name={combinedTerminalName} {endpoint}
                     timestampMode={logTimestampMode} />
             {/if}
         </div>

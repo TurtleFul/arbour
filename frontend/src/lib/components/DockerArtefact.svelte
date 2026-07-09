@@ -77,6 +77,13 @@ export function loadData() {
     });
 }
 
+const allSelected = $derived(tableData.length > 0 && selectedItems.length === tableData.length);
+const someSelected = $derived(selectedItems.length > 0 && !allSelected);
+
+function toggleSelectAll(checked: boolean) {
+    selectedItems = checked ? tableData.map(item => item.id) : [];
+}
+
 function toggleSort(col: string) {
     if (sortCol !== col) {
         sortCol = col; sortDir = "UP";
@@ -139,10 +146,21 @@ onMount(loadData);
         <div class="loading">{$t("fetchingData")}</div>
     {:else}
         <div class="table-responsive">
-            <table class="table table-sm table-striped">
+            <table class="table table-sm table-striped table-hover">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th class="check-col">
+                            <input
+                                type="checkbox"
+                                class="form-check-input row-check"
+                                checked={allSelected}
+                                indeterminate={someSelected}
+                                disabled={tableData.length === 0}
+                                aria-label={$t("selectAll")}
+                                title={$t("selectAll")}
+                                onchange={(e) => toggleSelectAll((e.target as HTMLInputElement).checked)}
+                            />
+                        </th>
                         {#each dataHeader as title (title)}
                             <th class="sortable" onclick={() => toggleSort(title)}>
                                 {title}
@@ -153,9 +171,14 @@ onMount(loadData);
                     </tr>
                 </thead>
                 <tbody>
+                    {#if tableData.length === 0}
+                        <tr>
+                            <td class="empty-msg" colspan={dataHeader.length + 2}>{$t("nothingFoundMsg")}</td>
+                        </tr>
+                    {/if}
                     {#each tableData as item (item.id)}
                         <tr>
-                            <td>
+                            <td class="check-col">
                                 <input
                                     type="checkbox"
                                     class="form-check-input row-check"
@@ -173,13 +196,16 @@ onMount(loadData);
                                 <td class="artefact-cell">{getValue(value)}</td>
                             {/each}
                             <td class="action-cell text-nowrap">
-                                {#if item.dangling}
-                                    <span class="badge bg-info me-2">{item.danglingLabel}</span>
-                                {/if}
+                                <!-- Button first, badge after: the button keeps the
+                                     same position in every row instead of being
+                                     pushed aside when a badge is present. -->
                                 {#if artefact.name === "network"}
-                                    <button class="btn btn-sm btn-outline-secondary py-0 px-1" title={$t("networkInspect")} onclick={() => openNetworkInspect(item.id)}>
+                                    <button class="btn btn-sm btn-normal" title={$t("networkInspect")} onclick={() => openNetworkInspect(item.id)}>
                                         <Icon name="circle-info" />
                                     </button>
+                                {/if}
+                                {#if item.dangling}
+                                    <span class="badge bg-info ms-2">{item.danglingLabel}</span>
                                 {/if}
                             </td>
                         </tr>
@@ -248,7 +274,36 @@ onMount(loadData);
 .loading { padding: 1rem; color: var(--arbour-text-muted); }
 
 .sortable { cursor: pointer; user-select: none; }
-.sort-sym { font-family: monospace; margin-left: 4px; color: var(--arbour-primary); }
+
+/* Reserved width so headers don't shift when the arrow appears or moves
+   between columns. */
+.sort-sym {
+    display: inline-block;
+    width: 1em;
+    font-family: monospace;
+    margin-left: 4px;
+    color: var(--arbour-primary);
+}
+
+.check-col {
+    width: 2.25rem;
+    text-align: center;
+}
+
+/* The global .form-check-input is styled for label rows (top-aligned with an
+   offset); inside table cells the box centers on the row instead. */
+.check-col .row-check {
+    vertical-align: middle;
+    margin-top: 0;
+    width: 1.05em;
+    height: 1.05em;
+}
+
+.empty-msg {
+    padding: 1rem;
+    text-align: center;
+    color: var(--arbour-text-muted);
+}
 
 .artefact-cell {
     max-width: 200px;
@@ -259,6 +314,4 @@ onMount(loadData);
 
 .row-check { width: 1em; height: 1em; margin: 0; cursor: pointer; }
 
-.py-0 { padding-top: 0; padding-bottom: 0; }
-.px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
 </style>

@@ -249,6 +249,8 @@
     "checkForUpdatesStarted": "Update check started",
     "serviceEventLog": "Service Event Log",
     "noEventsYet": "No events recorded yet.",
+    "selectAll": "Select all",
+    "nothingFoundMsg": "Nothing here yet.",
     "lastRestart": "Last restart",
     "lastUpdate": "Last update",
     "lastImageCheck": "Last image check",

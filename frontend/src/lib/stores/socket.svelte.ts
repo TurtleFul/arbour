@@ -14,7 +14,9 @@ import { toastStore } from "./toast.svelte";
 
 let socket: Socket;
 let agentSocket: AgentSocket;
-const terminalMap = new SvelteMap<string, Terminal>();
+// Several xterm instances can show the same terminal at once (e.g. the inline
+// stack log and its fullscreen modal), so each name holds a set of consumers.
+const terminalMap = new SvelteMap<string, Set<Terminal>>();
 const terminalTransformMap = new SvelteMap<string, (data: string) => string>();
 let filterRebuildTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -197,20 +199,35 @@ class SocketStore {
                     buffer = transform(buffer);
                 }
                 terminal.write(buffer);
-                terminalMap.set(terminalName, terminal);
+                let terminals = terminalMap.get(terminalName);
+                if (!terminals) {
+                    terminals = new SvelteSet();
+                    terminalMap.set(terminalName, terminals);
+                }
+                terminals.add(terminal);
             } else {
                 this.toastRes(res);
             }
         });
     }
 
-    unbindTerminal(endpoint: string, terminalName: string) {
+    unbindTerminal(endpoint: string, terminalName: string, terminal?: Terminal) {
+        const terminals = terminalMap.get(terminalName);
+        if (terminals && terminal) {
+            terminals.delete(terminal);
+            if (terminals.size > 0) {
+                // Other consumers (e.g. the inline log behind a closing modal)
+                // still listen — keep the server-side stream alive.
+                return;
+            }
+        }
         this.emitAgent(endpoint, "terminalLeave", terminalName, (res: SocketRes) => {
             if (!res.ok) {
                 this.toastRes(res);
             }
         });
         terminalMap.delete(terminalName);
+        terminalTransformMap.delete(terminalName);
     }
 
     setTerminalTransform(terminalName: string, transform: ((data: string) => string) | null) {
@@ -309,8 +326,8 @@ class SocketStore {
         agentSocket.on("terminalWrite", (...args) => {
             const terminalName = args[0] as string;
             let data = args[1] as string | Uint8Array;
-            const terminal = terminalMap.get(terminalName);
-            if (!terminal) {
+            const terminals = terminalMap.get(terminalName);
+            if (!terminals || terminals.size === 0) {
                 return;
             }
             if (typeof data === "string") {
@@ -319,7 +336,9 @@ class SocketStore {
                     data = transform(data);
                 }
             }
-            terminal.write(data);
+            for (const terminal of terminals) {
+                terminal.write(data);
+            }
         });
 
         agentSocket.on("stackList", (...args) => {
