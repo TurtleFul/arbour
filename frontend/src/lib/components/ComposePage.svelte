@@ -211,7 +211,10 @@ $effect(() => {
 
 $effect(() => {
     void docVersion; // re-serialize when a GUI editor signals an in-place mutation
-    if (!editorFocus) {
+    // Only in edit mode: GUI editors can't mutate the document in view mode, and
+    // re-serializing there fights the updateStackData poll (normalized YAML vs
+    // raw file content), causing repeated full-document replaces in the editor.
+    if (isEditMode && !editorFocus) {
         const yaml = composeDocument.toYAML();
         if (yaml !== stack.composeYAML) {
             stack = { ...stack,

@@ -306,6 +306,55 @@ describe("ComposeDocument — toYAML()", () => {
 });
 
 // ---------------------------------------------------------------------------
+// toYAML() — serialization stability
+//
+// toYAML() normalizes formatting (quotes, indentation, anchor names), so its
+// output can differ from the raw file it was parsed from. Code that compares
+// toYAML() against raw file content (e.g. to decide whether to push an update
+// into the UI) must therefore only do so for content it serialized itself —
+// see the isEditMode guard in ComposePage. These tests pin down the invariants
+// that make that safe: serialization must converge after one pass and must
+// never change the meaning of the document.
+// ---------------------------------------------------------------------------
+
+describe("ComposeDocument — toYAML() stability", () => {
+    // Formatting styles that toYAML() is known to normalize
+    const VARIANTS: Record<string, string> = {
+        "double-quoted scalars": "services:\n  app:\n    image: \"nginx:latest\"\n    ports:\n      - \"8080:80\"\n",
+        "4-space indentation": "services:\n    app:\n        image: nginx\n",
+        "missing trailing newline": "services:\n  app:\n    image: nginx",
+        "custom anchor names": "x-common: &common\n  restart: always\nservices:\n  app:\n    <<: *common\n    image: nginx\n",
+        "sequence dash at parent indent": "services:\n  app:\n    image: nginx\n    volumes:\n    - ./data:/data\n",
+        "comments": "# stack comment\nservices:\n  app:\n    image: nginx # inline\n",
+    };
+
+    for (const [ label, raw ] of Object.entries(VARIANTS)) {
+        test(`serialization is a fixed point: ${label}`, () => {
+            const once = new ComposeDocument(raw, "").toYAML();
+            const twice = new ComposeDocument(once, "").toYAML();
+            expect(twice).toBe(once);
+        });
+    }
+
+    for (const [ label, raw ] of Object.entries(VARIANTS)) {
+        test(`normalization preserves document meaning: ${label}`, () => {
+            const original = new ComposeDocument(raw, "");
+            const reparsed = new ComposeDocument(original.toYAML(), "");
+            expect(reparsed.composeData.data).toEqual(original.composeData.data);
+        });
+    }
+
+    test("repeated parse/serialize cycles do not drift", () => {
+        let yaml = "services:\n  app:\n    image: \"nginx:latest\"\n";
+        const stable = new ComposeDocument(yaml, "").toYAML();
+        for (let i = 0; i < 5; i++) {
+            yaml = new ComposeDocument(yaml, "").toYAML();
+        }
+        expect(yaml).toBe(stable);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // ComposeServices — has / delete / set
 // ---------------------------------------------------------------------------
 
