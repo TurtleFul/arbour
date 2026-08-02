@@ -6,7 +6,7 @@ const viteCompressionFilter = /\.(js|mjs|json|css|html|svg)$/i;
 
 export default defineConfig({
     server: {
-        port: 5000,
+        port: 5173,
         fs: {
             // SvelteKit hardcodes path.resolve('src') in its allow list, but this
             // project keeps source under frontend/src/ — so lang/ and other dirs

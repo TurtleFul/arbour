@@ -11,8 +11,12 @@ export class ImageRepository {
         this.imageInfos.delete(stack);
     }
 
-    async update(stack: string, service: string, image: string): Promise<ImageInfo> {
-        let imageInfo = await this.updateLocal(stack, service, image);
+    async update(stack: string, service: string, image: string, localImageId = ""): Promise<ImageInfo> {
+        let imageInfo = this.getImageInfo(stack, service, image);
+
+        if (!localImageId || imageInfo.localId !== localImageId) {
+            imageInfo = await this.updateLocal(stack, service, image, localImageId);
+        }
 
         if (!!imageInfo.localDigest && !image.startsWith("sha256:")) {
             const resRemote = await exec("skopeo", [ "inspect", "--no-tags", "--format", "{{ .Digest }}", "docker://" + image ]);
@@ -22,24 +26,31 @@ export class ImageRepository {
                 remoteDigest = resRemote.stdout.trim();
             }
 
-            imageInfo = new ImageInfo(remoteDigest, imageInfo.localDigests, imageInfo.localId);
+            imageInfo = new ImageInfo(remoteDigest, imageInfo.localDigests, imageInfo.localId, imageInfo.version);
             this.updateInfo(stack, service, image, imageInfo);
         }
 
         return imageInfo;
     }
 
-    async updateLocal(stack: string, service: string, image: string): Promise<ImageInfo> {
+    async updateLocal(stack: string, service: string, image: string, localImageId = ""): Promise<ImageInfo> {
         let imageInfo = this.getImageInfo(stack, service, image);
 
-        const resLocal = await exec("docker", [ "inspect", "--format", "json", image ]);
+        const resLocal = await exec("docker", [ "inspect", "--format", "json", localImageId || image ]);
 
         let localId = "";
+        let version = "";
         const localDigests: string[] = [];
         if (resLocal.stdout) {
             const localInspect = JSON.parse(resLocal.stdout);
             if (Array.isArray(localInspect) && localInspect[0]) {
                 localId = localInspect[0].Id;
+                const labels = localInspect[0].Config?.Labels;
+                if (labels && typeof labels === "object") {
+                    version = labels["org.opencontainers.image.version"]
+                        || labels["org.label-schema.version"]
+                        || "";
+                }
 
                 const repoDigests = localInspect[0].RepoDigests;
                 if (Array.isArray(repoDigests)) {
@@ -59,7 +70,7 @@ export class ImageRepository {
             log.warn("updateLocal", "Image '" + image + "': Local id '" + localId + "' digests '" + localDigests.join(", ") + "'");
         }
 
-        imageInfo = new ImageInfo(imageInfo.remoteDigest, localDigests, localId);
+        imageInfo = new ImageInfo(imageInfo.remoteDigest, localDigests, localId, version);
         this.updateInfo(stack, service, image, imageInfo);
 
         return imageInfo;
@@ -88,7 +99,8 @@ export class ImageInfo {
     constructor(
         public readonly remoteDigest: string,
         localDigests: string[] | string,
-        public readonly localId: string
+        public readonly localId: string,
+        public readonly version = ""
     ) {
         // Accept a single digest (back-compat / callers that only have one) or
         // the full list. A tag can resolve to several repo digests for the same
@@ -100,6 +112,11 @@ export class ImageInfo {
     /** Primary local digest (first repo digest) — used for display/back-compat. */
     get localDigest(): string {
         return this.localDigests[0] ?? "";
+    }
+
+    /** Human-readable OCI version when available, otherwise an immutable image ID. */
+    get runningVersion(): string {
+        return this.version || this.localId.replace(/^sha256:/, "").slice(0, 12);
     }
 
     isImageUpdateAvailable() {

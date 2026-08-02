@@ -36,14 +36,14 @@ Arbour has two servers in dev mode:
 
 | Server | Port | Command |
 |---|---|---|
-| Frontend (Vite) | 5000 | `bun run dev:frontend` |
-| Backend (Express + Socket.io) | 5001 | `ARBOUR_STACKS_DIR=./stacks bun run dev:backend` |
+| Frontend (Vite) | 5173 | `bun run dev:frontend` |
+| Backend (Express + Socket.io) | 5001 | `bun run dev:backend` |
 
 Open two terminals from the project root:
 
 **Terminal 1 — Backend:**
 ```bash
-ARBOUR_STACKS_DIR=./stacks bun run dev:backend
+bun run dev:backend
 ```
 
 **Terminal 2 — Frontend:**
@@ -51,7 +51,7 @@ ARBOUR_STACKS_DIR=./stacks bun run dev:backend
 bun run dev:frontend
 ```
 
-Then open **http://localhost:5000** in your browser. On first run you will be prompted to create an admin account.
+Then open **http://localhost:5173** in your browser. On first run you will be prompted to create an admin account.
 
 The frontend connects directly to the backend at `:5001` for all Socket.io communication. No proxy configuration is needed.
 
@@ -69,7 +69,7 @@ Bun loads `.env` natively — no `dotenv` import needed.
 
 | Variable | Default | Description |
 |---|---|---|
-| `ARBOUR_STACKS_DIR` | `/opt/stacks` | Override the stacks directory inside the container (optional in Docker — just mount to `/opt/stacks`) |
+| `ARBOUR_STACKS_DIR` | `./stacks` in development, `/opt/stacks` otherwise | Override the stacks directory inside the container (optional in Docker — just mount to `/opt/stacks`) |
 | `ARBOUR_PORT` | `5001` | Backend server port |
 | `ARBOUR_DATA_DIR` | `./data/` | Directory for the SQLite database and other runtime data |
 | `ARBOUR_HOSTNAME` | (unset) | Bind hostname |
@@ -158,4 +158,3 @@ dagger call ci               --source=.    # runs verify (fmt + typecheck + test
 ```
 
 Install Dagger with Homebrew: `brew install dagger`.
-

@@ -46,6 +46,16 @@ describe("ImageInfo.isImageUpdateAvailable", () => {
         expect(info.isImageUpdateAvailable()).toBe(false);
         expect(info.localDigests).toEqual([ "sha256:remote" ]);
     });
+
+    test("uses the OCI version for the running version", () => {
+        const info = new ImageInfo("", "", "sha256:abcdef1234567890", "2.7.3");
+        expect(info.runningVersion).toBe("2.7.3");
+    });
+
+    test("falls back to the immutable image ID when no version is published", () => {
+        const info = new ImageInfo("", "", "sha256:abcdef1234567890");
+        expect(info.runningVersion).toBe("abcdef123456");
+    });
 });
 
 describe("isRecreateNecessary", () => {

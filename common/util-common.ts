@@ -22,21 +22,12 @@ export interface BaseRes {
     msg?: string;
 }
 
-let randomBytes : (numBytes: number) => Uint8Array;
-initRandomBytes();
-
-async function initRandomBytes() {
-    if (typeof window !== "undefined" && window.crypto) {
-        randomBytes = function randomBytes(numBytes: number) {
-            const bytes = new Uint8Array(numBytes);
-            for (let i = 0; i < numBytes; i += 65536) {
-                window.crypto.getRandomValues(bytes.subarray(i, i + Math.min(numBytes - i, 65536)));
-            }
-            return bytes;
-        };
-    } else {
-        randomBytes = (await import("node:crypto")).randomBytes;
+function randomBytes(numBytes: number): Uint8Array {
+    const bytes = new Uint8Array(numBytes);
+    for (let i = 0; i < numBytes; i += 65536) {
+        globalThis.crypto.getRandomValues(bytes.subarray(i, i + Math.min(numBytes - i, 65536)));
     }
+    return bytes;
 }
 
 export const ALL_ENDPOINTS = "##ALL_ARBOUR_ENDPOINTS##";

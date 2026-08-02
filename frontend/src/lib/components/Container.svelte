@@ -326,6 +326,9 @@ function updateChangelogLink(link: string) {
         <div class="service-meta">
             <div class="image-label">
                 <span>{composeService.imageName}:</span><span class="tag">{composeService.imageTag}</span>
+                {#if composeService.imageTag === "latest" && (service as ServiceData).imageVersion}
+                    <span class="running-version" title={(service as ServiceData).imageId}>({(service as ServiceData).imageVersion})</span>
+                {/if}
             </div>
             {#if started()}
                 <div class="status-text">{(service as ServiceData).status}</div>
@@ -593,6 +596,7 @@ function updateChangelogLink(link: string) {
     gap: 4px;
 }
 .image-label .tag { color: var(--arbour-text-subtle); }
+.image-label .running-version { margin-left: 0.35rem; color: var(--arbour-text-muted); }
 
 .badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
 .port-link { display: inline-flex; align-items: center; text-decoration: none; }
