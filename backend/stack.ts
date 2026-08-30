@@ -379,7 +379,12 @@ export class Stack {
 
                         if (localImageId !== imageInfo.localId) {
                             try {
-                                imageInfo = await Stack.imageRepository.updateLocal(this.name, serviceInfo.Service, serviceInfo.Image);
+                                imageInfo = await Stack.imageRepository.updateLocal(
+                                    this.name,
+                                    serviceInfo.Service,
+                                    serviceInfo.Image,
+                                    localImageId
+                                );
                             } catch (e) {
                                 log.error("updateStackData", "Stack: '" + this.name + "' service: '" + serviceInfo.Service + "': " + e);
                             }
@@ -397,6 +402,8 @@ export class Stack {
                             name: serviceInfo.Service,
                             containerName: serviceInfo.Name,
                             image: serviceInfo.Image,
+                            imageId: imageInfo.localId,
+                            imageVersion: imageInfo.runningVersion,
                             state: serviceInfo.State,
                             status: serviceInfo.Status,
                             health: serviceInfo.Health,
@@ -449,25 +456,26 @@ export class Stack {
 
     async updateImageInfos() {
         Stack.imageRepository.resetStack(this.name);
+
+        // Rebuild local metadata from the immutable image IDs used by the
+        // running containers, not from mutable tags such as :latest.
+        await this.updateData();
         for (const serviceData of this._services.values()) {
             try {
-                await Stack.imageRepository.update(this.name, serviceData.name, serviceData.image);
+                await Stack.imageRepository.update(this.name, serviceData.name, serviceData.image, serviceData.imageId);
             } catch (e) {
                 log.error("updateImageInfos", "Stack '" + this.name + "' - Image '" + serviceData.image + "': " + e);
             }
         }
         this._lastImageCheck = Date.now();
+
+        // Apply the new remote digests to the stack/service flags before the
+        // result is sent to clients so the update arrows change immediately.
+        await this.updateData();
     }
 
     getServicesWithAvailableImageUpdates(): ServiceData[] {
-        const result: ServiceData[] = [];
-        for (const serviceData of this._services.values()) {
-            const imageInfo = Stack.imageRepository.getImageInfo(this.name, serviceData.name, serviceData.image);
-            if (imageInfo.isImageUpdateAvailable()) {
-                result.push(serviceData);
-            }
-        }
-        return result;
+        return [ ...this._services.values() ].filter(serviceData => serviceData.imageUpdateAvailable);
     }
 
     async autoUpdateService(serviceName: string): Promise<boolean> {
@@ -718,7 +726,6 @@ export class Stack {
             // imageUpdatesAvailable flag (and its arrow) clears immediately
             // instead of lingering until the next periodic refresh.
             await this.updateImageInfos();
-            await this.updateData();
         }
 
         if (pruneAfterUpdate) {

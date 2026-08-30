@@ -182,6 +182,22 @@ describe("Stack.isStarted", () => {
     });
 });
 
+describe("Stack.updateImageInfos", () => {
+    test("refreshes running image data before and update flags after the registry check", async () => {
+        class TestStack extends Stack {
+            updateDataCalls = 0;
+
+            override async updateData() {
+                this.updateDataCalls++;
+            }
+        }
+
+        const stack = new TestStack(mockServer(), "test", "", "");
+        await stack.updateImageInfos();
+        expect(stack.updateDataCalls).toBe(2);
+    });
+});
+
 // ---------------------------------------------------------------------------
 // path getter
 // ---------------------------------------------------------------------------

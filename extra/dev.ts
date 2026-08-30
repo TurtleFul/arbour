@@ -1,23 +1,3 @@
-import { $ } from "bun";
-
-const BACKEND_PORT = 5001;
-const FRONTEND_PORT = 5000;
-
-async function killPort(port: number) {
-    try {
-        const result = await $`lsof -ti :${port}`.text();
-        const pids = result.trim().split("\n").filter(Boolean);
-        for (const pid of pids) {
-            process.kill(Number(pid), "SIGTERM");
-        }
-    } catch {
-        // no process on port
-    }
-}
-
-await killPort(BACKEND_PORT);
-await killPort(FRONTEND_PORT);
-
 const backend = Bun.spawn([ "bun", "--watch", "./backend/index.ts" ], {
     stdio: [ "inherit", "inherit", "inherit" ],
     env: {
@@ -34,14 +14,21 @@ const frontend = Bun.spawn([ "bunx", "vite", "--host", "--strictPort", "--config
     },
 });
 
-function cleanup() {
+let cleaningUp = false;
+
+async function cleanup(exitCode = 0) {
+    if (cleaningUp) {
+        return;
+    }
+    cleaningUp = true;
     backend.kill();
     frontend.kill();
-    process.exit(0);
+    await Promise.all([ backend.exited, frontend.exited ]);
+    process.exit(exitCode);
 }
 
-process.on("SIGINT", cleanup);
-process.on("SIGTERM", cleanup);
+process.on("SIGINT", () => void cleanup());
+process.on("SIGTERM", () => void cleanup());
 
-await Promise.race([ backend.exited, frontend.exited ]);
-cleanup();
+const exitCode = await Promise.race([ backend.exited, frontend.exited ]);
+await cleanup(exitCode);

@@ -30,6 +30,8 @@ export type ServiceData = {
     name: string,
     containerName: string,
     image: string,
+    imageId: string,
+    imageVersion: string,
     state: string,
     status: string,
     health: string,
