@@ -1,7 +1,7 @@
 ############################################
 # System base: Bun + Docker CLI + skopeo + dumb-init
 ############################################
-FROM oven/bun:1.3.14-debian AS system-base
+FROM oven/bun:1.4.0-debian AS system-base
 RUN apt-get update && apt-get install --yes --no-install-recommends \
         ca-certificates \
         curl \
